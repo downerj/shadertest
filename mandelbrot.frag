@@ -5,13 +5,6 @@ precision highp float;
 precision mediump float;
 #endif
 
-#define PI 3.141592653589793
-#define DEG_TO_RAD PI/180.0
-#define RAD_TO_DEG 180.0/PI
-
-const vec2 R = vec2(1.0, 0.0);
-const vec2 I = vec2(0.0, 1.0);
-
 uniform vec2 resolution;
 uniform float time;
 
@@ -27,52 +20,6 @@ vec4 hsv2rgba(in vec3 hsv) {
 vec4 hsvCycled2rgba(in vec3 hsv, in float spread, in float speed) {
   hsv.x = fract(hsv.x*spread + time*speed);
   return hsv2rgba(hsv);
-}
-
-vec2 cMul(vec2 a, vec2 b) {
-  return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
-}
-
-vec2 cDiv(vec2 a, vec2 b) {
-  float d = b.x*b.x + b.y*b.y;
-  return vec2((a.x*b.x + a.y*b.y)/d, (a.y*b.x - a.x*b.y)/d);
-}
-
-float cLen(vec2 z) {
-  return sqrt(z.x*z.x + z.y*z.y);
-}
-
-float cArg(vec2 z) {
-  return atan(z.y, z.x);
-}
-
-vec2 cPolar(float r, float th) {
-  return vec2(r*cos(th), r*sin(th));
-}
-
-vec2 cUnit(vec2 z) {
-  float d = sqrt(z.x*z.x + z.y*z.y);
-  return vec2(z.x/d, z.y/d);
-}
-
-vec2 cRotate(vec2 z, float degrees) {
-  float r = cLen(z);
-  float th = cArg(z);
-  return cPolar(r, th + degrees*DEG_TO_RAD);
-}
-
-vec3 complex2hsv(vec2 point) {
-  float x = point.x;
-  float y = point.y;
-  float r = sqrt(x*x + y*y);
-  float a = atan(y, x)*RAD_TO_DEG;
-  
-  const float satRatio = 0.0625;
-  float hue = a/360.0;
-  float sat = 1.0 - pow(satRatio, r);
-  const float val = 1.0;
-  
-  return vec3(hue, sat, val);
 }
 
 int mandelbrot(in vec2 p) {
