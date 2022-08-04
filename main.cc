@@ -122,6 +122,20 @@ const std::vector<GLuint> possibleGLVersions = {
 
 #define WINDOW_WIDTH 400
 #define WINDOW_HEIGHT 400
+#define WINDOW_TITLE "Shader Test"
+
+GLFWwindow* createWindow(GLuint versionMajor, GLuint versionMinor) {
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, versionMajor);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, versionMinor);
+  
+  return glfwCreateWindow(
+    WINDOW_WIDTH,
+    WINDOW_HEIGHT,
+    WINDOW_TITLE,
+    nullptr,
+    nullptr
+  );
+}
 
 void printUsage() {
   std::cout << R"str(
@@ -152,8 +166,12 @@ void printInfo() {
 
 struct Configs {
   std::string fragmentFilePath;
-  bool showInfo = false;
-  bool showHelp = false;
+  bool wantInfo = false;
+  bool wantHelp = false;
+  unsigned int versionMajor = 0;
+  unsigned int versionMinor = 0;
+  bool wantCore = false;
+  bool wantES = false;
 };
 
 int main(int argc, char** argv) {
@@ -167,17 +185,17 @@ int main(int argc, char** argv) {
       for (int a = 1; a < argc; a++) {
         std::string arg(argv[a]);
         if (arg == "--info") {
-          configs.showInfo = true;
+          configs.wantInfo = true;
           break;
         }
         if (arg == "--help") {
-          configs.showHelp = true;
+          configs.wantHelp = true;
           break;
         }
       }
     }
     
-    if (configs.showHelp) {
+    if (configs.wantHelp) {
       printUsage();
       return EXIT_SUCCESS;
     }
@@ -190,15 +208,16 @@ int main(int argc, char** argv) {
     }
 
     GLFWwindow* window;
-    for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
-      GLuint versionMajor = possibleGLVersions[v];
-      GLuint versionMinor = possibleGLVersions[v + 1];
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, versionMajor);
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, versionMinor);
-      
-      window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Shader Test", nullptr, nullptr);
-      if (window) {
-        break;
+    if (configs.versionMajor > 0) {
+      window = createWindow(configs.versionMajor, configs.versionMinor);
+    } else {
+      for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
+        GLuint versionMajor = possibleGLVersions[v];
+        GLuint versionMinor = possibleGLVersions[v + 1];
+        window = createWindow(versionMajor, versionMinor);
+        if (window) {
+          break;
+        }
       }
     }
 
@@ -208,7 +227,7 @@ int main(int argc, char** argv) {
     }
     glfwMakeContextCurrent(window);
 
-    if (configs.showInfo) {
+    if (configs.wantInfo) {
       printInfo();
       return EXIT_SUCCESS;
     }
@@ -220,7 +239,6 @@ int main(int argc, char** argv) {
       std::cerr << glewGetErrorString(glewStatus) << std::endl;
       return EXIT_FAILURE;
     }
-
 
     /*
     GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
@@ -235,12 +253,13 @@ int main(int argc, char** argv) {
     glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    */
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClearDepth(1.0);
 
     while (not glfwWindowShouldClose(window)) {
-      Fint width;
+      int width;
       int height;
       glfwGetFramebufferSize(window, &width, &height);
       glViewport(0, 0, width, height);
@@ -248,17 +267,18 @@ int main(int argc, char** argv) {
     
       double time = glfwGetTime();
       
+      /*
       glUseProgram(program);
       glUniform2f(resolutionLocation, width, height);
       glUniform1f(timeLocation, time);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
-      
+      */
+
       glfwSwapBuffers(window);
       glfwPollEvents();
     }
     glfwDestroyWindow(window);
     glfwTerminate();
-  */
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;

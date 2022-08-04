@@ -7,7 +7,7 @@ LIBS = -lGL -lGLEW -lglfw
 $(BIN): main.oo
 	$(CXX) -o $@ $^ $(LIBS)
 
-main.oo: main.cc shaders.hh
+main.oo: main.cc
 	$(CXX) -c -g -o $@ $< $(WARNS)
 
 clean:
