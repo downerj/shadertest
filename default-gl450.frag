@@ -1,23 +1,11 @@
-#pragma once
-
-#include <string>
-
-std::string vertexShaderSource(R"str(#version 100
-precision highp float;
-
-attribute vec2 vertex;
-
-void main() {
-  gl_Position = vec4(vertex, 0.0, 1.0);
-}
-)str");
-
-std::string fragmentDefaultShaderSource(R"str(#version 100
+#version 100
+#ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
-#endif
+#endif // GL_FRAGMENT_PRECISION_HIGH
+#endif // GL_ES
 
 #define PI 3.141592653589793
 #define DEG_TO_RAD PI/180.0
@@ -35,9 +23,11 @@ vec4 hsv2rgba(in vec3 hsv) {
 uniform vec2 resolution;
 uniform float time;
 
+//out vec4 color;
+
 void main() {
+  //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   float hue = time*0.1;
   gl_FragColor = hsv2rgba(vec3(hue, 1.0, 1.0));
 }
-)str");
 

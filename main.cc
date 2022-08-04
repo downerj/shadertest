@@ -3,11 +3,10 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include "shaders.hh"
 
 float vertices[] = {
   -1.0, -1.0,
@@ -51,7 +50,6 @@ GLuint createBuffer(GLenum target, size_t size, void* data, GLenum usage) {
 GLuint createShader(GLenum type, const std::string& source) {
   GLuint shader = glCreateShader(type);
   const GLchar* sources[] = {(GLchar*)source.c_str()};
-  //const GLchar* sources[] = {"void main(){}"};
   glShaderSource(shader, 1, sources, nullptr);
   glCompileShader(shader);
   return shader;
@@ -106,30 +104,116 @@ GLuint createProgram(const std::string& vertexSource, const std::string& fragmen
   return program;
 }
 
+const std::vector<GLuint> possibleGLVersions = {
+  4, 6,
+  4, 5,
+  4, 4,
+  4, 3,
+  4, 2,
+  4, 1,
+  4, 0,
+  3, 3,
+  3, 2,
+  3, 1,
+  3, 0,
+  2, 1,
+  2, 0,
+};
+
 #define WINDOW_WIDTH 400
 #define WINDOW_HEIGHT 400
 
+void printUsage() {
+  std::cout << R"str(
+Usage: shadertest [OPTIONS] <fragmentFilePath>
+
+OPTIONS include:
+  --help                Print this help message and quit.
+  --info                Print OpenGL version info and quit.
+  --gl[=<version>]      Use an OpenGL + GLSL context with version X.X.
+                        If no version is specified, then the latest available version is selected.
+  --glcore[=<version>]  Use an OpenGL Core + GLSL Core context with version X.X.
+                        If no version is specified, then the latest available version is selected.
+  --gles[=<version>]    Use an OpenGL ES + ESSL context with version X.x.
+                        If no version is specified, then the latest available version is selected.
+)str";
+}
+
+void printInfo() {
+  const GLubyte* glVersion = glGetString(GL_VERSION);
+  const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+  const GLubyte* glVendor = glGetString(GL_VENDOR);
+  const GLubyte* glRenderer = glGetString(GL_RENDERER);
+  std::cout << "OpenGL Version: " << glVersion << std::endl
+    << "GLSL Version: " << glslVersion << std::endl
+    << "OpenGL Vendor: " << glVendor << std::endl
+    << "OpenGL Renderer: " << glRenderer << std::endl;
+}
+
+struct Configs {
+  std::string fragmentFilePath;
+  bool showInfo = false;
+  bool showHelp = false;
+};
+
 int main(int argc, char** argv) {
   try {
-    std::string fragmentShaderSource;
+    struct Configs configs;
     if (argc < 2) {
-      std::cout << "Using default fragment shader" << std::endl;
-      fragmentShaderSource = fragmentDefaultShaderSource;
+      std::cerr << "Please specify a fragment shader file." << std::endl;
+      printUsage();
+      return EXIT_FAILURE;
     } else {
-      fragmentShaderSource = readShaderFromFile(argv[1]);
+      for (int a = 1; a < argc; a++) {
+        std::string arg(argv[a]);
+        if (arg == "--info") {
+          configs.showInfo = true;
+          break;
+        }
+        if (arg == "--help") {
+          configs.showHelp = true;
+          break;
+        }
+      }
     }
+    
+    if (configs.showHelp) {
+      printUsage();
+      return EXIT_SUCCESS;
+    }
+
+    //std::string fragmentShaderSource = readShaderFromFile(argv[1]);
 
     if (not glfwInit()) {
       std::cerr << "Cannot initialize GLFW" << std::endl;
       return EXIT_FAILURE;
     }
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Shader Test", nullptr, nullptr);
+
+    GLFWwindow* window;
+    for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
+      GLuint versionMajor = possibleGLVersions[v];
+      GLuint versionMinor = possibleGLVersions[v + 1];
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, versionMajor);
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, versionMinor);
+      
+      window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Shader Test", nullptr, nullptr);
+      if (window) {
+        break;
+      }
+    }
+
     if (not window) {
       std::cerr << "Cannot create window" << std::endl;
       return EXIT_FAILURE;
     }
     glfwMakeContextCurrent(window);
-   
+
+    if (configs.showInfo) {
+      printInfo();
+      return EXIT_SUCCESS;
+    }
+
+    glewExperimental = GL_TRUE;
     GLenum glewStatus = glewInit();
     if (glewStatus != GLEW_OK) {
       std::cerr << "Cannot initialize GLEW" << std::endl;
@@ -137,7 +221,9 @@ int main(int argc, char** argv) {
       return EXIT_FAILURE;
     }
 
-    GLuint program = createProgram(vertexShaderSource, fragmentShaderSource);
+
+    /*
+    GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
     GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     GLuint indexBuffer = createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     GLint vertexLocation = glGetAttribLocation(program, "vertex");
@@ -154,7 +240,7 @@ int main(int argc, char** argv) {
     glClearDepth(1.0);
 
     while (not glfwWindowShouldClose(window)) {
-      int width;
+      Fint width;
       int height;
       glfwGetFramebufferSize(window, &width, &height);
       glViewport(0, 0, width, height);
@@ -172,6 +258,7 @@ int main(int argc, char** argv) {
     }
     glfwDestroyWindow(window);
     glfwTerminate();
+  */
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
