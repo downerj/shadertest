@@ -122,12 +122,18 @@ enum ProfileType {
   Core,
 };
 
+enum VersionRequest {
+  Default,
+  Specific,
+  Maximum,
+};
+
 struct Configs {
   std::string fragmentFilePath;
   std::string vertexSource;
   std::string fragmentSource;
   bool wantInfoOnly = false;
-  bool wantExplicitVersion = false;
+  enum VersionRequest versionRequest = Default;
   unsigned int wantVersionMajor = 0;
   unsigned int wantVersionMinor = 0;
   enum ProfileType wantProfile = Any;
@@ -138,7 +144,7 @@ struct Configs {
 };
 
 GLFWwindow* createWindow(struct Configs& configs) {
-  if (configs.wantExplicitVersion) {
+  if (configs.versionRequest == Specific) {
     if (configs.wantProfile == Core or configs.wantProfile == Compat) {
       if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and
          configs.wantVersionMinor < 3)) {
@@ -147,8 +153,10 @@ GLFWwindow* createWindow(struct Configs& configs) {
     }
   }
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.wantVersionMajor);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.wantVersionMinor);
+  if (configs.versionRequest != Default) {
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.wantVersionMajor);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.wantVersionMinor);
+  }
   if (configs.wantProfile == Core) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   } else if (configs.wantProfile == Compat) {
@@ -171,8 +179,11 @@ Usage: shadertest [OPTIONS] <fragmentFilePath>
 OPTIONS include:
   --help            Print this help message and quit.
   --info-only       Print OpenGL version info and quit.
-Version OPTIONS are mutually exclusive:
   --gl=<version>    Request an OpenGL context with version X.X.
+                    You can specify "max" (without quotes) to request the max version
+                    available.
+                    You can specify "default" (without quotes) to accept the default
+                    version provided by the vendor. This is the default option.
   --core            Request an OpenGL context with a Core profile.
                     This is only valid for GL>=3.3.
   --compat          Request an OpenGL context with a Compatibility profile.
@@ -223,8 +234,14 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
       } else if (arg == "--compat") {
         configs.wantProfile = Compat;
       } else if (arg.substr(0, 5) == "--gl=") {
-        parseGLVersion(arg.substr(5), configs);
-        configs.wantExplicitVersion = true;
+        if (arg.substr(5) == "max") {
+          configs.versionRequest = Maximum;
+        } else if (arg.substr(5) == "default") {
+          configs.versionRequest = Default;
+        } else {
+          parseGLVersion(arg.substr(5), configs);
+          configs.versionRequest = Specific;
+        }
       // After all switches/options, assume the rest is the file name.
       } else {
         // If we've already got a file name, then print an error.
@@ -259,25 +276,23 @@ void initializeWindow(struct Configs& configs) {
     throw std::logic_error("Cannot initialize GLFW");
   }
 
-  GLFWwindow* window;
-  if (configs.wantVersionMajor > 0) {
-    window = createWindow(configs);
+  if (configs.versionRequest != Maximum) {
+    configs.window = createWindow(configs);
   } else {
     for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
       configs.wantVersionMajor = possibleGLVersions[v];
       configs.wantVersionMinor = possibleGLVersions[v + 1];
-      window = createWindow(configs);
-      if (window) {
+      configs.window = createWindow(configs);
+      if (configs.window) {
         break;
       }
     }
   }
 
-  if (not window) {
+  if (not configs.window) {
     throw std::logic_error("Cannot create window");
   }
-  glfwMakeContextCurrent(window);
-  configs.window = window;
+  glfwMakeContextCurrent(configs.window);
 }
 
 bool doesGLSLVersionUseInOut(const std::string& versionLine) {
