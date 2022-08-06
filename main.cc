@@ -235,6 +235,48 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
   return true;
 }
 
+void printTryingString(const struct Configs& configs) {
+  if (configs.wantVersionMajor > 0 or configs.wantProfile != Any) {
+    std::cout << "Trying OpenGL";
+  
+    if (configs.wantVersionMajor > 0) {
+      std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
+    }
+    if (configs.wantProfile == Core) {
+      std::cout << " Core";
+    } else if (configs.wantProfile == Compat) {
+      std::cout << " Compatibility";
+    }
+    std::cout << std::endl;
+  }
+}
+
+GLFWwindow* initializeWindow(struct Configs& configs) {
+  if (not glfwInit()) {
+    throw std::logic_error("Cannot initialize GLFW");
+  }
+
+  GLFWwindow* window;
+  if (configs.wantVersionMajor > 0) {
+    window = createWindow(configs);
+  } else {
+    for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
+      configs.wantVersionMajor = possibleGLVersions[v];
+      configs.wantVersionMinor = possibleGLVersions[v + 1];
+      window = createWindow(configs);
+      if (window) {
+        break;
+      }
+    }
+  }
+
+  if (not window) {
+    throw std::logic_error("Cannot create window");
+  }
+  glfwMakeContextCurrent(window);
+  return window;
+}
+
 int main(int argc, char** argv) {
   try {
     struct Configs configs;
@@ -242,42 +284,9 @@ int main(int argc, char** argv) {
       return EXIT_SUCCESS;
     }
 
-    if (configs.wantVersionMajor > 0 or configs.wantProfile != Any) {
-      std::cout << "Trying OpenGL";
-    
-      if (configs.wantVersionMajor > 0) {
-        std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
-      }
-      if (configs.wantProfile == Core) {
-        std::cout << " Core";
-      } else if (configs.wantProfile == Compat) {
-        std::cout << " Compatibility";
-      }
-      std::cout << std::endl;
-    }
+    printTryingString(configs);
 
-    if (not glfwInit()) {
-      throw std::logic_error("Cannot initialize GLFW");
-    }
-
-    GLFWwindow* window;
-    if (configs.wantVersionMajor > 0) {
-      window = createWindow(configs);
-    } else {
-      for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
-        configs.wantVersionMajor = possibleGLVersions[v];
-        configs.wantVersionMinor = possibleGLVersions[v + 1];
-        window = createWindow(configs);
-        if (window) {
-          break;
-        }
-      }
-    }
-
-    if (not window) {
-      throw std::logic_error("Cannot create window");
-    }
-    glfwMakeContextCurrent(window);
+    GLFWwindow* window = initializeWindow(configs);
 
     printInfo();
     if (configs.wantInfoOnly) {
