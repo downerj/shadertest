@@ -353,15 +353,15 @@ std::string initializeVertexSource(const std::string& fragmentSource) {
   }
   if (not doesGLSLVersionUseInOut(firstLine)) {
     vertexBuffer << R"str(
-attribute vec2 position;)str";
+attribute vec2 vertex;)str";
   } else {
     vertexBuffer << R"str(
-in vec2 position;)str";
+in vec2 vertex;)str";
   }
   
   vertexBuffer << R"str(
 void main() {
-  gl_Position = vec4(position, 0.0, 1.0);
+  gl_Position = vec4(vertex, 0.0, 1.0);
 })str";
 
   return vertexBuffer.str();
