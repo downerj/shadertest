@@ -1,7 +1,7 @@
 #include <fstream> // std::
 #include <iostream> // std::cout, std::cerr, std::endl
 #include <sstream> // std::
-#include <stdexcept> // std::exception
+#include <stdexcept> // std::exception, std::invalid_argument
 #include <string> // std::string
 #include <vector> // std::vector
 
@@ -120,23 +120,38 @@ const std::vector<GLuint> possibleGLVersions = {
   2, 0,
 };
 
+enum ProfileType {
+  Any,
+  Compat,
+  Core,
+};
+
 struct Configs {
   std::string fragmentFilePath;
-  bool wantInfo = false;
+  bool wantInfoOnly = false;
   bool wantHelp = false;
-  unsigned int versionMajor = 0;
-  unsigned int versionMinor = 0;
-  bool wantCore = false;
+  unsigned int wantVersionMajor = 0;
+  unsigned int wantVersionMinor = 0;
+  enum ProfileType wantProfile = Any;
   unsigned int windowWidth = 400;
   unsigned int windowHeight = 400;
   const char* windowTitle = "Shader Test";
 };
 
 GLFWwindow* createWindow(struct Configs& configs) {
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.versionMajor);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.versionMinor);
-  if (configs.wantCore) {
+  if (configs.wantProfile == Core or configs.wantProfile == Compat) {
+    if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and
+       configs.wantVersionMinor < 3)) {
+      throw std::invalid_argument("Core/compat profiles only valid for GL>=3.3");
+    }
+  }
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.wantVersionMajor);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.wantVersionMinor);
+  if (configs.wantProfile == Core) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  } else if (configs.wantProfile == Compat) {
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
   }
 
   return glfwCreateWindow(
@@ -154,11 +169,13 @@ Usage: shadertest [OPTIONS] <fragmentFilePath>
 
 OPTIONS include:
   --help            Print this help message and quit.
-  --info            Print OpenGL version info and quit.
+  --info-only       Print OpenGL version info and quit.
 Version OPTIONS are mutually exclusive:
-  --gl=<version>    Use an OpenGL context with version X.X.
-  --core            Use an OpenGL Core Core context with version X.X.
-  --essl=<version>  Use GLSL ES (ESSL) version XXX instead of GLSL.
+  --gl=<version>    Request an OpenGL context with version X.X.
+  --core            Request an OpenGL context with a Core profile.
+                    This is only valid for GL>=3.3.
+  --compat          Request an OpenGL context with a Compatibility profile.
+                    This is only valid for GL>=3.3.
 )str";
 }
 
@@ -176,19 +193,19 @@ void printInfo() {
 bool parseGLVersion(const std::string& arg, struct Configs& configs) {
   std::pair<int, int> version;
 
-  if (arg.size() < 4 or arg[0] != '=' or arg[2] != '.') {
-    std::cerr << "GL version must be in format \"=X.X\"." << std::endl;
+  if (arg.size() < 3 or arg[1] != '.') {
+    std::cerr << "GL version must be in format \"X.X\"." << std::endl;
     return false;
   }
-  unsigned int major = (unsigned int)arg[1] - 0x30;
-  unsigned int minor = (unsigned int)arg[3] - 0x30;
+  unsigned int major = (unsigned int)arg[0] - 0x30;
+  unsigned int minor = (unsigned int)arg[2] - 0x30;
   if (major > 9 || minor > 9) {
     std::cerr << "GL version is not a valid number." << std::endl;
     return false;
   }
 
-  configs.versionMajor = major;
-  configs.versionMinor = minor;
+  configs.wantVersionMajor = major;
+  configs.wantVersionMinor = minor;
   return true;
 }
 
@@ -202,32 +219,22 @@ int main(int argc, char** argv) {
     } else {
       for (int a = 1; a < argc; a++) {
         std::string arg(argv[a]);
-        if (arg == "--info") {
-          configs.wantInfo = true;
-          break;
+        if (arg == "--info-only") {
+          configs.wantInfoOnly = true;
         }
         if (arg == "--help") {
           configs.wantHelp = true;
           break;
         }
-        if (arg.substr(0, 9) == "--gl+essl") {
-          if (not parseGLVersion(arg.substr(9), configs)) {
+        if (arg == "--core") {
+          configs.wantProfile = Core;
+        } else if (arg == "--compat") {
+          configs.wantProfile = Compat;
+        }
+        if (arg.substr(0, 5) == "--gl=") {
+          if (not parseGLVersion(arg.substr(5), configs)) {
             return EXIT_FAILURE;
           }
-          configs.wantCore = false;
-          configs.wantESSL = true;
-        } else if (arg.substr(0, 8) == "--glcore") {
-          if (not parseGLVersion(arg.substr(8), configs)) {
-            return EXIT_FAILURE;
-          }
-          configs.wantCore = true;
-          configs.wantESSL = false;
-        } else if (arg.substr(0, 4) == "--gl") {
-          if (not parseGLVersion(arg.substr(4), configs)) {
-            return EXIT_FAILURE;
-          }
-          configs.wantCore = false;
-          configs.wantESSL = false;
         }
       }
     }
@@ -237,18 +244,14 @@ int main(int argc, char** argv) {
       return EXIT_SUCCESS;
     }
 
-    if (not configs.wantInfo) {
-      std::cout << "Trying OpenGL "
-        << configs.versionMajor << "." << configs.versionMinor;
-      if (configs.wantCore) {
-        std::cout << " Core";
-      } else if (configs.wantESSL) {
-        std::cout << " + ESSL";
-      }
-      std::cout << std::endl;
+    std::cout << "Trying OpenGL "
+      << configs.wantVersionMajor << "." << configs.wantVersionMinor;
+    if (configs.wantProfile == Core) {
+      std::cout << " Core";
+    } else if (configs.wantProfile == Compat) {
+      std::cout << " Compatibility";
     }
-
-    //std::string fragmentShaderSource = readShaderFromFile(argv[1]);
+    std::cout << std::endl;
 
     if (not glfwInit()) {
       std::cerr << "Cannot initialize GLFW" << std::endl;
@@ -256,12 +259,12 @@ int main(int argc, char** argv) {
     }
 
     GLFWwindow* window;
-    if (not configs.wantInfo && configs.versionMajor > 0) {
+    if (not configs.wantInfoOnly && configs.wantVersionMajor > 0) {
       window = createWindow(configs);
     } else {
       for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
-        configs.versionMajor = possibleGLVersions[v];
-        configs.versionMinor = possibleGLVersions[v + 1];
+        configs.wantVersionMajor = possibleGLVersions[v];
+        configs.wantVersionMinor = possibleGLVersions[v + 1];
         window = createWindow(configs);
         if (window) {
           break;
@@ -276,10 +279,11 @@ int main(int argc, char** argv) {
     glfwMakeContextCurrent(window);
 
     printInfo();
-    if (configs.wantInfo) {
+    if (configs.wantInfoOnly) {
       return EXIT_SUCCESS;
     }
 
+    /*
     glewExperimental = GL_TRUE;
     GLenum glewStatus = glewInit();
     if (glewStatus != GLEW_OK) {
@@ -287,6 +291,9 @@ int main(int argc, char** argv) {
       std::cerr << glewGetErrorString(glewStatus) << std::endl;
       return EXIT_FAILURE;
     }
+    */
+
+    //std::string fragmentShaderSource = readShaderFromFile(argv[1]);
 
     /*
     GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
