@@ -374,8 +374,6 @@ void run(struct Configs& configs) {
     std::cerr << glewGetErrorString(glewStatus) << std::endl;
     throw std::logic_error("Cannot initialize GLEW");
   }
-  std::cout << configs.vertexSource << std::endl;
-  std::cout << configs.fragmentSource << std::endl;
 
   GLuint program = createProgram(configs.vertexSource, configs.fragmentSource);
   GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
