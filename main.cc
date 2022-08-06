@@ -2,7 +2,7 @@
 #include <iostream> // std::cout, std::cerr, std::endl
 #include <sstream> // std::*stringstream
 #include <stdexcept> // std::exception, std::invalid_argument, std::logic_error
-#include <string> // std::string
+#include <string> // std::string, std::stoi
 #include <vector> // std::vector
 
 #include <GL/glew.h>
@@ -277,6 +277,93 @@ GLFWwindow* initializeWindow(struct Configs& configs) {
   return window;
 }
 
+bool doesGLSLVersionUseInOut(const std::string& versionLine) {
+  std::istringstream versionBuffer(versionLine);
+  std::string input;
+  // Skip the first string ("#version"), if present.
+  if (versionLine.empty() or not getline(versionBuffer, input, ' ') or input != "#version") {
+    return false;
+  }
+  // Get the version integer.
+  if (not getline(versionBuffer, input, ' ')) {
+    throw std::invalid_argument("Missing GLSL version \"" + versionLine + "\"");
+  }
+  bool isESSL = false;
+  int version;
+  try {
+    version = std::stoi(input);
+    if (version < 0) {
+      throw std::invalid_argument("Invalid GLSL version \"" + versionLine + "\"");
+    }
+  } catch (std::exception& _e) {
+    throw std::invalid_argument("Invalid GLSL version \"" + versionLine + "\"");
+  }
+  // See if there's an "es" next.
+  if (getline(versionBuffer, input, ' ')) {
+    if (input == "es") {
+      isESSL = true;
+    }
+  }
+
+  if (not isESSL) {
+    switch (version) {
+      // Technically #version 100 is ESSL, but for simplicity's sake we'll
+      // put it here.
+      case 100:
+      case 110:
+      case 120:
+        return false;
+      case 130:
+      case 140:
+      case 150:
+      case 330:
+      case 400:
+      case 410:
+      case 420:
+      case 430:
+      case 440:
+      case 450:
+      case 460:
+        return true;
+      default:
+        throw std::invalid_argument("Invalid GLSL version \"" + versionLine + "\"");
+    }   
+  } else {
+    switch (version) {
+      case 300:
+      case 310:
+      case 320:
+        return true;
+      default:
+        throw std::invalid_argument("Invalid GLSL version \"" + versionLine + "\"");
+    }
+  }
+}
+
+std::string initializeVertexSource(const std::string& fragmentSource) {
+  std::istringstream fragmentBuffer(fragmentSource);
+  std::string firstLine;
+  getline(fragmentBuffer, firstLine);
+  std::ostringstream vertexBuffer;
+  if (firstLine.substr(0, 8) == "#version") {
+    vertexBuffer << firstLine;
+  }
+  if (not doesGLSLVersionUseInOut(firstLine)) {
+    vertexBuffer << R"str(
+attribute vec2 position;)str";
+  } else {
+    vertexBuffer << R"str(
+in vec2 position)str";
+  }
+  
+  vertexBuffer << R"str(
+void main() {
+  gl_Position = vec4(position, 0.0, 1.0);
+})str";
+
+  return vertexBuffer.str();
+}
+
 int main(int argc, char** argv) {
   try {
     struct Configs configs;
@@ -293,23 +380,20 @@ int main(int argc, char** argv) {
       return EXIT_SUCCESS;
     }
 
-    /*
     glewExperimental = GL_TRUE;
     GLenum glewStatus = glewInit();
     if (glewStatus != GLEW_OK) {
-      std::cerr << "Cannot initialize GLEW" << std::endl;
       std::cerr << glewGetErrorString(glewStatus) << std::endl;
-      return EXIT_FAILURE;
+      throw std::logic_error("Cannot initialize GLEW");
     }
-    */
 
     if (configs.fragmentFilePath.empty()) {
       throw std::invalid_argument("Please specify a fragment shader path");
     }
-    std::string fragmentShaderSource = readShaderFromFile(configs.fragmentFilePath);
-
-    /*
-    GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
+    std::string fragmentSource = readShaderFromFile(configs.fragmentFilePath);
+    std::string vertexSource = initializeVertexSource(fragmentSource);
+    
+    GLuint program = createProgram(vertexSource, fragmentSource);
     GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     GLuint indexBuffer = createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     GLint vertexLocation = glGetAttribLocation(program, "vertex");
@@ -321,8 +405,7 @@ int main(int argc, char** argv) {
     glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    */
-
+    
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClearDepth(1.0);
 
@@ -335,12 +418,10 @@ int main(int argc, char** argv) {
     
       double time = glfwGetTime();
       
-      /*
       glUseProgram(program);
       glUniform2f(resolutionLocation, width, height);
       glUniform1f(timeLocation, time);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
-      */
 
       glfwSwapBuffers(window);
       glfwPollEvents();
