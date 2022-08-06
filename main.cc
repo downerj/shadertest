@@ -116,7 +116,7 @@ const std::vector<GLuint> possibleGLVersions = {
   2, 0,
 };
 
-enum ProfileType {
+enum ProfileRequest {
   Any,
   Compat,
   Core,
@@ -136,7 +136,7 @@ struct Configs {
   enum VersionRequest versionRequest = Default;
   unsigned int wantVersionMajor = 0;
   unsigned int wantVersionMinor = 0;
-  enum ProfileType wantProfile = Any;
+  enum ProfileRequest profileRequest = Any;
   unsigned int windowWidth = 400;
   unsigned int windowHeight = 400;
   const char* windowTitle = "Shader Test";
@@ -145,7 +145,7 @@ struct Configs {
 
 GLFWwindow* createWindow(struct Configs& configs) {
   if (configs.versionRequest == Specific) {
-    if (configs.wantProfile == Core or configs.wantProfile == Compat) {
+    if (configs.profileRequest == Core or configs.profileRequest == Compat) {
       if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and
          configs.wantVersionMinor < 3)) {
         throw std::invalid_argument("Core/compat profiles are only valid for GL>=3.3");
@@ -157,9 +157,9 @@ GLFWwindow* createWindow(struct Configs& configs) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.wantVersionMajor);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.wantVersionMinor);
   }
-  if (configs.wantProfile == Core) {
+  if (configs.profileRequest == Core) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  } else if (configs.wantProfile == Compat) {
+  } else if (configs.profileRequest == Compat) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
   }
 
@@ -230,9 +230,9 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
         printUsage();
         return false;
       } else if (arg == "--core") {
-        configs.wantProfile = Core;
+        configs.profileRequest = Core;
       } else if (arg == "--compat") {
-        configs.wantProfile = Compat;
+        configs.profileRequest = Compat;
       } else if (arg.substr(0, 5) == "--gl=") {
         if (arg.substr(5) == "max") {
           configs.versionRequest = Maximum;
@@ -256,15 +256,15 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
 }
 
 void printTryingString(const struct Configs& configs) {
-  if (configs.wantVersionMajor > 0 or configs.wantProfile != Any) {
+  if (configs.wantVersionMajor > 0 or configs.profileRequest != Any) {
     std::cout << "Trying OpenGL";
   
     if (configs.wantVersionMajor > 0) {
       std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
     }
-    if (configs.wantProfile == Core) {
+    if (configs.profileRequest == Core) {
       std::cout << " Core";
-    } else if (configs.wantProfile == Compat) {
+    } else if (configs.profileRequest == Compat) {
       std::cout << " Compatibility";
     }
     std::cout << std::endl;
