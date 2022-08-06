@@ -137,8 +137,8 @@ struct Configs {
 GLFWwindow* createWindow(struct Configs& configs) {
   if (configs.wantExplicitVersion) {
     if (configs.wantProfile == Core or configs.wantProfile == Compat) {
-      if (configs.wantVersionMajor < 3 /*or (configs.wantVersionMajor == 3 and
-         configs.wantVersionMinor < 3)*/) {
+      if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and
+         configs.wantVersionMinor < 3)) {
         throw std::invalid_argument("Core/compat profiles are only valid for GL>=3.3");
       }
     }
