@@ -304,7 +304,7 @@ int main(int argc, char** argv) {
       std::cerr << "Please specify a fragment shader path" << std::endl;
       return EXIT_FAILURE;
     }
-    std::string fragmentShaderSource = readShaderFromFile(argv[1]);
+    std::string fragmentShaderSource = readShaderFromFile(configs.fragmentFilePath.c_str());
 
     /*
     GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
