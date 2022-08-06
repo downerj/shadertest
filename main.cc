@@ -214,7 +214,6 @@ int main(int argc, char** argv) {
     struct Configs configs;
     if (argc < 2) {
       std::cerr << "Please specify a fragment shader file, or pass --info-only or --help." << std::endl;
-      printUsage();
       return EXIT_FAILURE;
     } else {
       for (int a = 1; a < argc; a++) {
