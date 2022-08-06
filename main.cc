@@ -368,6 +368,13 @@ void main() {
 }
 
 void run(struct Configs& configs) {
+  glewExperimental = GL_TRUE;
+  GLenum glewStatus = glewInit();
+  if (glewStatus != GLEW_OK) {
+    std::cerr << glewGetErrorString(glewStatus) << std::endl;
+    throw std::logic_error("Cannot initialize GLEW");
+  }
+
   GLuint program = createProgram(configs.vertexSource, configs.fragmentSource);
   GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   GLuint indexBuffer = createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -416,13 +423,6 @@ int main(int argc, char** argv) {
     printInfo();
     if (configs.wantInfoOnly) {
       return EXIT_SUCCESS;
-    }
-
-    glewExperimental = GL_TRUE;
-    GLenum glewStatus = glewInit();
-    if (glewStatus != GLEW_OK) {
-      std::cerr << glewGetErrorString(glewStatus) << std::endl;
-      throw std::logic_error("Cannot initialize GLEW");
     }
 
     if (configs.fragmentFilePath.empty()) {
