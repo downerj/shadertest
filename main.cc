@@ -124,6 +124,8 @@ enum ProfileType {
 
 struct Configs {
   std::string fragmentFilePath;
+  std::string vertexSource;
+  std::string fragmentSource;
   bool wantInfoOnly = false;
   bool wantExplicitVersion = false;
   unsigned int wantVersionMajor = 0;
@@ -132,6 +134,7 @@ struct Configs {
   unsigned int windowWidth = 400;
   unsigned int windowHeight = 400;
   const char* windowTitle = "Shader Test";
+  GLFWwindow* window = nullptr;
 };
 
 GLFWwindow* createWindow(struct Configs& configs) {
@@ -251,7 +254,7 @@ void printTryingString(const struct Configs& configs) {
   }
 }
 
-GLFWwindow* initializeWindow(struct Configs& configs) {
+void initializeWindow(struct Configs& configs) {
   if (not glfwInit()) {
     throw std::logic_error("Cannot initialize GLFW");
   }
@@ -274,7 +277,7 @@ GLFWwindow* initializeWindow(struct Configs& configs) {
     throw std::logic_error("Cannot create window");
   }
   glfwMakeContextCurrent(window);
-  return window;
+  configs.window = window;
 }
 
 bool doesGLSLVersionUseInOut(const std::string& versionLine) {
@@ -364,17 +367,52 @@ void main() {
   return vertexBuffer.str();
 }
 
+void run(struct Configs& configs) {
+  GLuint program = createProgram(configs.vertexSource, configs.fragmentSource);
+  GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  GLuint indexBuffer = createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  GLint vertexLocation = glGetAttribLocation(program, "vertex");
+  GLint resolutionLocation = glGetUniformLocation(program, "resolution");
+  GLint timeLocation = glGetUniformLocation(program, "time");
+
+  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+  glEnableVertexAttribArray(vertexLocation);
+  glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+  
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClearDepth(1.0);
+
+  while (not glfwWindowShouldClose(configs.window)) {
+    int width;
+    int height;
+    glfwGetFramebufferSize(configs.window, &width, &height);
+    glViewport(0, 0, width, height);
+    glClear(GL_COLOR_BUFFER_BIT);
+  
+    double time = glfwGetTime();
+    
+    glUseProgram(program);
+    glUniform2f(resolutionLocation, width, height);
+    glUniform1f(timeLocation, time);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+
+    glfwSwapBuffers(configs.window);
+    glfwPollEvents();
+  }
+  glfwDestroyWindow(configs.window);
+  glfwTerminate();
+}
+
 int main(int argc, char** argv) {
   try {
     struct Configs configs;
     if (not parseArguments(argc, argv, configs)) {
       return EXIT_SUCCESS;
     }
-
     printTryingString(configs);
-
-    GLFWwindow* window = initializeWindow(configs);
-
+    initializeWindow(configs);
     printInfo();
     if (configs.wantInfoOnly) {
       return EXIT_SUCCESS;
@@ -390,44 +428,10 @@ int main(int argc, char** argv) {
     if (configs.fragmentFilePath.empty()) {
       throw std::invalid_argument("Please specify a fragment shader path");
     }
-    std::string fragmentSource = readShaderFromFile(configs.fragmentFilePath);
-    std::string vertexSource = initializeVertexSource(fragmentSource);
+    configs.fragmentSource = readShaderFromFile(configs.fragmentFilePath);
+    configs.vertexSource = initializeVertexSource(configs.fragmentSource);
     
-    GLuint program = createProgram(vertexSource, fragmentSource);
-    GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    GLuint indexBuffer = createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    GLint vertexLocation = glGetAttribLocation(program, "vertex");
-    GLint resolutionLocation = glGetUniformLocation(program, "resolution");
-    GLint timeLocation = glGetUniformLocation(program, "time");
-
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glEnableVertexAttribArray(vertexLocation);
-    glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClearDepth(1.0);
-
-    while (not glfwWindowShouldClose(window)) {
-      int width;
-      int height;
-      glfwGetFramebufferSize(window, &width, &height);
-      glViewport(0, 0, width, height);
-      glClear(GL_COLOR_BUFFER_BIT);
-    
-      double time = glfwGetTime();
-      
-      glUseProgram(program);
-      glUniform2f(resolutionLocation, width, height);
-      glUniform1f(timeLocation, time);
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
-
-      glfwSwapBuffers(window);
-      glfwPollEvents();
-    }
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    run(configs);
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
