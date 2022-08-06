@@ -28,7 +28,7 @@ std::string readShaderFromFile(const char* fileName) {
   }
 
   std::ifstream fileIn(fileName);
-  if (fileIn.bad()) {
+  if (fileIn.bad() or fileIn.fail()) {
     throw std::invalid_argument("Unable to open shader input file");
   }
   std::ostringstream textStream;
