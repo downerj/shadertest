@@ -1,6 +1,6 @@
-#include <fstream> // std::
+#include <fstream> // std::*fstream
 #include <iostream> // std::cout, std::cerr, std::endl
-#include <sstream> // std::
+#include <sstream> // std::*stringstream
 #include <stdexcept> // std::exception, std::invalid_argument
 #include <string> // std::string
 #include <vector> // std::vector
