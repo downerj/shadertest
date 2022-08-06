@@ -129,7 +129,6 @@ enum ProfileType {
 struct Configs {
   std::string fragmentFilePath;
   bool wantInfoOnly = false;
-  bool wantHelp = false;
   unsigned int wantVersionMajor = 0;
   unsigned int wantVersionMinor = 0;
   enum ProfileType wantProfile = Any;
@@ -220,12 +219,10 @@ int main(int argc, char** argv) {
         std::string arg(argv[a]);
         if (arg == "--info-only") {
           configs.wantInfoOnly = true;
-        }
-        if (arg == "--help") {
-          configs.wantHelp = true;
-          break;
-        }
-        if (arg == "--core") {
+        } else if (arg == "--help") {
+          printUsage();
+          return EXIT_SUCCESS;
+        } else if (arg == "--core") {
           configs.wantProfile = Core;
         } else if (arg == "--compat") {
           configs.wantProfile = Compat;
@@ -235,14 +232,10 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
           }
         }
+        
       }
     }
     
-    if (configs.wantHelp) {
-      printUsage();
-      return EXIT_SUCCESS;
-    }
-
     std::cout << "Trying OpenGL "
       << configs.wantVersionMajor << "." << configs.wantVersionMinor;
     if (configs.wantProfile == Core) {
