@@ -1,7 +1,7 @@
 #include <fstream> // std::*fstream
 #include <iostream> // std::cout, std::cerr, std::endl
 #include <sstream> // std::*stringstream
-#include <stdexcept> // std::exception, std::invalid_argument
+#include <stdexcept> // std::exception, std::invalid_argument, std::logic_error
 #include <string> // std::string
 #include <vector> // std::vector
 
@@ -192,59 +192,57 @@ void printInfo() {
     << "OpenGL Renderer: " << glRenderer << std::endl;
 }
 
-bool parseGLVersion(const std::string& arg, struct Configs& configs) {
+void parseGLVersion(const std::string& arg, struct Configs& configs) {
   std::pair<int, int> version;
 
   if (arg.size() < 3 or arg[1] != '.') {
-    std::cerr << "GL version must be in format \"X.X\"." << std::endl;
-    return false;
+    throw std::invalid_argument("GL version must be in format \"X.X\".");
   }
   unsigned int major = (unsigned int)arg[0] - 0x30;
   unsigned int minor = (unsigned int)arg[2] - 0x30;
   if (major > 9 || minor > 9) {
-    std::cerr << "GL version is not a valid number." << std::endl;
-    return false;
+    throw std::invalid_argument("GL version is not a valid number.");
   }
 
   configs.wantVersionMajor = major;
   configs.wantVersionMinor = minor;
+}
+
+bool parseArguments(int argc, char** argv, struct Configs& configs) {
+  if (argc < 2) {
+    throw std::invalid_argument("Please specify a fragment shader file, or pass --info-only or --help.");
+  } else {
+    for (int a = 1; a < argc; a++) {
+      std::string arg(argv[a]);
+      if (arg == "--info-only") {
+        configs.wantInfoOnly = true;
+      } else if (arg == "--help") {
+        printUsage();
+        return false;
+      } else if (arg == "--core") {
+        configs.wantProfile = Core;
+      } else if (arg == "--compat") {
+        configs.wantProfile = Compat;
+      } else if (arg.substr(0, 5) == "--gl=") {
+        parseGLVersion(arg.substr(5), configs);
+        configs.wantExplicitVersion = true;
+      // After all switches/options, assume the rest is the file name.
+      } else {
+        // If we've already got a file name, then print an error.
+        if (not configs.fragmentFilePath.empty()) {
+          throw std::invalid_argument("Cannot have more than one fragment shader path.");
+        }
+        configs.fragmentFilePath = arg;
+      }
+    }
+  }
   return true;
 }
 
 int main(int argc, char** argv) {
   try {
     struct Configs configs;
-    if (argc < 2) {
-      std::cerr << "Please specify a fragment shader file, or pass --info-only or --help." << std::endl;
-      return EXIT_FAILURE;
-    } else {
-      for (int a = 1; a < argc; a++) {
-        std::string arg(argv[a]);
-        if (arg == "--info-only") {
-          configs.wantInfoOnly = true;
-        } else if (arg == "--help") {
-          printUsage();
-          return EXIT_SUCCESS;
-        } else if (arg == "--core") {
-          configs.wantProfile = Core;
-        } else if (arg == "--compat") {
-          configs.wantProfile = Compat;
-        } else if (arg.substr(0, 5) == "--gl=") {
-          if (not parseGLVersion(arg.substr(5), configs)) {
-            return EXIT_FAILURE;
-          }
-          configs.wantExplicitVersion = true;
-        // After all switches/options, assume the rest is the file name.
-        } else {
-          // If we've already got a file name, then print an error.
-          if (not configs.fragmentFilePath.empty()) {
-            std::cerr << "Cannot have more than one fragment shader path." << std::endl;
-            return EXIT_FAILURE;
-          }
-          configs.fragmentFilePath = arg;
-        }
-      }
-    }
+    parseArguments(argc, argv, configs);
 
     if (configs.wantVersionMajor > 0 or configs.wantProfile != Any) {
       std::cout << "Trying OpenGL";
@@ -261,8 +259,7 @@ int main(int argc, char** argv) {
     }
 
     if (not glfwInit()) {
-      std::cerr << "Cannot initialize GLFW" << std::endl;
-      return EXIT_FAILURE;
+      throw std::logic_error("Cannot initialize GLFW");
     }
 
     GLFWwindow* window;
@@ -280,8 +277,7 @@ int main(int argc, char** argv) {
     }
 
     if (not window) {
-      std::cerr << "Cannot create window" << std::endl;
-      return EXIT_FAILURE;
+      throw std::logic_error("Cannot create window");
     }
     glfwMakeContextCurrent(window);
 
@@ -301,8 +297,7 @@ int main(int argc, char** argv) {
     */
 
     if (configs.fragmentFilePath.empty()) {
-      std::cerr << "Please specify a fragment shader path" << std::endl;
-      return EXIT_FAILURE;
+      throw std::invalid_argument("Please specify a fragment shader path");
     }
     std::string fragmentShaderSource = readShaderFromFile(configs.fragmentFilePath.c_str());
 
