@@ -22,14 +22,10 @@ unsigned int indices[] = {
   0, 2, 3,
 };
 
-std::string readShaderFromFile(const char* fileName) {
-  if (not fileName) {
-    throw std::invalid_argument("No shader input file name provided");
-  }
-
-  std::ifstream fileIn(fileName);
+std::string readShaderFromFile(const std::string& fileName) {
+  std::ifstream fileIn(fileName.c_str());
   if (fileIn.bad() or fileIn.fail()) {
-    throw std::invalid_argument("Unable to open shader input file");
+    throw std::invalid_argument("Unable to open shader input file " + fileName);
   }
   std::ostringstream textStream;
   textStream << fileIn.rdbuf();
@@ -242,7 +238,9 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
 int main(int argc, char** argv) {
   try {
     struct Configs configs;
-    parseArguments(argc, argv, configs);
+    if (not parseArguments(argc, argv, configs)) {
+      return EXIT_SUCCESS;
+    }
 
     if (configs.wantVersionMajor > 0 or configs.wantProfile != Any) {
       std::cout << "Trying OpenGL";
@@ -299,7 +297,7 @@ int main(int argc, char** argv) {
     if (configs.fragmentFilePath.empty()) {
       throw std::invalid_argument("Please specify a fragment shader path");
     }
-    std::string fragmentShaderSource = readShaderFromFile(configs.fragmentFilePath.c_str());
+    std::string fragmentShaderSource = readShaderFromFile(configs.fragmentFilePath);
 
     /*
     GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
