@@ -129,6 +129,7 @@ enum ProfileType {
 struct Configs {
   std::string fragmentFilePath;
   bool wantInfoOnly = false;
+  bool wantExplicitVersion = false;
   unsigned int wantVersionMajor = 0;
   unsigned int wantVersionMinor = 0;
   enum ProfileType wantProfile = Any;
@@ -138,10 +139,12 @@ struct Configs {
 };
 
 GLFWwindow* createWindow(struct Configs& configs) {
-  if (configs.wantProfile == Core or configs.wantProfile == Compat) {
-    if (configs.wantVersionMajor < 3 /*or (configs.wantVersionMajor == 3 and
-       configs.wantVersionMinor < 3)*/) {
-      throw std::invalid_argument("Core/compat profiles are only valid for GL>=3.3");
+  if (configs.wantExplicitVersion) {
+    if (configs.wantProfile == Core or configs.wantProfile == Compat) {
+      if (configs.wantVersionMajor < 3 /*or (configs.wantVersionMajor == 3 and
+         configs.wantVersionMinor < 3)*/) {
+        throw std::invalid_argument("Core/compat profiles are only valid for GL>=3.3");
+      }
     }
   }
 
@@ -226,24 +229,36 @@ int main(int argc, char** argv) {
           configs.wantProfile = Core;
         } else if (arg == "--compat") {
           configs.wantProfile = Compat;
-        }
-        if (arg.substr(0, 5) == "--gl=") {
+        } else if (arg.substr(0, 5) == "--gl=") {
           if (not parseGLVersion(arg.substr(5), configs)) {
             return EXIT_FAILURE;
           }
+          configs.wantExplicitVersion = true;
+        // After all switches/options, assume the rest is the file name.
+        } else {
+          // If we've already got a file name, then print an error.
+          if (not configs.fragmentFilePath.empty()) {
+            std::cerr << "Cannot have more than one fragment shader path." << std::endl;
+            return EXIT_FAILURE;
+          }
+          configs.fragmentFilePath = arg;
         }
-        
       }
     }
+
+    if (configs.wantVersionMajor > 0 or configs.wantProfile != Any) {
+      std::cout << "Trying OpenGL";
     
-    std::cout << "Trying OpenGL "
-      << configs.wantVersionMajor << "." << configs.wantVersionMinor;
-    if (configs.wantProfile == Core) {
-      std::cout << " Core";
-    } else if (configs.wantProfile == Compat) {
-      std::cout << " Compatibility";
+      if (configs.wantVersionMajor > 0) {
+        std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
+      }
+      if (configs.wantProfile == Core) {
+        std::cout << " Core";
+      } else if (configs.wantProfile == Compat) {
+        std::cout << " Compatibility";
+      }
+      std::cout << std::endl;
     }
-    std::cout << std::endl;
 
     if (not glfwInit()) {
       std::cerr << "Cannot initialize GLFW" << std::endl;
@@ -285,7 +300,11 @@ int main(int argc, char** argv) {
     }
     */
 
-    //std::string fragmentShaderSource = readShaderFromFile(argv[1]);
+    if (configs.fragmentFilePath.empty()) {
+      std::cerr << "Please specify a fragment shader path" << std::endl;
+      return EXIT_FAILURE;
+    }
+    std::string fragmentShaderSource = readShaderFromFile(argv[1]);
 
     /*
     GLuint program = createProgram(vertexSourceDefault, fragmentShaderSource);
