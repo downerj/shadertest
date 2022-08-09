@@ -20,6 +20,7 @@ void GLAPIENTRY messageCallback(
 ) {
   std::ostringstream buffer;
   buffer << "GL Callback: " << message;
+  //std::cerr << buffer.str() << std::endl;
   throw std::runtime_error(buffer.str());
 }
 #endif // DEBUG
@@ -161,10 +162,10 @@ struct Configs {
 
 GLFWwindow* createWindow(struct Configs& configs) {
   if (configs.versionRequest == Specific) {
-    if (configs.profileRequest == Core or configs.profileRequest == Compat) {
+    if (configs.profileRequest == Core || configs.profileRequest == Compat) {
       if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and
          configs.wantVersionMinor < 3)) {
-        throw std::invalid_argument("Core/compat profiles are only valid for GL>=3.3");
+        throw std::invalid_argument("Compatability profiles are only valid for GL>=3.3");
       }
     }
   }
@@ -278,10 +279,10 @@ void printTryingString(const struct Configs& configs) {
     if (configs.wantVersionMajor > 0) {
       std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
     }
-    if (configs.profileRequest == Core) {
-      std::cout << " Core";
-    } else if (configs.profileRequest == Compat) {
+    if (configs.profileRequest == Compat) {
       std::cout << " Compatibility";
+    } else if (configs.profileRequest == Core) {
+      std::cout << " Core";
     }
     std::cout << std::endl;
   }
@@ -418,14 +419,16 @@ void run(struct Configs& configs) {
   GLint resolutionLocation = glGetUniformLocation(program, "resolution");
   GLint timeLocation = glGetUniformLocation(program, "time");
 
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-  glEnableVertexAttribArray(vertexLocation);
   glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
+  glEnableVertexAttribArray(vertexLocation);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-  
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glClearDepth(1.0);
+  glUseProgram(program);
 
   while (not glfwWindowShouldClose(configs.window)) {
     int width;
@@ -435,8 +438,6 @@ void run(struct Configs& configs) {
     glClear(GL_COLOR_BUFFER_BIT);
   
     double time = glfwGetTime();
-    
-    glUseProgram(program);
     glUniform2f(resolutionLocation, width, height);
     glUniform1f(timeLocation, time);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
