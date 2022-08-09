@@ -1,4 +1,4 @@
-#version 100
+#version 320 es
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -59,7 +59,9 @@ void setColor(out vec4 fragColor, in vec4 fragCoord) {
   fragColor = hsvCycled2rgba(hsv, 1.0, 0.25);
 }
 
+out vec4 fragColor;
+
 void main() {
-  setColor(gl_FragColor, gl_FragCoord);
+  setColor(fragColor, gl_FragCoord);
 }
 
