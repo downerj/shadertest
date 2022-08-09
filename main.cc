@@ -8,6 +8,23 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+void GLAPIENTRY
+messageCallback(
+  GLenum source,
+  GLenum type,
+  GLuint id,
+  GLenum severity,
+  GLsizei length,
+  const GLchar* message,
+  const void* userParam
+) {
+  std::cerr << "GL CALLBACK:"
+    << " type = " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
+    << " severity = " << severity
+    << " message = " << message
+    << std::endl;
+}
+
 float vertices[] = {
   -1.0, -1.0,
   -1.0, 1.0,
@@ -389,6 +406,9 @@ void run(struct Configs& configs) {
     std::cerr << glewGetErrorString(glewStatus) << std::endl;
     throw std::logic_error("Cannot initialize GLEW");
   }
+  
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(messageCallback, 0);
 
   GLuint program = createProgram(configs.vertexSource, configs.fragmentSource);
   GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
