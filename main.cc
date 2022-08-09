@@ -8,22 +8,21 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-void GLAPIENTRY
-messageCallback(
-  GLenum source,
-  GLenum type,
-  GLuint id,
-  GLenum severity,
-  GLsizei length,
+#ifdef DEBUG
+void GLAPIENTRY messageCallback(
+  GLenum /*source*/,
+  GLenum /*type*/,
+  GLuint /*id*/,
+  GLenum /*severity*/,
+  GLsizei /*length*/,
   const GLchar* message,
-  const void* userParam
+  const void* /*userParam*/
 ) {
-  std::cerr << "GL CALLBACK:"
-    << " type = " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
-    << " severity = " << severity
-    << " message = " << message
-    << std::endl;
+  std::ostringstream buffer;
+  buffer << "GL Callback: " << message;
+  throw std::runtime_error(buffer.str());
 }
+#endif // DEBUG
 
 float vertices[] = {
   -1.0, -1.0,
@@ -407,8 +406,10 @@ void run(struct Configs& configs) {
     throw std::logic_error("Cannot initialize GLEW");
   }
   
+#ifdef DEBUG
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(messageCallback, 0);
+#endif // DEBUG
 
   GLuint program = createProgram(configs.vertexSource, configs.fragmentSource);
   GLuint vertexBuffer = createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -468,7 +469,8 @@ int main(int argc, char** argv) {
     
     run(configs);
   } catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "\e[0;31m" << "Error"
+      "\e[0m" << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 
