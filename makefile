@@ -1,22 +1,26 @@
 .PHONY: clean
 
+BINDIR = bin
+OBJDIR = obj
 BIN = shadertest
 WARNS = -Wall -Wextra
 DEBUGS = 
 LIBS = -lGL -lGLEW -lglfw
 
 release: DEBUGS = -O3
-release: $(BIN)
+release: $(BINDIR)/$(BIN)
 
 debug: DEBUGS = -DDEBUG -Og -g
-debug: $(BIN)
+debug: $(BINDIR)/$(BIN)
 
-$(BIN): main.oo
+$(BINDIR)/$(BIN): $(OBJDIR)/main.oo
+	mkdir -p $(BINDIR)
 	$(CXX) -o $@ $^ $(LIBS)
 
-main.oo: main.cc
+$(OBJDIR)/main.oo: main.cc
+	mkdir -p $(OBJDIR)
 	$(CXX) -c -g -o $@ $< $(WARNS) $(DEBUGS)
 
 clean:
-	rm -f $(BIN)
-	rm -f *.oo
+	rm -f $(BINDIR)/$(BIN)
+	rm -f $(OBJDIR)/*.oo

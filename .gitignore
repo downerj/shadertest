@@ -1,7 +1,6 @@
 # Object files
-**/*.o
-**/*.oo
+obj/
 
 # Binaries
-shadertest
+bin/
 
