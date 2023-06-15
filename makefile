@@ -1,7 +1,8 @@
-.PHONY: clean
+.PHONY: clean pre
 
 BINDIR = bin
 OBJDIR = obj
+PREDIR = pre
 BIN = shadertest
 WARNS = -Wall -Wextra
 DEBUGS = 
@@ -19,7 +20,13 @@ $(BINDIR)/$(BIN): $(OBJDIR)/main.oo
 
 $(OBJDIR)/main.oo: main.cc
 	mkdir -p $(OBJDIR)
-	$(CXX) -c -g -o $@ $< $(WARNS) $(DEBUGS)
+	$(CXX) -c -o $@ $< $(WARNS) $(DEBUGS)
+
+pre: $(PREDIR)/main.ii
+
+$(PREDIR)/main.ii: main.cc
+	mkdir -p $(PREDIR)
+	$(CXX) -E -o $@ $< $(WARNS) $(DEBUGS)
 
 clean:
 	rm -f $(BINDIR)/$(BIN)
