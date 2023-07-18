@@ -467,11 +467,11 @@ int main(int argc, char** argv) {
     }
     configs.fragmentSource = readShaderFromFile(configs.fragmentFilePath);
     configs.vertexSource = initializeVertexSource(configs.fragmentSource);
-    
+
     run(configs);
   } catch (std::exception& e) {
-    std::cerr << "\e[0;31m" << "Error"
-      "\e[0m" << ": " << e.what() << std::endl;
+    std::cerr << "\x1b[0;31m" << "Error"
+      "\x1b[0m" << ": " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 
