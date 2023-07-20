@@ -1,5 +1,6 @@
 .PHONY: clean
 
+SRCDIR = src
 INCDIR = include
 HEADERS = $(wildcard $(INCDIR)/*.hh)
 BINDIR = bin
@@ -21,19 +22,19 @@ $(BINDIR)/$(BIN): $(OBJDIR)/main.oo
 	mkdir -p $(BINDIR)
 	$(CXX) -o $@ $^ $(LIBS)
 
-$(OBJDIR)/main.oo: main.cc $(HEADERS)
+$(OBJDIR)/main.oo: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(OBJDIR)
 	$(CXX) -c -o $@ $< $(WARNS) $(DEBUGS)
 
 pre: $(PREDIR)/main.ii
 
-$(PREDIR)/main.ii: main.cc $(HEADERS)
+$(PREDIR)/main.ii: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(PREDIR)
 	$(CXX) -E -o $@ $< $(WARNS) $(DEBUGS)
 
 asm: $(ASMDIR)/main.s
 
-$(ASMDIR)/main.s: main.cc $(HEADERS)
+$(ASMDIR)/main.s: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(ASMDIR)
 	$(CXX) -S -o $@ $< $(WARNS) $(DEBUGS)
 
