@@ -8,6 +8,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glVersions.hh>
+
 #ifdef DEBUG
 void GLAPIENTRY messageCallback(
   GLenum /*source*/,
@@ -117,43 +119,15 @@ GLuint createProgram(const std::string& vertexSource, const std::string& fragmen
   return program;
 }
 
-const std::vector<GLuint> possibleGLVersions = {
-  4, 6,
-  4, 5,
-  4, 4,
-  4, 3,
-  4, 2,
-  4, 1,
-  4, 0,
-  3, 3,
-  3, 2,
-  3, 1,
-  3, 0,
-  2, 1,
-  2, 0,
-};
-
-enum ProfileRequest {
-  Any,
-  Compat,
-  Core,
-};
-
-enum VersionRequest {
-  Default,
-  Specific,
-  Maximum,
-};
-
 struct Configs {
   std::string fragmentFilePath;
   std::string vertexSource;
   std::string fragmentSource;
   bool wantInfoOnly = false;
-  enum VersionRequest versionRequest = Default;
+  enum graphics::VersionRequest versionRequest = graphics::VersionRequest::Default;
   unsigned int wantVersionMajor = 0;
   unsigned int wantVersionMinor = 0;
-  enum ProfileRequest profileRequest = Any;
+  enum graphics::ProfileRequest profileRequest = graphics::ProfileRequest::Any;
   unsigned int windowWidth = 400;
   unsigned int windowHeight = 400;
   const char* windowTitle = "Shader Test";
@@ -161,22 +135,21 @@ struct Configs {
 };
 
 GLFWwindow* createWindow(struct Configs& configs) {
-  if (configs.versionRequest == Specific) {
-    if (configs.profileRequest == Core || configs.profileRequest == Compat) {
-      if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and
-         configs.wantVersionMinor < 3)) {
+  if (configs.versionRequest == graphics::VersionRequest::Specific) {
+    if (configs.profileRequest == graphics::ProfileRequest::Core || configs.profileRequest == graphics::ProfileRequest::Compat) {
+      if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and configs.wantVersionMinor < 3)) {
         throw std::invalid_argument("Compatability profiles are only valid for GL>=3.3");
       }
     }
   }
 
-  if (configs.versionRequest != Default) {
+  if (configs.versionRequest != graphics::VersionRequest::Default) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.wantVersionMajor);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.wantVersionMinor);
   }
-  if (configs.profileRequest == Core) {
+  if (configs.profileRequest == graphics::ProfileRequest::Core) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  } else if (configs.profileRequest == Compat) {
+  } else if (configs.profileRequest == graphics::ProfileRequest::Compat) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
   }
 
@@ -247,17 +220,17 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
         printUsage();
         return false;
       } else if (arg == "--core") {
-        configs.profileRequest = Core;
+        configs.profileRequest = graphics::ProfileRequest::Core;
       } else if (arg == "--compat") {
-        configs.profileRequest = Compat;
+        configs.profileRequest = graphics::ProfileRequest::Compat;
       } else if (arg.substr(0, 5) == "--gl=") {
         if (arg.substr(5) == "max") {
-          configs.versionRequest = Maximum;
+          configs.versionRequest = graphics::VersionRequest::Maximum;
         } else if (arg.substr(5) == "default") {
-          configs.versionRequest = Default;
+          configs.versionRequest = graphics::VersionRequest::Default;
         } else {
           parseGLVersion(arg.substr(5), configs);
-          configs.versionRequest = Specific;
+          configs.versionRequest = graphics::VersionRequest::Specific;
         }
       // After all switches/options, assume the rest is the file name.
       } else {
@@ -273,15 +246,15 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
 }
 
 void printTryingString(const struct Configs& configs) {
-  if (configs.wantVersionMajor > 0 or configs.profileRequest != Any) {
+  if (configs.wantVersionMajor > 0 or configs.profileRequest != graphics::ProfileRequest::Any) {
     std::cout << "Trying OpenGL";
   
     if (configs.wantVersionMajor > 0) {
       std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
     }
-    if (configs.profileRequest == Compat) {
+    if (configs.profileRequest == graphics::ProfileRequest::Compat) {
       std::cout << " Compatibility";
-    } else if (configs.profileRequest == Core) {
+    } else if (configs.profileRequest == graphics::ProfileRequest::Core) {
       std::cout << " Core";
     }
     std::cout << std::endl;
@@ -293,12 +266,12 @@ void initializeWindow(struct Configs& configs) {
     throw std::logic_error("Cannot initialize GLFW");
   }
 
-  if (configs.versionRequest != Maximum) {
+  if (configs.versionRequest != graphics::VersionRequest::Maximum) {
     configs.window = createWindow(configs);
   } else {
-    for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
-      configs.wantVersionMajor = possibleGLVersions[v];
-      configs.wantVersionMinor = possibleGLVersions[v + 1];
+    for (unsigned int v = 0; v < graphics::possibleGLVersions.size(); v += 2) {
+      configs.wantVersionMajor = graphics::possibleGLVersions[v];
+      configs.wantVersionMinor = graphics::possibleGLVersions[v + 1];
       configs.window = createWindow(configs);
       if (configs.window) {
         break;

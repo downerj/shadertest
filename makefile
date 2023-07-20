@@ -24,19 +24,19 @@ $(BINDIR)/$(BIN): $(OBJDIR)/main.oo
 
 $(OBJDIR)/main.oo: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(OBJDIR)
-	$(CXX) -c -o $@ $< $(WARNS) $(DEBUGS)
+	$(CXX) -c -o $@ $< -I$(INCDIR) $(WARNS) $(DEBUGS)
 
 pre: $(PREDIR)/main.ii
 
 $(PREDIR)/main.ii: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(PREDIR)
-	$(CXX) -E -o $@ $< $(WARNS) $(DEBUGS)
+	$(CXX) -E -o $@ $< -I$(INCDIR) $(WARNS) $(DEBUGS)
 
 asm: $(ASMDIR)/main.s
 
 $(ASMDIR)/main.s: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(ASMDIR)
-	$(CXX) -S -o $@ $< $(WARNS) $(DEBUGS)
+	$(CXX) -S -o $@ $< -I$(INCDIR) $(WARNS) $(DEBUGS)
 
 clean:
 	rm -f $(BINDIR)/$(BIN)
