@@ -8,8 +8,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <glVersions.hh>
-#include <Configurations.hh>
+#include <graphics/Compatibility.hh>
+#include <graphics/Configurations.hh>
 
 #ifdef DEBUG
 void GLAPIENTRY messageCallback(

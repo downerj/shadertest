@@ -2,7 +2,7 @@
 
 SRCDIR = src
 INCDIR = include
-HEADERS = $(wildcard $(INCDIR)/*.hh)
+HEADERS = $(wildcard $(INCDIR)/**/*.hh)
 BINDIR = bin
 OBJDIR = obj
 PREDIR = out/pre
