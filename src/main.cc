@@ -3,6 +3,7 @@
 #include <sstream> // std::*stringstream
 #include <stdexcept> // std::exception, std::invalid_argument, std::logic_error
 #include <string> // std::string, std::stoi
+#include <tuple> // std::tuple, std::tie
 #include <vector> // std::vector
 
 #include <GL/glew.h>
@@ -178,9 +179,7 @@ void printInfo() {
     << "OpenGL Renderer: " << glRenderer << std::endl;
 }
 
-void parseGLVersion(const std::string& arg, graphics::Configurations& configs) {
-  std::pair<int, int> version;
-
+std::tuple<int, int> parseGLVersion(const std::string& arg) {
   if (arg.size() < 3 or arg[1] != '.') {
     throw std::invalid_argument("GL version must be in format \"X.X\".");
   }
@@ -190,8 +189,7 @@ void parseGLVersion(const std::string& arg, graphics::Configurations& configs) {
     throw std::invalid_argument("GL version is not a valid number.");
   }
 
-  configs.wantVersionMajor = major;
-  configs.wantVersionMinor = minor;
+  return {major, minor};
 }
 
 bool parseArguments(int argc, char** argv, graphics::Configurations& configs) {
@@ -215,7 +213,7 @@ bool parseArguments(int argc, char** argv, graphics::Configurations& configs) {
         } else if (arg.substr(5) == "default") {
           configs.versionRequest = graphics::VersionRequest::Default;
         } else {
-          parseGLVersion(arg.substr(5), configs);
+          std::tie(configs.wantVersionMajor, configs.wantVersionMinor) = parseGLVersion(arg.substr(5));
           configs.versionRequest = graphics::VersionRequest::Specific;
         }
       // After all switches/options, assume the rest is the file name.
