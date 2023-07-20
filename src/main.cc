@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include <glVersions.hh>
+#include <Configurations.hh>
 
 #ifdef DEBUG
 void GLAPIENTRY messageCallback(
@@ -119,22 +120,7 @@ GLuint createProgram(const std::string& vertexSource, const std::string& fragmen
   return program;
 }
 
-struct Configs {
-  std::string fragmentFilePath;
-  std::string vertexSource;
-  std::string fragmentSource;
-  bool wantInfoOnly = false;
-  enum graphics::VersionRequest versionRequest = graphics::VersionRequest::Default;
-  unsigned int wantVersionMajor = 0;
-  unsigned int wantVersionMinor = 0;
-  enum graphics::ProfileRequest profileRequest = graphics::ProfileRequest::Any;
-  unsigned int windowWidth = 400;
-  unsigned int windowHeight = 400;
-  const char* windowTitle = "Shader Test";
-  GLFWwindow* window = nullptr;
-};
-
-GLFWwindow* createWindow(struct Configs& configs) {
+GLFWwindow* createWindow(graphics::Configurations& configs) {
   if (configs.versionRequest == graphics::VersionRequest::Specific) {
     if (configs.profileRequest == graphics::ProfileRequest::Core || configs.profileRequest == graphics::ProfileRequest::Compat) {
       if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and configs.wantVersionMinor < 3)) {
@@ -192,7 +178,7 @@ void printInfo() {
     << "OpenGL Renderer: " << glRenderer << std::endl;
 }
 
-void parseGLVersion(const std::string& arg, struct Configs& configs) {
+void parseGLVersion(const std::string& arg, graphics::Configurations& configs) {
   std::pair<int, int> version;
 
   if (arg.size() < 3 or arg[1] != '.') {
@@ -208,7 +194,7 @@ void parseGLVersion(const std::string& arg, struct Configs& configs) {
   configs.wantVersionMinor = minor;
 }
 
-bool parseArguments(int argc, char** argv, struct Configs& configs) {
+bool parseArguments(int argc, char** argv, graphics::Configurations& configs) {
   if (argc < 2) {
     throw std::invalid_argument("Please specify a fragment shader file, or pass --info-only or --help.");
   } else {
@@ -245,7 +231,7 @@ bool parseArguments(int argc, char** argv, struct Configs& configs) {
   return true;
 }
 
-void printTryingString(const struct Configs& configs) {
+void printTryingString(const graphics::Configurations& configs) {
   if (configs.wantVersionMajor > 0 or configs.profileRequest != graphics::ProfileRequest::Any) {
     std::cout << "Trying OpenGL";
   
@@ -261,7 +247,7 @@ void printTryingString(const struct Configs& configs) {
   }
 }
 
-void initializeWindow(struct Configs& configs) {
+void initializeWindow(graphics::Configurations& configs) {
   if (not glfwInit()) {
     throw std::logic_error("Cannot initialize GLFW");
   }
@@ -372,7 +358,7 @@ void main() {
   return vertexBuffer.str();
 }
 
-void run(struct Configs& configs) {
+void run(graphics::Configurations& configs) {
   glewExperimental = GL_TRUE;
   GLenum glewStatus = glewInit();
   if (glewStatus != GLEW_OK) {
@@ -424,7 +410,7 @@ void run(struct Configs& configs) {
 
 int main(int argc, char** argv) {
   try {
-    struct Configs configs;
+    graphics::Configurations configs;
     if (not parseArguments(argc, argv, configs)) {
       return EXIT_SUCCESS;
     }
