@@ -1,9 +1,14 @@
 # Preprocessed files
-pre/
+out/pre/
+
+# Assembly files
+out/asm/
 
 # Object files
-obj/
+out/obj/
 
 # Binaries
 bin/
 
+# VSCode
+settings.json

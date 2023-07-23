@@ -3,7 +3,7 @@
 SRCDIR = src
 HEADERS = $(wildcard $(SRCDIR)/**/*.hh)
 BINDIR = bin
-OBJDIR = obj
+OBJDIR = out/obj
 PREDIR = out/pre
 ASMDIR = out/asm
 BIN = shadertest
