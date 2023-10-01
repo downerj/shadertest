@@ -1,0 +1,46 @@
+.PHONY: clean
+
+SRCDIR = src
+HEADERS = $(wildcard $(SRCDIR)/**/*.hh)
+BINDIR = bin
+OBJDIR = out/obj
+PREDIR = out/pre
+ASMDIR = out/asm
+BIN = shadertest.exe
+WARNS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
+DEBUGS =
+INCLUDES = -I"/mingw64/include" -DGLEW_NO_GLU
+LINKS = -L"/mingw64/bin"
+LIBS = -lopengl32 -lglew32 -lglfw3
+
+release: DEBUGS = -O3
+release: $(BINDIR)/$(BIN)
+
+debug: DEBUGS = -DDEBUG -Og -g
+debug: $(BINDIR)/$(BIN)
+
+$(BINDIR)/$(BIN): $(OBJDIR)/main.obj
+	mkdir -p $(BINDIR)
+	$(CXX) -o $@ $^ $(LINKS) $(LIBS)
+
+$(OBJDIR)/main.obj: $(SRCDIR)/main.cc $(HEADERS)
+	mkdir -p $(OBJDIR)
+	$(CXX) -c -o $@ $< -I$(SRCDIR) $(WARNS) $(DEBUGS) $(INCLUDES)
+
+pre: $(PREDIR)/main.ii
+
+$(PREDIR)/main.ii: $(SRCDIR)/main.cc $(HEADERS)
+	mkdir -p $(PREDIR)
+	$(CXX) -E -o $@ $< -I$(SRCDIR) $(WARNS) $(DEBUGS) $(INCLUDES)
+
+asm: $(ASMDIR)/main.s
+
+$(ASMDIR)/main.s: $(SRCDIR)/main.cc $(HEADERS)
+	mkdir -p $(ASMDIR)
+	$(CXX) -S -o $@ $< -I$(SRCDIR) $(WARNS) $(DEBUGS) $(INCLUDES)
+
+clean:
+	rm -f $(BINDIR)/$(BIN)
+	rm -f $(OBJDIR)/*.obj
+	rm -f $(PREDIR)/*.ii
+	rm -f $(ASMDIR)/**.s
