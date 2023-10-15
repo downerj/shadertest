@@ -10,7 +10,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <graphics/Configurations.hh>
+#include "configurations.hh"
 
 namespace graphics {
 #ifdef DEBUG

@@ -5,8 +5,8 @@
 
 #include <GLFW/glfw3.h>
 
-#include <graphics/Compatibility.hh>
-#include <graphics/Configurations.hh>
+#include "compatibility.hh"
+#include "configurations.hh"
 
 namespace graphics {
   GLFWwindow* createWindow(Configurations& configs) {

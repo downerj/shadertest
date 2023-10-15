@@ -5,11 +5,11 @@
 #include <string> // string
 #include <tuple> // tie
 
-#include <graphics/Compatibility.hh>
-#include <graphics/Configurations.hh>
-#include <graphics/Core.hh>
-#include <graphics/Runtime.hh>
-#include <graphics/Window.hh>
+#include "compatibility.hh"
+#include "configurations.hh"
+#include "core.hh"
+#include "runtime.hh"
+#include "window.hh"
 
 namespace application {
   std::string readShaderFromFile(const std::string& fileName) {

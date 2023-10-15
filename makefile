@@ -3,7 +3,7 @@
 SRCDIR = src
 HEADERS = $(wildcard $(SRCDIR)/**/*.hh)
 BINDIR = bin
-OBJDIR = out/obj
+OBJDIR = obj
 BIN = shadertest
 WARNS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 DEBUGS =
@@ -21,7 +21,7 @@ $(BINDIR)/$(BIN): $(OBJDIR)/main.oo
 
 $(OBJDIR)/main.oo: $(SRCDIR)/main.cc $(HEADERS)
 	mkdir -p $(OBJDIR)
-	$(CXX) -c -o $@ $< -I$(SRCDIR) $(WARNS) $(DEBUGS)
+	$(CXX) -c -o $@ $< -I$(SRCDIR)/graphics $(WARNS) $(DEBUGS)
 
 clean:
 	rm -f $(BINDIR)/$(BIN)

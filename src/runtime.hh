@@ -7,9 +7,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <graphics/Configurations.hh>
-#include <graphics/Core.hh>
-#include <graphics/Geometry.hh>
+#include "configurations.hh"
+#include "core.hh"
+#include "geometry.hh"
 
 namespace graphics {
   void run(Configurations& configs) {

@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <graphics/Compatibility.hh>
+#include "compatibility.hh"
 
 namespace graphics {
   class Configurations {
