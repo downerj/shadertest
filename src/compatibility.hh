@@ -1,9 +1,9 @@
 #ifndef GL_DEFINITIONS_HH
 #define GL_DEFINITIONS_HH
 
-#include <vector>
+#include <vector> // vector
 
-#include <GL/glew.h>
+#include "gl-includes.hh"
 
 namespace graphics {
   const std::vector<GLuint> possibleGLVersions = {

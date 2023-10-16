@@ -1,10 +1,9 @@
 #ifndef CONFIGS_HH
 #define CONFIGS_HH
 
-#include <string>
+#include <string> // string
 
-#include <GLFW/glfw3.h>
-
+#include "gl-includes.hh"
 #include "compatibility.hh"
 
 namespace graphics {
@@ -14,10 +13,10 @@ namespace graphics {
     std::string vertexSource;
     std::string fragmentSource;
     bool wantInfoOnly = false;
-    graphics::VersionRequest versionRequest = graphics::VersionRequest::Default;
+    VersionRequest versionRequest = VersionRequest::Default;
     unsigned int wantVersionMajor = 0;
     unsigned int wantVersionMinor = 0;
-    graphics::ProfileRequest profileRequest = graphics::ProfileRequest::Any;
+    ProfileRequest profileRequest = ProfileRequest::Any;
     unsigned int windowWidth = 400;
     unsigned int windowHeight = 400;
     const char* windowTitle = "Shader Test";
