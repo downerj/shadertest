@@ -1,12 +1,8 @@
-#ifndef WINDOW_HH
-#define WINDOW_HH
-
 #include <stdexcept> // invalid_argument, logic_error
 
-#include <GLFW/glfw3.h>
-
-#include <graphics/Compatibility.hh>
-#include <graphics/Configurations.hh>
+#include "window.hh"
+#include "compatibility.hh"
+#include "configurations.hh"
 
 namespace graphics {
   GLFWwindow* createWindow(Configurations& configs) {
@@ -61,5 +57,3 @@ namespace graphics {
     glfwMakeContextCurrent(configs.window);
   }
 }
-
-#endif // WINDOW_HH

@@ -1,16 +1,13 @@
-#ifndef CORE_HH
-#define CORE_HH
-
 #include <iostream> // cout, cerr, endl
 #include <sstream> // istringstream, ostringstream
 #include <stdexcept> // invalid_argument
 #include <string>  // stoi, string
 #include <tuple> // tie, tuple
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "core.hh"
+#include "configurations.hh"
 
-#include <graphics/Configurations.hh>
+using GLBytes = const GLubyte*;
 
 namespace graphics {
 #ifdef DEBUG
@@ -30,7 +27,6 @@ namespace graphics {
   }
 #endif // DEBUG
 
-  using GLBytes = const GLubyte*;
   std::tuple<GLBytes, GLBytes, GLBytes, GLBytes> getInfo() {
     GLBytes glVersion = glGetString(GL_VERSION);
     GLBytes glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
@@ -217,5 +213,3 @@ void main() {
     return vertexBuffer.str();
   }
 }
-
-#endif // CORE_HH

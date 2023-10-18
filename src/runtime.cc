@@ -1,15 +1,10 @@
-#ifndef RUNTIME_HH
-#define RUNTIME_HH
-
 #include <iostream> // cerr, endl
 #include <stdexcept> // logic_error
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <graphics/Configurations.hh>
-#include <graphics/Core.hh>
-#include <graphics/Geometry.hh>
+#include "runtime.hh"
+#include "configurations.hh"
+#include "core.hh"
+#include "geometry.hh"
 
 namespace graphics {
   void run(Configurations& configs) {
@@ -62,5 +57,3 @@ namespace graphics {
     glfwTerminate();
   }
 }
-
-#endif // RUNTIME_HH

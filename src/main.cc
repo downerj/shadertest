@@ -5,11 +5,11 @@
 #include <string> // string
 #include <tuple> // tie
 
-#include <graphics/Compatibility.hh>
-#include <graphics/Configurations.hh>
-#include <graphics/Core.hh>
-#include <graphics/Runtime.hh>
-#include <graphics/Window.hh>
+#include "compatibility.hh"
+#include "configurations.hh"
+#include "core.hh"
+#include "runtime.hh"
+#include "window.hh"
 
 namespace application {
   std::string readShaderFromFile(const std::string& fileName) {
@@ -25,22 +25,21 @@ namespace application {
   }
 
   void printUsage() {
-    std::cout << R"str(
-  Usage: shadertest [OPTIONS] <fragmentFilePath>
+    std::cout << R"str(Usage: shadertest [OPTIONS] <fragmentFilePath>
 
-  OPTIONS include:
-    --help            Print this help message and quit.
-    --info-only       Print OpenGL version info and quit.
-    --gl=<version>    Request an OpenGL context with version X.X.
-                      You can specify "max" (without quotes) to request the max version
-                      available.
-                      You can specify "default" (without quotes) to accept the default
-                      version provided by the vendor. This is the default option.
-    --core            Request an OpenGL context with a Core profile.
-                      This is only valid for GL>=3.3.
-    --compat          Request an OpenGL context with a Compatibility profile.
-                      This is only valid for GL>=3.3.
-  )str";
+OPTIONS include:
+  --help            Print this help message and quit.
+  --info-only       Print OpenGL version info and quit.
+  --gl=<version>    Request an OpenGL context with version X.X.
+                    You can specify "max" (without quotes) to request the max version
+                    available.
+                    You can specify "default" (without quotes) to accept the default
+                    version provided by the vendor. This is the default option.
+  --core            Request an OpenGL context with a Core profile.
+                    This is only valid for GL>=3.3.
+  --compat          Request an OpenGL context with a Compatibility profile.
+                    This is only valid for GL>=3.3.
+)str";
   }
 
   bool parseArguments(int argc, char** argv, graphics::Configurations& configs) {

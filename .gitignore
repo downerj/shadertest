@@ -1,11 +1,5 @@
-# Preprocessed files
-out/pre/
-
-# Assembly files
-out/asm/
-
 # Object files
-out/obj/
+obj/
 
 # Binaries
 bin/
