@@ -1,4 +1,5 @@
 #include <iostream> // cout, cerr, endl
+#include <memory> // make_unique
 #include <sstream> // istringstream, ostringstream
 #include <stdexcept> // invalid_argument
 #include <string>  // stoi, string
@@ -20,7 +21,7 @@ namespace graphics {
     const GLchar* message,
     const void* /*userParam*/
   ) {
-    std::ostringstream buffer;
+    auto buffer = std::ostringstream();
     buffer << "GL Callback: " << message;
     //std::cerr << buffer.str() << std::endl;
     throw std::runtime_error(buffer.str());
@@ -28,19 +29,15 @@ namespace graphics {
 #endif // DEBUG
 
   std::tuple<GLBytes, GLBytes, GLBytes, GLBytes> getInfo() {
-    GLBytes glVersion = glGetString(GL_VERSION);
-    GLBytes glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    GLBytes glVendor = glGetString(GL_VENDOR);
-    GLBytes glRenderer = glGetString(GL_RENDERER);
+    auto glVersion = glGetString(GL_VERSION);
+    auto glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+    auto glVendor = glGetString(GL_VENDOR);
+    auto glRenderer = glGetString(GL_RENDERER);
     return {glVersion, glslVersion, glVendor, glRenderer};
   }
 
   void printInfo() {
-    GLBytes glVersion;
-    GLBytes glslVersion;
-    GLBytes glVendor;
-    GLBytes glRenderer;
-    std::tie(glVersion, glslVersion, glVendor, glRenderer) = getInfo();
+    const auto [glVersion, glslVersion, glVendor, glRenderer] = getInfo();
     std::cout << "OpenGL Version: " << glVersion << std::endl
       << "GLSL Version: " << glslVersion << std::endl
       << "OpenGL Vendor: " << glVendor << std::endl
@@ -51,8 +48,8 @@ namespace graphics {
     if (arg.size() < 3 or arg[1] != '.') {
       throw std::invalid_argument("GL version must be in format \"X.X\".");
     }
-    unsigned int major = (unsigned int)arg[0] - 0x30;
-    unsigned int minor = (unsigned int)arg[2] - 0x30;
+    const auto major = static_cast<unsigned int>(arg[0]) - 0x30u;
+    const auto minor = static_cast<unsigned int>(arg[2]) - 0x30u;
     if (major > 9 || minor > 9) {
       throw std::invalid_argument("GL version is not a valid number.");
     }
@@ -61,8 +58,8 @@ namespace graphics {
   }
 
   bool doesGLSLVersionUseInOut(const std::string& versionLine) {
-    std::istringstream versionBuffer(versionLine);
-    std::string input;
+    auto versionBuffer = std::istringstream(versionLine);
+    auto input = std::string();
     // Skip the first string ("#version"), if present.
     if (versionLine.empty() or not getline(versionBuffer, input, ' ') or input != "#version") {
       return false;
@@ -71,8 +68,8 @@ namespace graphics {
     if (not getline(versionBuffer, input, ' ')) {
       throw std::invalid_argument("Missing GLSL version \"" + versionLine + "\"");
     }
-    bool isESSL = false;
-    int version;
+    auto isESSL = false;
+    auto version = int();
     try {
       version = std::stoi(input);
       if (version < 0) {
@@ -124,7 +121,7 @@ namespace graphics {
   }
 
   GLuint createBuffer(GLenum target, size_t size, void* data, GLenum usage) {
-    GLuint buffer;
+    auto buffer = GLuint();
     glGenBuffers(1, &buffer);
     glBindBuffer(target, buffer);
     glBufferData(target, size, data, usage);
@@ -133,47 +130,49 @@ namespace graphics {
   }
 
   GLuint createShader(GLenum type, const std::string& source) {
-    GLuint shader = glCreateShader(type);
-    const GLchar* sources[] = {(GLchar*)source.c_str()};
-    glShaderSource(shader, 1, sources, nullptr);
+    auto shader = glCreateShader(type);
+    auto sources = std::make_unique<const char*[]>(1);
+    sources[0] = source.c_str();
+    glShaderSource(shader, 1, sources.get(), nullptr);
     glCompileShader(shader);
     return shader;
   }
 
   GLuint createProgram(const std::string& vertexSource, const std::string& fragmentSource) {
-    GLuint vertexShader = createShader(GL_VERTEX_SHADER, vertexSource);
-    GLuint fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentSource);
-    GLuint program = glCreateProgram();
+    const auto vertexShader = createShader(GL_VERTEX_SHADER, vertexSource);
+    const auto fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentSource);
+    const auto program = glCreateProgram();
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
-    GLint linkStatus;
+    auto linkStatus = GLint();
     glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
     if (not linkStatus) {
-      GLsizei programLogLength;
+      auto programLogLength = GLsizei();
       glGetProgramiv(program, GL_INFO_LOG_LENGTH, &programLogLength);
-      GLchar* programLog = new GLchar[programLogLength];
-      glGetProgramInfoLog(program, programLogLength, &programLogLength, programLog);
+      auto programLog = std::string();
+      programLog.resize(programLogLength);
+      glGetProgramInfoLog(program, programLogLength, &programLogLength, programLog.data());
       std::cerr << "Program linker: " << programLog << std::endl;
-      delete[] programLog;
 
-      GLsizei vertexLogLength;
+      auto vertexLogLength = GLsizei();
       glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &vertexLogLength);
       if (vertexLogLength > 0) {
-        GLchar* vertexLog = new GLchar[vertexLogLength];
-        glGetShaderInfoLog(vertexShader, vertexLogLength, &vertexLogLength, vertexLog);
+        // GLchar* vertexLog = new GLchar[vertexLogLength];
+        auto vertexLog = std::string();
+        programLog.resize(vertexLogLength);
+        glGetShaderInfoLog(vertexShader, vertexLogLength, &vertexLogLength, vertexLog.data());
         std::cerr << "Vertex shader compiler: " << vertexLog << std::endl;
-        delete[] vertexLog;
       }
 
-      GLsizei fragmentLogLength;
+      auto fragmentLogLength = GLsizei();
       glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &fragmentLogLength);
       if (fragmentLogLength > 0) {
-        GLchar* fragmentLog = new GLchar[fragmentLogLength];
-        glGetShaderInfoLog(fragmentShader, fragmentLogLength, &fragmentLogLength, fragmentLog);
+        auto fragmentLog = std::string();
+        fragmentLog.resize(fragmentLogLength);
+        glGetShaderInfoLog(fragmentShader, fragmentLogLength, &fragmentLogLength, fragmentLog.data());
         std::cerr << "Fragment shader compiler: " << fragmentLog << std::endl;
-        delete[] fragmentLog;
       }
     }
 
@@ -190,10 +189,10 @@ namespace graphics {
   }
 
   std::string initializeVertexSource(const std::string& fragmentSource) {
-    std::istringstream fragmentBuffer(fragmentSource);
-    std::string firstLine;
+    auto fragmentBuffer = std::istringstream(fragmentSource);
+    auto firstLine = std::string();
     getline(fragmentBuffer, firstLine);
-    std::ostringstream vertexBuffer;
+    auto vertexBuffer = std::ostringstream();
     if (firstLine.substr(0, 8) == "#version") {
       vertexBuffer << firstLine;
     }
