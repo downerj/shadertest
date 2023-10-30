@@ -4,6 +4,12 @@
 #include "compatibility.hh"
 #include "configurations.hh"
 
+void onKey(GLFWwindow* window, int key, int /* scancode */, int action, int mods) {
+  if ((key == GLFW_KEY_Q or key == GLFW_KEY_W) and mods & GLFW_MOD_CONTROL and action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GL_TRUE);
+  }
+}
+
 namespace graphics {
   GLFWwindow* createWindow(Configurations& configs) {
     if (configs.versionRequest == VersionRequest::Specific) {
@@ -55,5 +61,6 @@ namespace graphics {
       throw std::logic_error("Cannot create window");
     }
     glfwMakeContextCurrent(configs.window);
+    glfwSetKeyCallback(configs.window, onKey);
   }
 }
