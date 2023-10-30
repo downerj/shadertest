@@ -1,4 +1,4 @@
-#version 320 es
+#version 330
 
 #ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH

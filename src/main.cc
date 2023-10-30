@@ -13,11 +13,11 @@
 
 namespace application {
   std::string readShaderFromFile(const std::string& fileName) {
-    std::ifstream fileIn(fileName.c_str());
+    auto fileIn = std::ifstream(fileName.c_str());
     if (fileIn.bad() or fileIn.fail()) {
       throw std::invalid_argument("Unable to open shader input file " + fileName);
     }
-    std::ostringstream textStream;
+    auto textStream = std::ostringstream();
     textStream << fileIn.rdbuf();
     fileIn.close();
 
@@ -47,7 +47,7 @@ OPTIONS include:
       throw std::invalid_argument("Please specify a fragment shader file, or pass --info-only or --help.");
     } else {
       for (int a = 1; a < argc; a++) {
-        std::string arg(argv[a]);
+        auto arg = std::string(argv[a]);
         if (arg == "--info-only") {
           configs.wantInfoOnly = true;
         } else if (arg == "--help") {
@@ -97,7 +97,7 @@ OPTIONS include:
 
   int main(int argc, char** argv) {
     try {
-      graphics::Configurations configs;
+      auto configs = graphics::Configurations();
       if (not parseArguments(argc, argv, configs)) {
         return EXIT_SUCCESS;
       }
