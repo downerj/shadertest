@@ -1,8 +1,14 @@
-#version 320 es
+#version 330
+
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
+#endif
+
+#if __VERSION__ > 130
+#define attribute in
+#define varying out
 #endif
 
 // **********

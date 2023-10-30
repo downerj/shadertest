@@ -1,8 +1,14 @@
-#version 100
+#version 330
+
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
+#endif
+
+#if __VERSION__ > 130
+#define attribute in
+#define varying out
 #endif
 
 uniform vec2 resolution;
@@ -46,6 +52,13 @@ void setColor(out vec4 fragColor, in vec4 fragCoord) {
   fragColor = hsvCycled2rgba(hsv, 5.0, CYCLE_SPEED);
 }
 
+#define fragCoord gl_FragCoord
+#if __VERSION__ <= 130
+#define fragColor gl_FragColor
+#else
+out vec4 fragColor;
+#endif
+
 void main(void) {
-  setColor(gl_FragColor, gl_FragCoord);
+  setColor(gl_FragColor, fragCoord);
 }
