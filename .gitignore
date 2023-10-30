@@ -6,3 +6,4 @@ bin/
 
 # VSCode
 settings.json
+.vscode/
