@@ -1,9 +1,15 @@
 #version 330
 
+/**
+ * Setup.
+ */
+
+#ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
+#endif
 #endif
 
 #if __VERSION__ > 130
@@ -14,13 +20,29 @@ precision mediump float;
 uniform vec2 resolution;
 uniform float time;
 
+#define fragCoordIn gl_FragCoord
+#if __VERSION__ <= 130
+#define fragColorOut gl_FragColor
+#else
+out vec4 fragColorOut;
+#endif
+
+void setColor(out vec4, in vec4);
+void main(void) {
+  setColor(fragColorOut, fragCoordIn);
+}
+
+/**
+ * Colors.
+ */
+
 vec4 hsv2rgba(in vec3 hsv) {
   float h = hsv.x;
   float s = hsv.y;
   float v = hsv.z;
-  vec3 k = vec3(1.0, 2.0/3.0, 1.0/3.0);
-  vec3 p = clamp(abs(6.0*fract(h - k) - 3.0) - 1.0, 0.0, 1.0);
-  return vec4(v * mix(k.xxx, p, s), 1.0);
+  vec3 k = vec3(1., 2./3., 1./3.);
+  vec3 p = clamp(abs(6.*fract(h - k) - 3.) - 1., 0., 1.);
+  return vec4(v * mix(k.xxx, p, s), 1.);
 }
 
 vec4 hsvCycled2rgba(in vec3 hsv, in float spread, in float speed) {
@@ -28,11 +50,15 @@ vec4 hsvCycled2rgba(in vec3 hsv, in float spread, in float speed) {
   return hsv2rgba(hsv);
 }
 
-#define CYCLE_SPEED 1.0/5.0
+/**
+ * Main code.
+ */
+
+#define CYCLE_SPEED 1./5.
 #define FUNC_CIRCLES
 
 void setColor(out vec4 fragColor, in vec4 fragCoord) {
-  vec2 c = resolution*0.5;
+  vec2 c = resolution*.5;
   float scale = min(resolution.x, resolution.y);
   vec2 p = (fragCoord.xy - c)/scale;
   
@@ -48,17 +74,6 @@ void setColor(out vec4 fragColor, in vec4 fragCoord) {
   float value = p.x*p.x/p.y;
 #endif
 
-  vec3 hsv = vec3(value, 1.0, 1.0);
-  fragColor = hsvCycled2rgba(hsv, 5.0, CYCLE_SPEED);
-}
-
-#define fragCoord gl_FragCoord
-#if __VERSION__ <= 130
-#define fragColor gl_FragColor
-#else
-out vec4 fragColor;
-#endif
-
-void main(void) {
-  setColor(gl_FragColor, fragCoord);
+  vec3 hsv = vec3(value, 1., 1.);
+  fragColor = hsvCycled2rgba(hsv, 5., CYCLE_SPEED);
 }

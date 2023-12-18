@@ -1,9 +1,15 @@
 #version 330
 
+/**
+ * Setup.
+ */
+
+#ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
+#endif
 #endif
 
 #if __VERSION__ > 130
@@ -11,17 +17,24 @@ precision mediump float;
 #define varying out
 #endif
 
-// **********
-// * Uniforms
-// **********
-
 uniform vec2 resolution;
 uniform float time;
-uniform vec2 mouse;
 
-// **********
-// * Math
-// **********
+#define fragCoordIn gl_FragCoord
+#if __VERSION__ <= 130
+#define fragColorOut gl_FragColor
+#else
+out vec4 fragColorOut;
+#endif
+
+void setColor(out vec4, in vec4);
+void main(void) {
+  setColor(fragColorOut, fragCoordIn);
+}
+
+/**
+ * Math code.
+ */
 
 #define E 2.71828182845904
 #define PI 3.141592653589793
@@ -30,6 +43,20 @@ uniform vec2 mouse;
 
 const vec2 R = vec2(1., 0.);
 const vec2 I = vec2(0., 1.);
+
+#if __VERSION__ <= 130
+float cosh(in float x) {
+  return (pow(E, x) + pow(E, -x))*.5;
+}
+
+float sinh(in float x) {
+  return (pow(E, x) - pow(E, -x))*.5;
+}
+
+float tanh(in float x) {
+  return sinh(x)/cosh(x);
+}
+#endif
 
 vec2 cmul(in vec2 a, in vec2 b) {
   return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
@@ -46,8 +73,6 @@ vec2 cpowz(in vec2 z, in int n) {
     return R;
   }
   vec2 res = R;
-  // Custom replacement for int abs(int) for GLSL 1.00.
-  //int limit = n < 0 ? -n : n;
   int limit = abs(n);
   for (int i = 0; i < MAX_N; i++) {
     if (i >= limit) {
@@ -105,9 +130,9 @@ vec2 ctan(in vec2 z) {
   return cdiv(numer, denom);
 }
 
-// **********
-// * Colors
-// **********
+/**
+ * Color code.
+ */
 
 #define DO_HUE_CYCLE
 #ifdef DO_HUE_CYCLE
@@ -130,9 +155,6 @@ vec4 hsv2rgba(in vec3 hsv) {
 
 #define SATURATION_RATIO .0625
 #define CONTOURS
-#ifdef CONTOURS
-
-#endif
 
 vec3 complex2hsv(vec2 point) {
   float x = point.x;
@@ -157,9 +179,9 @@ vec3 complex2hsv(vec2 point) {
 #endif
 }
 
-// **********
-// * Primary complex function(s)
-// **********
+/**
+ * Primary complex functions.
+ */
 
 #define OFFSET_X 0.
 #define OFFSET_Y 0.
@@ -186,9 +208,9 @@ vec2 func(vec2 z) {
 }
 #endif
 
-// **********
-// * Main
-// **********
+/**
+ * Main code.
+ */
 
 void setColor(out vec4 fragColor, in vec4 fragCoord) {
   vec2 c = resolution.xy*.5 + vec2(OFFSET_X, OFFSET_Y);
@@ -198,10 +220,3 @@ void setColor(out vec4 fragColor, in vec4 fragCoord) {
   vec3 hsv = complex2hsv(o);
   fragColor = hsv2rgba(hsv);
 }
-
-out vec4 fragColor;
-
-void main(void) {
-  setColor(fragColor, gl_FragCoord);
-}
-

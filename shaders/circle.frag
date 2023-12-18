@@ -1,5 +1,9 @@
 #version 330
 
+/**
+ * Setup.
+ */
+
 #ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -16,6 +20,22 @@ precision mediump float;
 uniform vec2 resolution;
 uniform float time;
 
+#define fragCoordIn gl_FragCoord
+#if __VERSION__ <= 130
+#define fragColorOut gl_FragColor
+#else
+out vec4 fragColorOut;
+#endif
+
+void setColor(out vec4, in vec4);
+void main(void) {
+  setColor(fragColorOut, fragCoordIn);
+}
+
+/**
+ * Colors.
+ */
+
 vec4 hsv2rgba(in vec3 hsv) {
   float h = hsv.x;
   float s = hsv.y;
@@ -25,8 +45,12 @@ vec4 hsv2rgba(in vec3 hsv) {
   return vec4(v * mix(k.xxx, p, s), 1.);
 }
 
+/**
+ * Main code.
+ */
+
 void setColor(out vec4 fragColor, in vec4 fragCoord) {
-  vec2 c = resolution*0.5;
+  vec2 c = resolution*.5;
   vec2 uv = (fragCoord.xy - c) / min(resolution.x, resolution.y);
   float d = distance(vec2(0.), uv);
   float width = .5;
@@ -35,15 +59,4 @@ void setColor(out vec4 fragColor, in vec4 fragCoord) {
   float val = step(-2.*width + 1., sin(d*20. + time));
   vec3 hsv = vec3(hue, sat, val);
   fragColor = hsv2rgba(hsv);
-}
-
-#define fragCoord gl_FragCoord
-#if __VERSION__ <= 130
-#define fragColor gl_FragColor
-#else
-out vec4 fragColor;
-#endif
-
-void main() {
-  setColor(fragColor, fragCoord);
 }
