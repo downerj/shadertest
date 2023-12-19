@@ -4,10 +4,10 @@
 #include "gl-includes.hh"
 
 namespace graphics {
-  class Configurations;
+  struct Configurations;
 
-  GLFWwindow* createWindow(Configurations& configs);
-  void initializeWindow(Configurations& configs);
+  auto createWindow(Configurations& configs) -> GLFWwindow*;
+  auto initializeWindow(Configurations& configs) -> void;
 }
 
 #endif // WINDOW_HH

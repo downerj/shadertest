@@ -4,18 +4,20 @@
 #include "compatibility.hh"
 #include "configurations.hh"
 
-void onKey(GLFWwindow* window, int key, int /* scancode */, int action, int mods) {
+using namespace std;
+
+auto onKey(GLFWwindow* window, int key, int /* scancode */, int action, int mods) -> void {
   if ((key == GLFW_KEY_Q or key == GLFW_KEY_W) and mods & GLFW_MOD_CONTROL and action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 }
 
 namespace graphics {
-  GLFWwindow* createWindow(Configurations& configs) {
+  auto createWindow(Configurations& configs) -> GLFWwindow* {
     if (configs.versionRequest == VersionRequest::Specific) {
       if (configs.profileRequest == ProfileRequest::Core || configs.profileRequest == ProfileRequest::Compat) {
-        if (configs.wantVersionMajor < 3 or (configs.wantVersionMajor == 3 and configs.wantVersionMinor < 3)) {
-          throw std::invalid_argument("Compatability profiles are only valid for GL>=3.3");
+        if (configs.wantVersionMajor < 3u or (configs.wantVersionMajor == 3u and configs.wantVersionMinor < 3u)) {
+          throw invalid_argument{"Compatability profiles are only valid for GL>=3.3"};
         }
       }
     }
@@ -33,23 +35,23 @@ namespace graphics {
     return glfwCreateWindow(
       configs.windowWidth,
       configs.windowHeight,
-      configs.windowTitle,
+      configs.windowTitle.c_str(),
       nullptr,
       nullptr
     );
   }
 
-  void initializeWindow(Configurations& configs) {
+  auto initializeWindow(Configurations& configs) -> void {
     if (not glfwInit()) {
-      throw std::logic_error("Cannot initialize GLFW");
+      throw logic_error{"Cannot initialize GLFW"};
     }
 
     if (configs.versionRequest != VersionRequest::Maximum) {
       configs.window = createWindow(configs);
     } else {
-      for (unsigned int v = 0; v < possibleGLVersions.size(); v += 2) {
+      for (auto v = 0u; v < possibleGLVersions.size(); v += 2u) {
         configs.wantVersionMajor = possibleGLVersions[v];
-        configs.wantVersionMinor = possibleGLVersions[v + 1];
+        configs.wantVersionMinor = possibleGLVersions[v + 1u];
         configs.window = createWindow(configs);
         if (configs.window) {
           break;
@@ -58,7 +60,7 @@ namespace graphics {
     }
 
     if (not configs.window) {
-      throw std::logic_error("Cannot create window");
+      throw logic_error{"Cannot create window"};
     }
     glfwMakeContextCurrent(configs.window);
     glfwSetKeyCallback(configs.window, onKey);

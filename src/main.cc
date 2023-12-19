@@ -11,21 +11,23 @@
 #include "runtime.hh"
 #include "window.hh"
 
+using namespace std;
+
 namespace application {
-  std::string readShaderFromFile(const std::string& fileName) {
-    auto fileIn = std::ifstream(fileName.c_str());
+  auto readShaderFromFile(const string& fileName) -> string {
+    auto fileIn = ifstream{fileName.c_str()};
     if (fileIn.bad() or fileIn.fail()) {
-      throw std::invalid_argument("Unable to open shader input file " + fileName);
+      throw invalid_argument{"Unable to open shader input file " + fileName};
     }
-    auto textStream = std::ostringstream();
+    auto textStream = ostringstream{};
     textStream << fileIn.rdbuf();
     fileIn.close();
 
     return textStream.str();
   }
 
-  void printUsage() {
-    std::cout << R"str(Usage: shadertest [OPTIONS] <fragmentFilePath>
+  auto printUsage() -> void {
+    cout << R"str(Usage: shadertest [OPTIONS] <fragmentFilePath>
 
 OPTIONS include:
   --help            Print this help message and quit.
@@ -42,12 +44,12 @@ OPTIONS include:
 )str";
   }
 
-  bool parseArguments(int argc, char** argv, graphics::Configurations& configs) {
+  auto parseArguments(unsigned int argc, char** argv, graphics::Configurations& configs) -> bool {
     if (argc < 2) {
-      throw std::invalid_argument("Please specify a fragment shader file, or pass --info-only or --help.");
+      throw invalid_argument{"Please specify a fragment shader file, or pass --info-only or --help."};
     } else {
-      for (int a = 1; a < argc; a++) {
-        auto arg = std::string(argv[a]);
+      for (auto a = 1u; a < argc; a++) {
+        const auto arg = string{argv[a]};
         if (arg == "--info-only") {
           configs.wantInfoOnly = true;
         } else if (arg == "--help") {
@@ -63,14 +65,14 @@ OPTIONS include:
           } else if (arg.substr(5) == "default") {
             configs.versionRequest = graphics::VersionRequest::Default;
           } else {
-            std::tie(configs.wantVersionMajor, configs.wantVersionMinor) = graphics::parseGLVersion(arg.substr(5));
+            tie(configs.wantVersionMajor, configs.wantVersionMinor) = graphics::parseGLVersion(arg.substr(5));
             configs.versionRequest = graphics::VersionRequest::Specific;
           }
         // After all switches/options, assume the rest is the file name.
         } else {
           // If we've already got a file name, then print an error.
           if (not configs.fragmentFilePath.empty()) {
-            throw std::invalid_argument("Cannot have more than one fragment shader path.");
+            throw invalid_argument{"Cannot have more than one fragment shader path."};
           }
           configs.fragmentFilePath = arg;
         }
@@ -79,25 +81,25 @@ OPTIONS include:
     return true;
   }
 
-  void printTryingString(const graphics::Configurations& configs) {
+  auto printTryingString(const graphics::Configurations& configs) -> void {
     if (configs.wantVersionMajor > 0 or configs.profileRequest != graphics::ProfileRequest::Any) {
-      std::cout << "Trying OpenGL";
+      cout << "Trying OpenGL";
     
       if (configs.wantVersionMajor > 0) {
-        std::cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
+        cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
       }
       if (configs.profileRequest == graphics::ProfileRequest::Compat) {
-        std::cout << " Compatibility";
+        cout << " Compatibility";
       } else if (configs.profileRequest == graphics::ProfileRequest::Core) {
-        std::cout << " Core";
+        cout << " Core";
       }
-      std::cout << std::endl;
+      cout << endl;
     }
   }
 
-  int main(int argc, char** argv) {
+  auto main(unsigned int argc, char** argv) -> int {
     try {
-      auto configs = graphics::Configurations();
+      auto configs = graphics::Configurations{};
       if (not parseArguments(argc, argv, configs)) {
         return EXIT_SUCCESS;
       }
@@ -109,15 +111,15 @@ OPTIONS include:
       }
 
       if (configs.fragmentFilePath.empty()) {
-        throw std::invalid_argument("Please specify a fragment shader path");
+        throw invalid_argument{"Please specify a fragment shader path"};
       }
       configs.fragmentSource = readShaderFromFile(configs.fragmentFilePath);
       configs.vertexSource = graphics::initializeVertexSource(configs.fragmentSource);
 
       graphics::run(configs);
-    } catch (std::exception& e) {
-      std::cerr << "\x1b[0;31m" << "Error"
-        "\x1b[0m" << ": " << e.what() << std::endl;
+    } catch (exception& e) {
+      cerr << "\x1b[0;31m" << "Error"
+        "\x1b[0m" << ": " << e.what() << endl;
       return EXIT_FAILURE;
     }
 
@@ -125,7 +127,6 @@ OPTIONS include:
   }
 }
 
-int main(int argc, char** argv) {
-  return application::main(argc, argv);
+auto main(int argc, char** argv) -> int {
+  return application::main(static_cast<unsigned int>(argc), argv);
 }
-

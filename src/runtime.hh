@@ -4,9 +4,9 @@
 #include "gl-includes.hh"
 
 namespace graphics {
-  class Configurations;
+  struct Configurations;
 
-  void run(Configurations& configs);
+  auto run(Configurations& configs) -> void;
 }
 
 #endif // RUNTIME_HH

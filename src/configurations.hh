@@ -7,19 +7,20 @@
 #include "compatibility.hh"
 
 namespace graphics {
-  class Configurations {
+  using namespace std::literals;
+  struct Configurations {
   public:
     std::string fragmentFilePath;
     std::string vertexSource;
     std::string fragmentSource;
     bool wantInfoOnly = false;
     VersionRequest versionRequest = VersionRequest::Default;
-    unsigned int wantVersionMajor = 0;
-    unsigned int wantVersionMinor = 0;
+    unsigned int wantVersionMajor = 0u;
+    unsigned int wantVersionMinor = 0u;
     ProfileRequest profileRequest = ProfileRequest::Any;
-    unsigned int windowWidth = 400;
-    unsigned int windowHeight = 400;
-    const char* windowTitle = "Shader Test";
+    unsigned int windowWidth = 400u;
+    unsigned int windowHeight = 400u;
+    std::string windowTitle = "Shader Test"s;
     GLFWwindow* window = nullptr;
   };
 }

@@ -1,19 +1,21 @@
 #ifndef GEOMETRY_HH
 #define GEOMETRY_HH
 
+#include <array> // array
+
 namespace graphics {
-  float vertices[] = {
-    -1.0, -1.0,
-    -1.0, 1.0,
-    1.0, 1.0,
-    1.0, -1.0,
+  auto vertices = std::array<float, 8>{
+    -1.f, -1.f,
+    -1.f, 1.f,
+    1.f, 1.f,
+    1.f, -1.f,
   };
 
-  unsigned int indices[] = {
+  auto indices = std::array<unsigned int, 6>{
     // Left triangle
-    0, 1, 2,
+    0u, 1u, 2u,
     // Right triangle
-    0, 2, 3,
+    0u, 2u, 3u,
   };
 }
 
