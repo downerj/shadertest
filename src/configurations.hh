@@ -13,6 +13,7 @@ namespace graphics {
     std::string fragmentFilePath;
     std::string vertexSource;
     std::string fragmentSource;
+    bool wantHelpOnly = false;
     bool wantInfoOnly = false;
     VersionRequest versionRequest = VersionRequest::Default;
     unsigned int wantVersionMajor = 0u;

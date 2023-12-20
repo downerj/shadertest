@@ -44,17 +44,22 @@ OPTIONS include:
 )str";
   }
 
-  auto parseArguments(unsigned int argc, char** argv, graphics::Configurations& configs) -> bool {
-    if (argc < 2) {
+  auto parseArguments(const vector<string>& args) -> graphics::Configurations {
+    auto configs = graphics::Configurations{};
+    if (args.size() < 2u) {
       throw invalid_argument{"Please specify a fragment shader file, or pass --info-only or --help."};
     } else {
-      for (auto a = 1u; a < argc; a++) {
-        const auto arg = string{argv[a]};
+      auto argsIter = args.cbegin();
+      // Skip the first argument, which is the executable name/path.
+      argsIter++;
+
+      for (/**/; argsIter != args.cend(); ++argsIter) {
+        const auto& arg = *argsIter;
         if (arg == "--info-only") {
           configs.wantInfoOnly = true;
         } else if (arg == "--help") {
-          printUsage();
-          return false;
+          configs.wantHelpOnly = true;
+          break;
         } else if (arg == "--core") {
           configs.profileRequest = graphics::ProfileRequest::Core;
         } else if (arg == "--compat") {
@@ -78,7 +83,7 @@ OPTIONS include:
         }
       }
     }
-    return true;
+    return configs;
   }
 
   auto printTryingString(const graphics::Configurations& configs) -> void {
@@ -97,10 +102,11 @@ OPTIONS include:
     }
   }
 
-  auto main(unsigned int argc, char** argv) -> int {
+  auto main(const vector<string>& args) -> int {
     try {
-      auto configs = graphics::Configurations{};
-      if (not parseArguments(argc, argv, configs)) {
+      auto configs = parseArguments(args);
+      if (configs.wantHelpOnly) {
+        printUsage();
         return EXIT_SUCCESS;
       }
       printTryingString(configs);
@@ -118,8 +124,7 @@ OPTIONS include:
 
       graphics::run(configs);
     } catch (exception& e) {
-      cerr << "\x1b[0;31m" << "Error"
-        "\x1b[0m" << ": " << e.what() << endl;
+      cerr << "\x1b[0;31m" << "Error" "\x1b[0m" << ": " << e.what() << endl;
       return EXIT_FAILURE;
     }
 
@@ -128,5 +133,6 @@ OPTIONS include:
 }
 
 auto main(int argc, char** argv) -> int {
-  return application::main(static_cast<unsigned int>(argc), argv);
+  const auto args = vector<string>{argv, argv + argc};
+  return application::main(args);
 }
