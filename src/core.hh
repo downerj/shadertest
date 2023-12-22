@@ -1,6 +1,9 @@
 #ifndef CORE_HH
 #define CORE_HH
 
+#include <string>
+#include <tuple>
+
 #include "gl-includes.hh"
 
 namespace graphics {
@@ -16,7 +19,7 @@ namespace graphics {
   ) -> void;
 #endif // DEBUG
 
-  auto getInfo() -> std::tuple<const GLubyte*, const GLubyte*, const GLubyte*, const GLubyte*>;
+  auto getInfo() -> std::tuple<std::string, std::string, std::string, std::string>;
   auto printInfo() -> void;
   auto parseGLVersion(const std::string& arg) -> std::tuple<int, int>;
   auto doesGLSLVersionUseInOut(const std::string& versionLine) -> bool;

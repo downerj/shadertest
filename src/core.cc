@@ -9,7 +9,6 @@
 #include "configurations.hh"
 
 using namespace std;
-using GLBytes = const GLubyte*;
 
 namespace graphics {
 #ifdef DEBUG
@@ -22,17 +21,17 @@ namespace graphics {
     const GLchar* message,
     const void* /*userParam*/
   ) -> void {
-    auto buffer = ostringstream{};
-    buffer << "GL Callback: " << message;
-    throw runtime_error{buffer.str()};
+    cerr << "\x1b[0;33m""GL Callback""\x1b[0m"":" << message << endl;
   }
 #endif // DEBUG
 
-  auto getInfo() -> tuple<GLBytes, GLBytes, GLBytes, GLBytes> {
-    auto glVersion = glGetString(GL_VERSION);
-    auto glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    auto glVendor = glGetString(GL_VENDOR);
-    auto glRenderer = glGetString(GL_RENDERER);
+  auto getInfo() -> tuple<string, string, string, string> {
+    // `glGetString` returns `const GLubyte*` which cannot be used to construct a `std::string`.
+    // We can convert it first to `const char*` and then pass it into the `std::string`'s constructor (ugly approach).
+    auto glVersion = string{reinterpret_cast<const char*>(glGetString(GL_VERSION))};
+    auto glslVersion = string{reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION))};
+    auto glVendor = string{reinterpret_cast<const char*>(glGetString(GL_VENDOR))};
+    auto glRenderer = string{reinterpret_cast<const char*>(glGetString(GL_RENDERER))};
     return {glVersion, glslVersion, glVendor, glRenderer};
   }
 
@@ -107,7 +106,7 @@ namespace graphics {
         case 460ul:
           return true;
         default:
-          throw invalid_argument("Invalid GLSL version \"" + versionLine + "\"");
+          throw invalid_argument{"Invalid GLSL version \"" + versionLine + "\""};
       }   
     } else {
       switch (version) {
