@@ -1,6 +1,8 @@
+#include <algorithm> // find_if
+#include <filesystem> // current_path
 #include <fstream> // ifstream
 #include <iostream> // cout, cerr, endl
-#include <sstream> // ostringstream
+#include <sstream> // istringstream, ostringstream
 #include <stdexcept> // exception, invalid_argument
 #include <string> // string
 #include <tuple> // tie
@@ -102,6 +104,43 @@ OPTIONS include:
     }
   }
 
+  auto trim(string& str, const unsigned char ch) -> void {
+    // Trim left.
+    str.erase(str.begin(), find_if(str.begin(), str.end(), [ch](const unsigned char chIn) {
+      return chIn != ch;
+    }));
+    // Trim right.
+    str.erase(find_if(str.rbegin(), str.rend(), [ch](const unsigned char chIn) {
+      return chIn != ch;
+    }).base(), str.end());
+  }
+
+  auto preprocess(const string& fragmentSource, const filesystem::path& path) -> string {
+    const auto originalPath = filesystem::current_path();
+    filesystem::current_path(path);
+    auto fragmentIn = istringstream{fragmentSource};
+    auto fragmentOut = ostringstream{};
+    auto line = string{};
+    for (auto l = 1u; getline(fragmentIn, line); ++l) {
+      if (line.starts_with("#pragma include"s)) {
+        auto segment = line.substr(15);
+        trim(segment, ' ');
+        trim(segment, '"');
+        auto fileIn = ifstream{segment};
+        if (not fileIn.good()) {
+          throw runtime_error{"Fragment shader line "s + to_string(l) + ": Unable to open file \""s + segment + "\""s};
+        }
+        for (auto fileLine = string{}; getline(fileIn, fileLine); /**/) {
+          fragmentOut << fileLine << endl;
+        }
+      } else {
+        fragmentOut << line << endl;
+      }
+    }
+    filesystem::current_path(originalPath);
+    return fragmentOut.str();
+  }
+
   auto main(const vector<string>& args) -> int {
     try {
       auto configs = parseArguments(args);
@@ -119,7 +158,9 @@ OPTIONS include:
       if (configs.fragmentFilePath.empty()) {
         throw invalid_argument{"Please specify a fragment shader path"};
       }
-      configs.fragmentSource = readShaderFromFile(configs.fragmentFilePath);
+      const auto fragmentRaw = readShaderFromFile(configs.fragmentFilePath);
+      const auto fragmentDir = filesystem::path(configs.fragmentFilePath).parent_path();
+      configs.fragmentSource = preprocess(fragmentRaw, fragmentDir);
       configs.vertexSource = graphics::initializeVertexSource(configs.fragmentSource);
 
       graphics::run(configs);
