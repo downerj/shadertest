@@ -89,10 +89,10 @@ OPTIONS include:
   }
 
   auto printTryingString(const graphics::Configurations& configs) -> void {
-    if (configs.wantVersionMajor > 0 or configs.profileRequest != graphics::ProfileRequest::Any) {
+    if (configs.wantVersionMajor > 0u or configs.profileRequest != graphics::ProfileRequest::Any) {
       cout << "Trying OpenGL";
     
-      if (configs.wantVersionMajor > 0) {
+      if (configs.wantVersionMajor > 0u) {
         cout << " " << configs.wantVersionMajor << "." << configs.wantVersionMinor;
       }
       if (configs.profileRequest == graphics::ProfileRequest::Compat) {
