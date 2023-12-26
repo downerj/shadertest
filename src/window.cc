@@ -30,10 +30,18 @@ namespace graphics {
     }
     glfwSetWindowUserPointer(window, this);
     glfwMakeContextCurrent(window);
+    glfwGetWindowPos(window, &position.x, &position.y);
+    glfwGetWindowSize(window, &dimensions.width, &dimensions.height);
     // Note: A lambda can be used here as a callback only because it has no capturing group.
     // This allows the compiler to convert it to a function pointer.
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int /* scancode */, int action, int mods) {
       static_cast<WindowHandler*>(glfwGetWindowUserPointer(window))->onKey(key, action, mods);
+    });
+    glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
+      static_cast<WindowHandler*>(glfwGetWindowUserPointer(window))->onMove(x, y);
+    });
+    glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+      static_cast<WindowHandler*>(glfwGetWindowUserPointer(window))->onResize(width, height);
     });
   }
 
@@ -70,11 +78,38 @@ namespace graphics {
     const auto isCtrlR = key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL;
     const auto isCtrlW = key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL;
     const auto isAltF4 = key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT;
+    const auto isF11 = key == GLFW_KEY_F11 and mods == 0;
     const auto isPressed = action == GLFW_PRESS;
     if ((isCtrlQ or isCtrlW or isAltF4) and isPressed) {
       glfwSetWindowShouldClose(window, GL_TRUE);
     } else if (isCtrlR and action == GLFW_PRESS) {
       glfwSetWindowSize(window, configs.windowWidth, configs.windowHeight);
+    } else if (isF11 and action == GLFW_PRESS) {
+      isFullScreen = !isFullScreen;
+      auto primaryMonitor = glfwGetPrimaryMonitor();
+      if (isFullScreen) {
+        glfwGetWindowPos(window, &position.x, &position.y);
+        const auto monitorMode = glfwGetVideoMode(primaryMonitor);
+        glfwSetWindowMonitor(window, primaryMonitor, 0, 0, monitorMode->width, monitorMode->height, monitorMode->refreshRate);
+      } else {
+        glfwSetWindowMonitor(window, nullptr, position.x, position.y, dimensions.width, dimensions.height, 0);
+      }
     }
+  }
+
+  auto WindowHandler::onMove(int x, int y) -> void {
+    if (isFullScreen) {
+      return;
+    }
+    position.x = x;
+    position.y = y;
+  }
+
+  auto WindowHandler::onResize(int width, int height) -> void {
+    if (isFullScreen) {
+      return;
+    }
+    dimensions.width = width;
+    dimensions.height = height;
   }
 }
