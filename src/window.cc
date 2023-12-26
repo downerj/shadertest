@@ -77,6 +77,7 @@ namespace graphics {
   }
 
   auto WindowHandler::onKey(int key, int action, int mods) -> void {
+    const auto isCtrlP = key == GLFW_KEY_P and mods == GLFW_MOD_CONTROL;
     const auto isCtrlQ = key == GLFW_KEY_Q and mods == GLFW_MOD_CONTROL;
     const auto isCtrlR = key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL;
     const auto isCtrlW = key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL;
@@ -105,6 +106,9 @@ namespace graphics {
       } else {
         glfwSetWindowMonitor(window, nullptr, position.x, position.y, size.width, size.height, 0);
       }
+    // Toggle pause animation.
+    } else if (isCtrlP and action == GLFW_PRESS) {
+      isAnimationPaused = !isAnimationPaused;
     }
   }
 

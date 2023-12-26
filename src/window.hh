@@ -20,10 +20,12 @@ namespace graphics {
   public:
     WindowHandler(Configurations& configs);
     auto getWindow() -> GLFWwindow* { return window; }
+    auto getIsAnimationPaused() -> bool { return isAnimationPaused; }
   private:
     GLFWwindow* window;
     Configurations& configs;
     bool isFullScreen = false;
+    bool isAnimationPaused = false;
     Position initialPosition{};
     Dimensions initialSize{400u, 400u};
     Position position;

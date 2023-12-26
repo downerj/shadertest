@@ -42,6 +42,7 @@ namespace graphics {
     glUseProgram(program);
 
     const auto window = windowHandler.getWindow();
+    auto previousTime = 0.;
     while (not glfwWindowShouldClose(window)) {
       auto width = int{};
       auto height = int{};
@@ -49,8 +50,9 @@ namespace graphics {
       glViewport(0, 0, width, height);
       glClear(GL_COLOR_BUFFER_BIT);
     
-      const auto time = glfwGetTime();
       glUniform2f(resolutionLocation, width, height);
+      const auto time = !windowHandler.getIsAnimationPaused() ? glfwGetTime() : previousTime;
+      previousTime = time;
       glUniform1f(timeLocation, time);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
 
