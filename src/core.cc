@@ -21,7 +21,7 @@ namespace graphics {
     const GLchar* message,
     const void* /*userParam*/
   ) -> void {
-    cerr << "\x1b[0;33m""GL Callback""\x1b[0m"":" << message << endl;
+    cerr << "\x1b[0;33m""GL message""\x1b[0m"": " << message << endl;
   }
 #endif // DEBUG
 

@@ -1,19 +1,53 @@
 #include <stdexcept> // invalid_argument, logic_error
 
-#include "window.hh"
 #include "compatibility.hh"
 #include "configurations.hh"
+#include "window.hh"
 
 using namespace std;
 
-auto onKey(GLFWwindow* window, int key, int /* scancode */, int action, int mods) -> void {
-  if ((key == GLFW_KEY_Q or key == GLFW_KEY_W) and mods & GLFW_MOD_CONTROL and action == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, GL_TRUE);
-  }
-}
-
 namespace graphics {
-  auto createWindow(Configurations& configs) -> GLFWwindow* {
+  WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
+    if (not glfwInit()) {
+      throw logic_error{"Cannot initialize GLFW"};
+    }
+
+    if (configs.versionRequest != VersionRequest::Maximum) {
+      createWindow(configs);
+    } else {
+      for (auto v = 0u; v < possibleGLVersions.size(); v += 2u) {
+        configs.wantVersionMajor = possibleGLVersions[v];
+        configs.wantVersionMinor = possibleGLVersions[v + 1u];
+        createWindow(configs);
+        if (window) {
+          break;
+        }
+      }
+    }
+
+    if (not window) {
+      throw logic_error{"Cannot create window"};
+    }
+    glfwSetWindowUserPointer(window, this);
+    glfwMakeContextCurrent(window);
+    auto& [initialX, initialY] = initialPosition;
+    glfwGetWindowPos(window, &initialX, &initialY);
+    position = initialPosition;
+    size = initialSize;
+    // Note: A lambda can be used here as a callback only because it has no capturing group.
+    // This allows the compiler to convert it to a function pointer.
+    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int /* scancode */, int action, int mods) {
+      static_cast<WindowHandler*>(glfwGetWindowUserPointer(window))->onKey(key, action, mods);
+    });
+    glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
+      static_cast<WindowHandler*>(glfwGetWindowUserPointer(window))->onMove(x, y);
+    });
+    glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+      static_cast<WindowHandler*>(glfwGetWindowUserPointer(window))->onResize(width, height);
+    });
+  }
+
+  auto WindowHandler::createWindow(const Configurations& configs) -> void {
     if (configs.versionRequest == VersionRequest::Specific) {
       if (configs.profileRequest == ProfileRequest::Core || configs.profileRequest == ProfileRequest::Compat) {
         if (configs.wantVersionMajor < 3u or (configs.wantVersionMajor == 3u and configs.wantVersionMinor < 3u)) {
@@ -32,37 +66,65 @@ namespace graphics {
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     }
 
-    return glfwCreateWindow(
-      configs.windowWidth,
-      configs.windowHeight,
+    const auto& [initialWidth, initialHeight] = initialSize;
+    window = glfwCreateWindow(
+      initialWidth,
+      initialHeight,
       configs.windowTitle.c_str(),
       nullptr,
       nullptr
     );
   }
 
-  auto initializeWindow(Configurations& configs) -> void {
-    if (not glfwInit()) {
-      throw logic_error{"Cannot initialize GLFW"};
-    }
-
-    if (configs.versionRequest != VersionRequest::Maximum) {
-      configs.window = createWindow(configs);
-    } else {
-      for (auto v = 0u; v < possibleGLVersions.size(); v += 2u) {
-        configs.wantVersionMajor = possibleGLVersions[v];
-        configs.wantVersionMinor = possibleGLVersions[v + 1u];
-        configs.window = createWindow(configs);
-        if (configs.window) {
-          break;
-        }
+  auto WindowHandler::onKey(int key, int action, int mods) -> void {
+    const auto isCtrlP = key == GLFW_KEY_P and mods == GLFW_MOD_CONTROL;
+    const auto isCtrlQ = key == GLFW_KEY_Q and mods == GLFW_MOD_CONTROL;
+    const auto isCtrlR = key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL;
+    const auto isCtrlW = key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL;
+    const auto isAltF4 = key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT;
+    const auto isF11 = key == GLFW_KEY_F11 and mods == 0;
+    const auto isPressed = action == GLFW_PRESS;
+    // Close window.
+    if ((isCtrlQ or isCtrlW or isAltF4) and isPressed) {
+      glfwSetWindowShouldClose(window, GL_TRUE);
+    // Reset window position & size.
+    } else if (isCtrlR and action == GLFW_PRESS) {
+      if (!isFullScreen) {
+        const auto& [x, y] = initialPosition;
+        const auto& [width, height] = initialSize;
+        glfwSetWindowPos(window, x, y);
+        glfwSetWindowSize(window, width, height);
       }
+    // Toggle fullscreen.
+    } else if (isF11 and action == GLFW_PRESS) {
+      isFullScreen = !isFullScreen;
+      auto primaryMonitor = glfwGetPrimaryMonitor();
+      if (isFullScreen) {
+        glfwGetWindowPos(window, &position.x, &position.y);
+        const auto monitorMode = glfwGetVideoMode(primaryMonitor);
+        glfwSetWindowMonitor(window, primaryMonitor, 0, 0, monitorMode->width, monitorMode->height, monitorMode->refreshRate);
+      } else {
+        glfwSetWindowMonitor(window, nullptr, position.x, position.y, size.width, size.height, 0);
+      }
+    // Toggle pause animation.
+    } else if (isCtrlP and action == GLFW_PRESS) {
+      isAnimationPaused = !isAnimationPaused;
     }
+  }
 
-    if (not configs.window) {
-      throw logic_error{"Cannot create window"};
+  auto WindowHandler::onMove(int x, int y) -> void {
+    if (isFullScreen) {
+      return;
     }
-    glfwMakeContextCurrent(configs.window);
-    glfwSetKeyCallback(configs.window, onKey);
+    position.x = x;
+    position.y = y;
+  }
+
+  auto WindowHandler::onResize(int width, int height) -> void {
+    if (isFullScreen) {
+      return;
+    }
+    size.width = width;
+    size.height = height;
   }
 }
