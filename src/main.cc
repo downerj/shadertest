@@ -130,9 +130,7 @@ OPTIONS include:
         if (not fileIn.good()) {
           throw runtime_error{"Fragment shader line "s + to_string(l) + ": Unable to open file \""s + segment + "\""s};
         }
-        for (auto fileLine = string{}; getline(fileIn, fileLine); /**/) {
-          fragmentOut << fileLine << endl;
-        }
+        for (auto fileLine = string{}; getline(fileIn, fileLine); fragmentOut << fileLine << endl) {}
       } else {
         fragmentOut << line << endl;
       }
@@ -159,7 +157,7 @@ OPTIONS include:
         throw invalid_argument{"Please specify a fragment shader path"};
       }
       const auto fragmentRaw = readShaderFromFile(configs.fragmentFilePath);
-      const auto fragmentDir = filesystem::path(configs.fragmentFilePath).parent_path();
+      const auto fragmentDir = filesystem::path{configs.fragmentFilePath}.parent_path();
       configs.fragmentSource = preprocess(fragmentRaw, fragmentDir);
       configs.vertexSource = graphics::initializeVertexSource(configs.fragmentSource);
 
