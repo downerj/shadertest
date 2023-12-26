@@ -5,11 +5,12 @@
 #include "configurations.hh"
 #include "core.hh"
 #include "geometry.hh"
+#include "window.hh"
 
 using namespace std;
 
 namespace graphics {
-  auto run(Configurations& configs) -> void {
+  auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
     glewExperimental = GL_TRUE;
     auto glewStatus = glewInit();
     if (glewStatus != GLEW_OK) {
@@ -40,10 +41,11 @@ namespace graphics {
     glClearDepth(1.f);
     glUseProgram(program);
 
-    while (not glfwWindowShouldClose(configs.window)) {
+    const auto window = windowHandler.getWindow();
+    while (not glfwWindowShouldClose(window)) {
       auto width = int{};
       auto height = int{};
-      glfwGetFramebufferSize(configs.window, &width, &height);
+      glfwGetFramebufferSize(window, &width, &height);
       glViewport(0, 0, width, height);
       glClear(GL_COLOR_BUFFER_BIT);
     
@@ -52,10 +54,10 @@ namespace graphics {
       glUniform1f(timeLocation, time);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
 
-      glfwSwapBuffers(configs.window);
+      glfwSwapBuffers(window);
       glfwPollEvents();
     }
-    glfwDestroyWindow(configs.window);
+    glfwDestroyWindow(window);
     glfwTerminate();
   }
 }

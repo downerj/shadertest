@@ -149,7 +149,7 @@ OPTIONS include:
         return EXIT_SUCCESS;
       }
       printTryingString(configs);
-      graphics::initializeWindow(configs);
+      auto windowHandler = graphics::WindowHandler{configs};
       graphics::printInfo();
       if (configs.wantInfoOnly) {
         return EXIT_SUCCESS;
@@ -163,7 +163,7 @@ OPTIONS include:
       configs.fragmentSource = preprocess(fragmentRaw, fragmentDir);
       configs.vertexSource = graphics::initializeVertexSource(configs.fragmentSource);
 
-      graphics::run(configs);
+      graphics::run(windowHandler, configs);
     } catch (exception& e) {
       cerr << "\x1b[0;31m" << "Error" "\x1b[0m" << ": " << e.what() << endl;
       return EXIT_FAILURE;

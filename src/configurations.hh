@@ -22,7 +22,6 @@ namespace graphics {
     unsigned int windowWidth = 400u;
     unsigned int windowHeight = 400u;
     std::string windowTitle = "Shader Test"s;
-    GLFWwindow* window = nullptr;
   };
 }
 
