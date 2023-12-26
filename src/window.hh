@@ -24,8 +24,10 @@ namespace graphics {
     GLFWwindow* window;
     Configurations& configs;
     bool isFullScreen = false;
-    Position position{};
-    Dimensions dimensions{};
+    Position initialPosition{};
+    Dimensions initialSize{400u, 400u};
+    Position position;
+    Dimensions size;
 
     auto createWindow(const Configurations& configs) -> void;
     auto onKey(int key, int action, int mods) -> void;

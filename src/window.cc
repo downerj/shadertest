@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace graphics {
-  WindowHandler::WindowHandler(Configurations& configs) : configs(configs) {
+  WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
     if (not glfwInit()) {
       throw logic_error{"Cannot initialize GLFW"};
     }
@@ -30,8 +30,10 @@ namespace graphics {
     }
     glfwSetWindowUserPointer(window, this);
     glfwMakeContextCurrent(window);
-    glfwGetWindowPos(window, &position.x, &position.y);
-    glfwGetWindowSize(window, &dimensions.width, &dimensions.height);
+    auto& [initialX, initialY] = initialPosition;
+    glfwGetWindowPos(window, &initialX, &initialY);
+    position = initialPosition;
+    size = initialSize;
     // Note: A lambda can be used here as a callback only because it has no capturing group.
     // This allows the compiler to convert it to a function pointer.
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int /* scancode */, int action, int mods) {
@@ -64,9 +66,10 @@ namespace graphics {
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     }
 
+    const auto& [initialWidth, initialHeight] = initialSize;
     window = glfwCreateWindow(
-      configs.windowWidth,
-      configs.windowHeight,
+      initialWidth,
+      initialHeight,
       configs.windowTitle.c_str(),
       nullptr,
       nullptr
@@ -80,10 +83,18 @@ namespace graphics {
     const auto isAltF4 = key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT;
     const auto isF11 = key == GLFW_KEY_F11 and mods == 0;
     const auto isPressed = action == GLFW_PRESS;
+    // Close window.
     if ((isCtrlQ or isCtrlW or isAltF4) and isPressed) {
       glfwSetWindowShouldClose(window, GL_TRUE);
+    // Reset window position & size.
     } else if (isCtrlR and action == GLFW_PRESS) {
-      glfwSetWindowSize(window, configs.windowWidth, configs.windowHeight);
+      if (!isFullScreen) {
+        const auto& [x, y] = initialPosition;
+        const auto& [width, height] = initialSize;
+        glfwSetWindowPos(window, x, y);
+        glfwSetWindowSize(window, width, height);
+      }
+    // Toggle fullscreen.
     } else if (isF11 and action == GLFW_PRESS) {
       isFullScreen = !isFullScreen;
       auto primaryMonitor = glfwGetPrimaryMonitor();
@@ -92,7 +103,7 @@ namespace graphics {
         const auto monitorMode = glfwGetVideoMode(primaryMonitor);
         glfwSetWindowMonitor(window, primaryMonitor, 0, 0, monitorMode->width, monitorMode->height, monitorMode->refreshRate);
       } else {
-        glfwSetWindowMonitor(window, nullptr, position.x, position.y, dimensions.width, dimensions.height, 0);
+        glfwSetWindowMonitor(window, nullptr, position.x, position.y, size.width, size.height, 0);
       }
     }
   }
@@ -109,7 +120,7 @@ namespace graphics {
     if (isFullScreen) {
       return;
     }
-    dimensions.width = width;
-    dimensions.height = height;
+    size.width = width;
+    size.height = height;
   }
 }
