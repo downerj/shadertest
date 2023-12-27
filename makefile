@@ -5,7 +5,7 @@ OBJ_DIR = obj
 SRC_DIR = src
 INCL_DIR = src
 EXEC = $(EXE_DIR)/shadertest
-DIST = $(EXE_DIR)/ShaderTest.tar.gz
+DIST = $(EXE_DIR)/ShaderTest.zip
 WARNS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 CXX_STD = -std=c++20
 DEFINES =
@@ -33,7 +33,7 @@ debug: OPTIMIZE = -Og
 debug: $(EXEC)
 
 dist: $(EXEC)
-	tar -c -f $(DIST) -v -z $(EXEC)
+	zip $(DIST) $(EXEC)
 
 COMPATIBILITY_HH = $(INCL_DIR)/compatibility.hh
 CONFIGURATIONS_HH = $(INCL_DIR)/configurations.hh
