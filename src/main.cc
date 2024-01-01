@@ -10,6 +10,7 @@
 #include "compatibility.hh"
 #include "configurations.hh"
 #include "core.hh"
+#include "defines.hh"
 #include "runtime.hh"
 #include "window.hh"
 
@@ -19,7 +20,7 @@ namespace application {
   auto readShaderFromFile(const string& fileName) -> string {
     auto fileIn = ifstream{fileName.c_str()};
     if (fileIn.bad() or fileIn.fail()) {
-      throw invalid_argument{"Unable to open shader input file " + fileName};
+      throw invalid_argument{"Unable to open shader input file "s + fileName};
     }
     auto textStream = ostringstream{};
     textStream << fileIn.rdbuf();
@@ -49,7 +50,7 @@ OPTIONS include:
   auto parseArguments(const vector<string>& args) -> graphics::Configurations {
     auto configs = graphics::Configurations{};
     if (args.size() < 2u) {
-      throw invalid_argument{"Please specify a fragment shader file, or pass --info-only or --help."};
+      configs.fragmentFilePath = "shaders/default.frag"s;
     } else {
       auto argsIter = args.cbegin();
       // Skip the first argument, which is the executable name/path.
@@ -57,19 +58,19 @@ OPTIONS include:
 
       for (/**/; argsIter != args.cend(); ++argsIter) {
         const auto& arg = *argsIter;
-        if (arg == "--info-only") {
+        if (arg == "--info-only"s) {
           configs.wantInfoOnly = true;
-        } else if (arg == "--help") {
+        } else if (arg == "--help"s) {
           configs.wantHelpOnly = true;
           break;
-        } else if (arg == "--core") {
+        } else if (arg == "--core"s) {
           configs.profileRequest = graphics::ProfileRequest::Core;
-        } else if (arg == "--compat") {
+        } else if (arg == "--compat"s) {
           configs.profileRequest = graphics::ProfileRequest::Compat;
-        } else if (arg.substr(0, 5) == "--gl=") {
-          if (arg.substr(5) == "max") {
+        } else if (arg.substr(0, 5) == "--gl="s) {
+          if (arg.substr(5) == "max"s) {
             configs.versionRequest = graphics::VersionRequest::Maximum;
-          } else if (arg.substr(5) == "default") {
+          } else if (arg.substr(5) == "default"s) {
             configs.versionRequest = graphics::VersionRequest::Default;
           } else {
             tie(configs.wantVersionMajor, configs.wantVersionMinor) = graphics::parseGLVersion(arg.substr(5));

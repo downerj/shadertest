@@ -3,7 +3,12 @@ obj/
 
 # Binaries
 bin/
+x86/
+x64/
 
 # VSCode
 settings.json
 .vscode/
+
+# Visual Studio
+.vs/
