@@ -4,6 +4,9 @@ obj/
 # Binaries
 bin/
 
+# Libraries
+lib/
+
 # VSCode
 settings.json
 .vscode/

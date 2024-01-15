@@ -4,25 +4,25 @@ EXE_DIR = bin
 OBJ_DIR = obj
 SRC_DIR = src
 INCL_DIR = src
+LIB_DIR = lib
 EXEC = $(EXE_DIR)/shadertest
 DIST = $(EXE_DIR)/ShaderTest.zip
 WARNS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 CXX_STD = -std=c++20
 DEFINES =
 
-GLFW_PREFIX ?= /usr/local/src/glfw
-INCL_GLFW_DIR = $(GLFW_PREFIX)/include
-LIB_GLFW_DIR = $(GLFW_PREFIX)/build/release/src
-LIB_GLFW = -L"$(LIB_GLFW_DIR)" -l:libglfw3.a
-
-GLEW_PREFIX ?= /usr/local/src/glew
-INCL_GLEW_DIR = $(GLEW_PREFIX)/include
-LIB_GLEW_DIR = $(GLEW_PREFIX)/lib
-LIB_GLEW = -L"$(LIB_GLEW_DIR)" -l:libGLEW.a
-
+# GLFW_PREFIX ?= /usr/local/src/glfw
+# INCL_GLFW_DIR = $(GLFW_PREFIX)/include
+# LIB_GLFW_DIR = $(GLFW_PREFIX)/build/release/src
+# LIB_GLFW = -L"$(LIB_GLFW_DIR)" -l:libglfw3.a
+# GLEW_PREFIX ?= /usr/local/src/glew
+# INCL_GLEW_DIR = $(GLEW_PREFIX)/include
+# LIB_GLEW_DIR = $(GLEW_PREFIX)/lib
+# LIB_GLEW = -L"$(LIB_GLEW_DIR)" -l:libGLEW.a
+# LIB_INCLUDES = -I"$(INCL_GLFW_DIR)" -I"$(INCL_GLEW_DIR)"
+LIB_GLFW = $$(pkg-config --libs glfw3)
+LIB_GLEW = $$(pkg-config --libs glew)
 LIB_OPENGL = $$(pkg-config --libs gl)
-
-LIB_INCLUDES = -I"$(INCL_GLFW_DIR)" -I"$(INCL_GLEW_DIR)"
 LIBS = $(LIB_GLFW) $(LIB_GLEW) $(LIB_OPENGL)
 
 release: OPTIMIZE = -O3
@@ -54,7 +54,10 @@ WINDOW_OBJ = $(OBJ_DIR)/window.o
 
 $(EXEC): $(MAIN_OBJ) $(CORE_OBJ) $(RUNTIME_OBJ) $(WINDOW_OBJ)
 	mkdir -p $(EXE_DIR)
-	$(CXX) -o $@ $^ $(LIBS)
+	mkdir -p $(LIB_DIR)
+	cp -L $$(ldconfig -p | grep libglfw.so\  | tr ' ' '\n' | grep /) $(LIB_DIR)/
+	cp -L $$(ldconfig -p | grep libGLEW.so\  | tr ' ' '\n' | grep /) $(LIB_DIR)/
+	LD_LIBRARY_PATH="$(LIB_DIR)" $(CXX) -o $@ $^ -lGL -Wl,-rpath,"$(LIB_DIR)" -L"$(LIB_DIR)" -lGLEW -lglfw
 
 $(MAIN_OBJ): $(MAIN_CC) $(COMPATIBILITY_HH) $(CONFIGURATIONS_HH) $(CORE_HH) $(RUNTIME_HH) $(WINDOW_HH) $(DEBUG_HH)
 	mkdir -p $(OBJ_DIR)
