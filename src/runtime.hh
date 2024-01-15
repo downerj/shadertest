@@ -4,10 +4,10 @@
 #include "gl-includes.hh"
 
 namespace graphics {
-  struct Configurations;
-  class WindowHandler;
+struct Configurations;
+class WindowHandler;
 
-  auto run(WindowHandler& windowHandler, const Configurations& configs) -> void;
-}
+auto run(WindowHandler& windowHandler, const Configurations& configs) -> void;
+} // namespace graphics
 
 #endif // RUNTIME_HH
