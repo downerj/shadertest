@@ -3,7 +3,10 @@
 
 #ifdef DEBUG
 #include <iostream>
-#define DEBUG_LOG(x) do { std::cout << x << std::endl; } while (0);
+#define DEBUG_LOG(x) \
+  do { \
+    std::cout << x << std::endl; \
+  } while (0);
 #endif // DEBUG
 
 #endif // DEBUG_HXX
