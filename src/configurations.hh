@@ -13,13 +13,9 @@ public:
   std::string fragmentFilePath;
   std::string vertexSource;
   std::string fragmentSource;
-  bool wantHelpOnly = false;
-  bool wantInfoOnly = false;
-  VersionRequest versionRequest = VersionRequest::Default;
-  unsigned int wantVersionMajor = 0u;
-  unsigned int wantVersionMinor = 0u;
-  ProfileRequest profileRequest = ProfileRequest::Any;
-  std::string windowTitle = "Shader Test"s;
+  bool wantHelpOnly{false};
+  bool wantInfoOnly{false};
+  std::string windowTitle{"Shader Test"s};
 };
 } // namespace graphics
 

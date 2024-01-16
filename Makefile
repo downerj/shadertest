@@ -1,5 +1,7 @@
 .PHONY: clean
 
+STATIC_BUILD ?= 0
+
 EXE_DIR = bin
 OBJ_DIR = obj
 SRC_DIR = src
@@ -10,25 +12,24 @@ WARNS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 CXX_STD = -std=c++20
 DEFINES =
 
+ifeq ($(STATIC_BUILD), 1)
 GLFW_PREFIX ?= /usr/local/src/glfw
 INCL_GLFW_DIR = $(GLFW_PREFIX)/include
 LIB_GLFW_DIR = $(GLFW_PREFIX)/build/release/src
 LIB_GLFW = -L"$(LIB_GLFW_DIR)" -l:libglfw3.a
+LIB_INCLUDES = -I"$(INCL_GLFW_DIR)"
+else
+LIB_GLFW = $$(pkg-config --libs glfw3)
+LIB_INCLUDES =
+endif
+LIB_OPENGLES = $$(pkg-config --libs glesv2)
+LIBS = $(LIB_GLFW) $(LIB_OPENGLES)
 
-GLEW_PREFIX ?= /usr/local/src/glew
-INCL_GLEW_DIR = $(GLEW_PREFIX)/include
-LIB_GLEW_DIR = $(GLEW_PREFIX)/lib
-LIB_GLEW = -L"$(LIB_GLEW_DIR)" -l:libGLEW.a
-
-LIB_OPENGL = $$(pkg-config --libs gl)
-
-LIB_INCLUDES = -I"$(INCL_GLFW_DIR)" -I"$(INCL_GLEW_DIR)"
-LIBS = $(LIB_GLFW) $(LIB_GLEW) $(LIB_OPENGL)
-
+release: DEFINES =
 release: OPTIMIZE = -O3
 release: $(EXEC)
 
-debug: DEFINES = $(DEFINES) -DDEBUG -g
+debug: DEFINES = -DDEBUG -g
 debug: OPTIMIZE = -Og
 debug: $(EXEC)
 
@@ -70,5 +71,4 @@ $(WINDOW_OBJ): $(WINDOW_CC) $(WINDOW_HH) $(COMPATIBILITY_HH) $(CONFIGURATIONS_HH
 	$(CXX) -c -o $@ $< $(WARNS) $(DEFINES) $(OPTIMIZE) $(CXX_STD) $(LIB_INCLUDES)
 
 clean:
-	rm -rf $(EXE_DIR)
-	rm -rf $(OBJ_DIR)
+	rm -rf $(EXE_DIR) $(OBJ_DIR)

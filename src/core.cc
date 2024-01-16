@@ -6,6 +6,7 @@
 #include <stdexcept> // invalid_argument
 #include <string> // stoi, string
 #include <tuple> // tie, tuple
+#include <vector> // vector
 
 #include "configurations.hh"
 
@@ -31,16 +32,15 @@ auto getInfo() -> tuple<string, string, string, string> {
   // `glGetString` returns `const GLubyte*` which cannot be used to construct a
   // `std::string`. We can convert it first to `const char*` and then pass it
   // into the `std::string`'s constructor (ugly approach).
-  auto glVersion = string{reinterpret_cast<const char*>(glGetString(GL_VERSION))};
-  auto glslVersion
-    = string{reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION))};
-  auto glVendor = string{reinterpret_cast<const char*>(glGetString(GL_VENDOR))};
-  auto glRenderer = string{reinterpret_cast<const char*>(glGetString(GL_RENDERER))};
+  auto glVersion{string{reinterpret_cast<const char*>(glGetString(GL_VERSION))}};
+  auto glslVersion{string{reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION))}};
+  auto glVendor{string{reinterpret_cast<const char*>(glGetString(GL_VENDOR))}};
+  auto glRenderer{string{reinterpret_cast<const char*>(glGetString(GL_RENDERER))}};
   return {glVersion, glslVersion, glVendor, glRenderer};
 }
 
 auto printInfo() -> void {
-  const auto [glVersion, glslVersion, glVendor, glRenderer] = getInfo();
+  const auto [glVersion, glslVersion, glVendor, glRenderer]{getInfo()};
   cout << "OpenGL Version: " << glVersion << endl;
   cout << "GLSL Version: " << glslVersion << endl;
   cout << "OpenGL Vendor: " << glVendor << endl;
@@ -52,8 +52,8 @@ auto parseGLVersion(const string& arg) -> tuple<int, int> {
     throw invalid_argument{"GL version must be in format \"X.X\"."};
   }
   try {
-    const auto major = stoul(arg.substr(0u, 1u));
-    const auto minor = stoul(arg.substr(2u, 1u));
+    const auto major{stoul(arg.substr(0u, 1u))};
+    const auto minor{stoul(arg.substr(2u, 1u))};
     if (major > 9ul || minor > 9ul) {
       throw exception{};
     }
@@ -64,8 +64,8 @@ auto parseGLVersion(const string& arg) -> tuple<int, int> {
 }
 
 auto doesGLSLVersionUseInOut(const string& versionLine) -> bool {
-  auto versionBuffer = istringstream{versionLine};
-  auto input = string{};
+  auto versionBuffer{istringstream{versionLine}};
+  auto input{string{}};
   // Skip the first string ("#version"), if present.
   if (versionLine.empty() or not getline(versionBuffer, input, ' ') or input != "#version") {
     return false;
@@ -74,9 +74,8 @@ auto doesGLSLVersionUseInOut(const string& versionLine) -> bool {
   if (not getline(versionBuffer, input, ' ')) {
     throw invalid_argument{"Missing GLSL version \"" + versionLine + "\""};
   }
-  using ulong = unsigned long;
-  auto isESSL = false;
-  auto version = ulong{};
+  auto isESSL{false};
+  auto version{0ul};
   try {
     version = stoul(input);
   } catch (exception& _e) {
@@ -125,7 +124,7 @@ auto doesGLSLVersionUseInOut(const string& versionLine) -> bool {
 }
 
 auto createBuffer(GLenum target, size_t size, void* data, GLenum usage) -> GLuint {
-  auto buffer = GLuint{};
+  auto buffer{GLuint{}};
   glGenBuffers(1, &buffer);
   glBindBuffer(target, buffer);
   glBufferData(target, size, data, usage);
@@ -134,8 +133,8 @@ auto createBuffer(GLenum target, size_t size, void* data, GLenum usage) -> GLuin
 }
 
 auto createShader(GLenum type, const string& source) -> GLuint {
-  auto shader = glCreateShader(type);
-  auto sources = make_unique<const char*[]>(1u);
+  auto shader{glCreateShader(type)};
+  auto sources{make_unique<const char*[]>(1u)};
   sources[0] = source.c_str();
   glShaderSource(shader, 1, sources.get(), nullptr);
   glCompileShader(shader);
@@ -143,38 +142,38 @@ auto createShader(GLenum type, const string& source) -> GLuint {
 }
 
 auto createProgram(const string& vertexSource, const string& fragmentSource) -> GLuint {
-  const auto vertexShader = createShader(GL_VERTEX_SHADER, vertexSource);
-  const auto fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentSource);
-  const auto program = glCreateProgram();
+  const auto vertexShader{createShader(GL_VERTEX_SHADER, vertexSource)};
+  const auto fragmentShader{createShader(GL_FRAGMENT_SHADER, fragmentSource)};
+  const auto program{glCreateProgram()};
   glAttachShader(program, vertexShader);
   glAttachShader(program, fragmentShader);
   glLinkProgram(program);
-  auto linkStatus = GLint{};
+  auto linkStatus{GLint{}};
   glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
   if (not linkStatus) {
-    auto programLogLength = GLsizei{};
+    auto programLogLength{GLsizei{}};
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &programLogLength);
-    auto programLog = vector<GLchar>{};
+    auto programLog{vector<GLchar>{}};
     programLog.resize(programLogLength);
     glGetProgramInfoLog(program, programLogLength, &programLogLength, programLog.data());
     cerr << "Program linker: " << string(programLog.begin(), programLog.end());
     cerr << endl;
 
-    auto vertexLogLength = GLsizei{};
+    auto vertexLogLength{GLsizei{}};
     glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &vertexLogLength);
     if (vertexLogLength > 0) {
-      auto vertexLog = vector<GLchar>{};
+      auto vertexLog{vector<GLchar>{}};
       programLog.resize(vertexLogLength);
       glGetShaderInfoLog(vertexShader, vertexLogLength, &vertexLogLength, vertexLog.data());
       cerr << "Vertex shader compiler: ";
       cerr << string(vertexLog.begin(), vertexLog.end()) << endl;
     }
 
-    auto fragmentLogLength = GLsizei{};
+    auto fragmentLogLength{GLsizei{}};
     glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &fragmentLogLength);
     if (fragmentLogLength > 0) {
-      auto fragmentLog = vector<GLchar>{};
+      auto fragmentLog{vector<GLchar>{}};
       fragmentLog.resize(fragmentLogLength);
       glGetShaderInfoLog(fragmentShader, fragmentLogLength, &fragmentLogLength, fragmentLog.data());
       cerr << "Fragment shader compiler: ";
@@ -195,10 +194,10 @@ auto createProgram(const string& vertexSource, const string& fragmentSource) -> 
 }
 
 auto initializeVertexSource(const string& fragmentSource) -> string {
-  auto fragmentBuffer = istringstream{fragmentSource};
-  auto firstLine = string{};
+  auto fragmentBuffer{istringstream{fragmentSource}};
+  auto firstLine{string{}};
   getline(fragmentBuffer, firstLine);
-  auto vertexBuffer = ostringstream{};
+  auto vertexBuffer{ostringstream{}};
   if (firstLine.substr(0u, 8u) == "#version") {
     vertexBuffer << firstLine;
   }
