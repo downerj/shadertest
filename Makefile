@@ -25,10 +25,11 @@ endif
 LIB_OPENGLES = $$(pkg-config --libs glesv2)
 LIBS = $(LIB_GLFW) $(LIB_OPENGLES)
 
+release: DEFINES =
 release: OPTIMIZE = -O3
 release: $(EXEC)
 
-debug: DEFINES = $(DEFINES) -DDEBUG -g
+debug: DEFINES = -DDEBUG -g
 debug: OPTIMIZE = -Og
 debug: $(EXEC)
 
