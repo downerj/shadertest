@@ -13,9 +13,9 @@ public:
   std::string fragmentFilePath;
   std::string vertexSource;
   std::string fragmentSource;
-  bool wantHelpOnly = false;
-  bool wantInfoOnly = false;
-  std::string windowTitle = "Shader Test"s;
+  bool wantHelpOnly{false};
+  bool wantInfoOnly{false};
+  std::string windowTitle{"Shader Test"s};
 };
 } // namespace graphics
 

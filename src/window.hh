@@ -7,13 +7,13 @@ namespace graphics {
 struct Configurations;
 
 struct Position {
-  int x = 0;
-  int y = 0;
+  int x{0};
+  int y{0};
 };
 
 struct Dimensions {
-  int width = 0;
-  int height = 0;
+  int width{0};
+  int height{0};
 };
 
 class WindowHandler {
@@ -25,8 +25,8 @@ public:
 private:
   GLFWwindow* window;
   Configurations& configs;
-  bool isFullScreen = false;
-  bool isAnimationPaused = false;
+  bool isFullScreen{false};
+  bool isAnimationPaused{false};
   Position initialPosition{};
   Dimensions initialSize{400u, 400u};
   Position position;

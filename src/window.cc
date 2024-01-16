@@ -19,7 +19,7 @@ WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
   }
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);
-  auto& [initialX, initialY] = initialPosition;
+  auto& [initialX, initialY]{initialPosition};
   glfwGetWindowPos(window, &initialX, &initialY);
   position = initialPosition;
   size = initialSize;
@@ -49,37 +49,36 @@ auto WindowHandler::createWindow(const Configurations& configs) -> void {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
-  const auto& [initialWidth, initialHeight] = initialSize;
-  window
-    = glfwCreateWindow(initialWidth, initialHeight, configs.windowTitle.c_str(), nullptr, nullptr);
+  const auto& [initialWidth, initialHeight]{initialSize};
+  window = glfwCreateWindow(initialWidth, initialHeight, configs.windowTitle.c_str(), nullptr, nullptr);
 }
 
 auto WindowHandler::onKey(int key, int action, int mods) -> void {
-  const auto isCtrlP = key == GLFW_KEY_P and mods == GLFW_MOD_CONTROL;
-  const auto isCtrlQ = key == GLFW_KEY_Q and mods == GLFW_MOD_CONTROL;
-  const auto isCtrlR = key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL;
-  const auto isCtrlW = key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL;
-  const auto isAltF4 = key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT;
-  const auto isF11 = key == GLFW_KEY_F11 and mods == 0;
-  const auto isPressed = action == GLFW_PRESS;
+  const auto isCtrlP{key == GLFW_KEY_P and mods == GLFW_MOD_CONTROL};
+  const auto isCtrlQ{key == GLFW_KEY_Q and mods == GLFW_MOD_CONTROL};
+  const auto isCtrlR{key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL};
+  const auto isCtrlW{key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL};
+  const auto isAltF4{key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT};
+  const auto isF11{key == GLFW_KEY_F11 and mods == 0};
+  const auto isPressed{action == GLFW_PRESS};
   // Close window.
   if ((isCtrlQ or isCtrlW or isAltF4) and isPressed) {
     glfwSetWindowShouldClose(window, GL_TRUE);
     // Reset window position & size.
   } else if (isCtrlR and action == GLFW_PRESS) {
     if (!isFullScreen) {
-      const auto& [x, y] = initialPosition;
-      const auto& [width, height] = initialSize;
+      const auto& [x, y]{initialPosition};
+      const auto& [width, height]{initialSize};
       glfwSetWindowPos(window, x, y);
       glfwSetWindowSize(window, width, height);
     }
     // Toggle fullscreen.
   } else if (isF11 and action == GLFW_PRESS) {
     isFullScreen = !isFullScreen;
-    auto primaryMonitor = glfwGetPrimaryMonitor();
+    auto primaryMonitor{glfwGetPrimaryMonitor()};
     if (isFullScreen) {
       glfwGetWindowPos(window, &position.x, &position.y);
-      const auto monitorMode = glfwGetVideoMode(primaryMonitor);
+      const auto monitorMode{glfwGetVideoMode(primaryMonitor)};
       glfwSetWindowMonitor(
         window, primaryMonitor, 0, 0, monitorMode->width, monitorMode->height,
         monitorMode->refreshRate
