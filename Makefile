@@ -33,8 +33,9 @@ debug: DEFINES = -DDEBUG -g
 debug: OPTIMIZE = -Og
 debug: $(EXEC)
 
+SHADERS_DIR = shaders
 dist: $(EXEC)
-	zip $(DIST) $(EXEC)
+	zip -r $(DIST) $(EXEC) $(SHADERS_DIR)
 
 COMPATIBILITY_HH = $(INCL_DIR)/compatibility.hh
 CONFIGURATIONS_HH = $(INCL_DIR)/configurations.hh
