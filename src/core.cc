@@ -216,7 +216,6 @@ void main() {
   gl_Position = vec4(vertex, 0., 1.);
 })str";
 
-  cout << vertexBuffer.str() << endl;
   return vertexBuffer.str();
 }
 } // namespace graphics
