@@ -18,8 +18,10 @@ auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
 #endif // DEBUG
 
   auto program{createProgram(configs.vertexSource, configs.fragmentSource)};
-  auto vertexBuffer{createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW)};
-  auto indexBuffer{createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW)};
+  auto vertexBuffer{
+    createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW)};
+  auto indexBuffer{
+    createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW)};
   auto vertexLocation{glGetAttribLocation(program, "vertex")};
   auto resolutionLocation{glGetUniformLocation(program, "resolution")};
   auto timeLocation{glGetUniformLocation(program, "time")};

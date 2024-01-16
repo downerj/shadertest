@@ -50,7 +50,8 @@ auto WindowHandler::createWindow(const Configurations& configs) -> void {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
   const auto& [initialWidth, initialHeight]{initialSize};
-  window = glfwCreateWindow(initialWidth, initialHeight, configs.windowTitle.c_str(), nullptr, nullptr);
+  window
+    = glfwCreateWindow(initialWidth, initialHeight, configs.windowTitle.c_str(), nullptr, nullptr);
 }
 
 auto WindowHandler::onKey(int key, int action, int mods) -> void {

@@ -5,7 +5,14 @@
 
 namespace graphics {
 auto vertices{std::array<float, 8>{
-  -1.f, -1.f, -1.f, 1.f, 1.f, 1.f, 1.f, -1.f,
+  -1.f,
+  -1.f,
+  -1.f,
+  1.f,
+  1.f,
+  1.f,
+  1.f,
+  -1.f,
 }};
 
 auto indices{std::array<unsigned int, 6>{
