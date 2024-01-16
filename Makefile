@@ -15,15 +15,18 @@ INCL_GLFW_DIR = $(GLFW_PREFIX)/include
 LIB_GLFW_DIR = $(GLFW_PREFIX)/build/release/src
 LIB_GLFW = -L"$(LIB_GLFW_DIR)" -l:libglfw3.a
 
-GLEW_PREFIX ?= /usr/local/src/glew
-INCL_GLEW_DIR = $(GLEW_PREFIX)/include
-LIB_GLEW_DIR = $(GLEW_PREFIX)/lib
-LIB_GLEW = -L"$(LIB_GLEW_DIR)" -l:libGLEW.a
+# GLEW_PREFIX ?= /usr/local/src/glew
+# INCL_GLEW_DIR = $(GLEW_PREFIX)/include
+# LIB_GLEW_DIR = $(GLEW_PREFIX)/lib
+# LIB_GLEW = -L"$(LIB_GLEW_DIR)" -l:libGLEW.a
 
-LIB_OPENGL = $$(pkg-config --libs gl)
+LIB_OPENGLES = $$(pkg-config --libs glesv2)
 
-LIB_INCLUDES = -I"$(INCL_GLFW_DIR)" -I"$(INCL_GLEW_DIR)"
-LIBS = $(LIB_GLFW) $(LIB_GLEW) $(LIB_OPENGL)
+# LIB_INCLUDES = -I"$(INCL_GLFW_DIR)" -I"$(INCL_GLEW_DIR)"
+# LIBS = $(LIB_GLFW) $(LIB_GLEW) $(LIB_OPENGLES)
+
+LIB_INCLUDES = -I"$(INCL_GLFW_DIR)"
+LIBS = $(LIB_GLFW) $(LIB_OPENGLES)
 
 release: OPTIMIZE = -O3
 release: $(EXEC)

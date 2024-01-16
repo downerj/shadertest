@@ -6,6 +6,7 @@
 #include <stdexcept> // invalid_argument
 #include <string> // stoi, string
 #include <tuple> // tie, tuple
+#include <vector> // vector
 
 #include "configurations.hh"
 
@@ -215,6 +216,7 @@ void main() {
   gl_Position = vec4(vertex, 0., 1.);
 })str";
 
+  cout << vertexBuffer.str() << endl;
   return vertexBuffer.str();
 }
 } // namespace graphics

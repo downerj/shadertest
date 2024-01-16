@@ -1,8 +1,8 @@
 #ifndef CORE_HH
 #define CORE_HH
 
-#include <string>
-#include <tuple>
+#include <string> // string
+#include <tuple> // tuple
 
 #include "gl-includes.hh"
 

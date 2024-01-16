@@ -12,19 +12,7 @@ WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
   if (not glfwInit()) {
     throw logic_error{"Cannot initialize GLFW"};
   }
-
-  if (configs.versionRequest != VersionRequest::Maximum) {
-    createWindow(configs);
-  } else {
-    for (auto v = 0u; v < possibleGLVersions.size(); v += 2u) {
-      configs.wantVersionMajor = possibleGLVersions[v];
-      configs.wantVersionMinor = possibleGLVersions[v + 1u];
-      createWindow(configs);
-      if (window) {
-        break;
-      }
-    }
-  }
+  createWindow(configs);
 
   if (not window) {
     throw logic_error{"Cannot create window"};
@@ -56,23 +44,10 @@ WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
 }
 
 auto WindowHandler::createWindow(const Configurations& configs) -> void {
-  if (configs.versionRequest == VersionRequest::Specific) {
-    if (configs.profileRequest == ProfileRequest::Core || configs.profileRequest == ProfileRequest::Compat) {
-      if (configs.wantVersionMajor < 3u or (configs.wantVersionMajor == 3u and configs.wantVersionMinor < 3u)) {
-        throw invalid_argument{"Compatability profiles are only valid for GL>=3.3"};
-      }
-    }
-  }
-
-  if (configs.versionRequest != VersionRequest::Default) {
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, configs.wantVersionMajor);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, configs.wantVersionMinor);
-  }
-  if (configs.profileRequest == ProfileRequest::Core) {
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  } else if (configs.profileRequest == ProfileRequest::Compat) {
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-  }
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
   const auto& [initialWidth, initialHeight] = initialSize;
   window

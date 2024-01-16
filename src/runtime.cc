@@ -12,12 +12,12 @@ using namespace std;
 
 namespace graphics {
 auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
-  glewExperimental = GL_TRUE;
-  auto glewStatus = glewInit();
-  if (glewStatus != GLEW_OK) {
-    cerr << glewGetErrorString(glewStatus) << endl;
-    throw logic_error{"Cannot initialize GLEW"};
-  }
+  // glewExperimental = GL_TRUE;
+  // auto glewStatus = glewInit();
+  // if (glewStatus != GLEW_OK) {
+  //   cerr << glewGetErrorString(glewStatus) << endl;
+  //   throw logic_error{"Cannot initialize GLEW"};
+  // }
 
 #ifdef DEBUG
   glEnable(GL_DEBUG_OUTPUT);
@@ -41,7 +41,7 @@ auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
   glEnableVertexAttribArray(vertexLocation);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glClearColor(0.f, 0.f, 0.f, 1.f);
-  glClearDepth(1.f);
+  glClearDepthf(1.f);
   glUseProgram(program);
 
   const auto window = windowHandler.getWindow();

@@ -34,23 +34,13 @@ auto printUsage() -> void {
 OPTIONS include:
   --help            Print this help message and quit.
   --info-only       Print OpenGL version info and quit.
-  --gl=<version>    Request an OpenGL context with version X.X.
-                    You can specify "max" (without quotes) to request the max version
-                    available.
-                    You can specify "default" (without quotes) to accept the default
-                    version provided by the vendor. This is the default option.
-  --core            Request an OpenGL context with a Core profile.
-                    This is only valid for GL>=3.3.
-  --compat          Request an OpenGL context with a Compatibility profile.
-                    This is only valid for GL>=3.3.
 )str";
 }
 
 auto parseArguments(const vector<string>& args) -> graphics::Configurations {
   auto configs = graphics::Configurations{};
   if (args.size() < 2u) {
-    throw invalid_argument{"Please specify a fragment shader file, or pass --info-only or "
-                           "--help."};
+    throw invalid_argument{"Please provide a fragment shader file."};
   } else {
     auto argsIter = args.cbegin();
     // Skip the first argument, which is the executable name/path.
@@ -63,21 +53,6 @@ auto parseArguments(const vector<string>& args) -> graphics::Configurations {
       } else if (arg == "--help") {
         configs.wantHelpOnly = true;
         break;
-      } else if (arg == "--core") {
-        configs.profileRequest = graphics::ProfileRequest::Core;
-      } else if (arg == "--compat") {
-        configs.profileRequest = graphics::ProfileRequest::Compat;
-      } else if (arg.substr(0, 5) == "--gl=") {
-        if (arg.substr(5) == "max") {
-          configs.versionRequest = graphics::VersionRequest::Maximum;
-        } else if (arg.substr(5) == "default") {
-          configs.versionRequest = graphics::VersionRequest::Default;
-        } else {
-          tie(configs.wantVersionMajor, configs.wantVersionMinor)
-            = graphics::parseGLVersion(arg.substr(5));
-          configs.versionRequest = graphics::VersionRequest::Specific;
-        }
-        // After all switches/options, assume the rest is the file name.
       } else {
         // If we've already got a file name, then print an error.
         if (not configs.fragmentFilePath.empty()) {
@@ -90,33 +65,20 @@ auto parseArguments(const vector<string>& args) -> graphics::Configurations {
   return configs;
 }
 
-auto printTryingString(const graphics::Configurations& configs) -> void {
-  if (configs.wantVersionMajor > 0u or configs.profileRequest != graphics::ProfileRequest::Any) {
-    cout << "Trying OpenGL";
-
-    if (configs.wantVersionMajor > 0u) {
-      cout << " " << configs.wantVersionMajor << ".";
-      cout << configs.wantVersionMinor;
-    }
-    if (configs.profileRequest == graphics::ProfileRequest::Compat) {
-      cout << " Compatibility";
-    } else if (configs.profileRequest == graphics::ProfileRequest::Core) {
-      cout << " Core";
-    }
-    cout << endl;
-  }
+// https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
+auto ltrim(const string& s, const string& characters) -> string {
+  auto start{s.find_first_not_of(characters)};
+  return (start == string::npos) ? ""s : s.substr(start);
 }
 
-auto trim(string& str, const unsigned char ch) -> void {
-  // Trim left.
-  str.erase(str.begin(), find_if(str.begin(), str.end(), [ch](const unsigned char chIn) {
-              return chIn != ch;
-            }));
-  // Trim right.
-  str.erase(
-    find_if(str.rbegin(), str.rend(), [ch](const unsigned char chIn) { return chIn != ch; }).base(),
-    str.end()
-  );
+auto rtrim(const string& s, const string& characters) -> string {
+  auto end{s.find_last_not_of(characters)};
+  return (end == string::npos) ? ""s : s.substr(0u, end + 1u);
+}
+
+const auto whitespace{" \n\r\t\f\v"s};
+auto trim(const string& s, const string& characters = whitespace) -> string {
+  return rtrim(ltrim(s, characters), characters);
 }
 
 auto preprocess(const string& fragmentSource, const filesystem::path& path) -> string {
@@ -126,10 +88,11 @@ auto preprocess(const string& fragmentSource, const filesystem::path& path) -> s
   auto fragmentOut = ostringstream{};
   auto line = string{};
   for (auto l = 1u; getline(fragmentIn, line); ++l) {
+    line = trim(line);
     if (line.starts_with("#pragma include"s)) {
-      auto segment = line.substr(15);
-      trim(segment, ' ');
-      trim(segment, '"');
+      auto segment{line.substr(15)};
+      segment = trim(segment);
+      segment = trim(segment, "\""s);
       auto fileIn = ifstream{segment};
       if (not fileIn.good()) {
         throw runtime_error{
@@ -152,7 +115,6 @@ auto main(const vector<string>& args) -> int {
       printUsage();
       return EXIT_SUCCESS;
     }
-    printTryingString(configs);
     auto windowHandler = graphics::WindowHandler{configs};
     graphics::printInfo();
     if (configs.wantInfoOnly) {

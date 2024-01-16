@@ -1,4 +1,4 @@
-#version 330
+#version 320 es
 
 #pragma include "base.part.frag"
 
