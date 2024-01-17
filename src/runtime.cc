@@ -30,7 +30,7 @@ auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-  glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+  glVertexAttribPointer(vertexLocation, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
   glEnableVertexAttribArray(vertexLocation);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -50,7 +50,7 @@ auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
     const auto time{!windowHandler.getIsAnimationPaused() ? glfwGetTime() : previousTime};
     previousTime = time;
     glUniform1f(timeLocation, time);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
