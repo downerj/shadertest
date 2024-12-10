@@ -1,32 +1,32 @@
 #ifndef CORE_HH
 #define CORE_HH
 
-#include <string> // string
-#include <tuple> // tuple
+#include <string>
+#include <tuple>
 
 #include "gl-includes.hh"
 
 namespace graphics {
 #ifdef DEBUG
-auto GLAPIENTRY messageCallback(
-  GLenum, // source
-  GLenum, // type
-  GLuint, // id
-  GLenum, // severity
-  GLsizei, // length
+void GLAPIENTRY messageCallback(
+  GLenum source,
+  GLenum type,
+  GLuint id,
+  GLenum severity,
+  GLsizei length,
   const GLchar* message,
-  const void* // userParam
-) -> void;
+  const void* userParam
+);
 #endif // DEBUG
 
-auto getInfo() -> std::tuple<std::string, std::string, std::string, std::string>;
-auto printInfo() -> void;
-auto parseGLVersion(const std::string& arg) -> std::tuple<int, int>;
-auto doesGLSLVersionUseInOut(const std::string& versionLine) -> bool;
-auto createBuffer(GLenum target, size_t size, void* data, GLenum usage) -> GLuint;
-auto createShader(GLenum type, const std::string& source) -> GLuint;
-auto createProgram(const std::string& vertexSource, const std::string& fragmentSource) -> GLuint;
-auto initializeVertexSource(const std::string& fragmentSource) -> std::string;
+std::tuple<std::string, std::string, std::string, std::string> getInfo();
+void printInfo();
+std::tuple<int, int> parseGLVersion(const std::string& arg);
+bool doesGLSLVersionUseInOut(const std::string& versionLine);
+GLuint createBuffer(GLenum target, size_t size, void* data, GLenum usage);
+GLuint createShader(GLenum type, const std::string& source);
+GLuint createProgram(const std::string& vertexSource, const std::string& fragmentSource);
+std::string initializeVertexSource(const std::string& fragmentSource);
 } // namespace graphics
 
 #endif // CORE_HH

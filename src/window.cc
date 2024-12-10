@@ -1,21 +1,19 @@
 #include "window.hh"
 
-#include <stdexcept> // invalid_argument, logic_error
+#include <stdexcept>
 
 #include "compatibility.hh"
 #include "configurations.hh"
 
-using namespace std;
-
 namespace graphics {
 WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
   if (not glfwInit()) {
-    throw logic_error{"Cannot initialize GLFW"};
+    throw std::logic_error{"Cannot initialize GLFW"};
   }
   createWindow(configs);
 
   if (not window) {
-    throw logic_error{"Cannot create window"};
+    throw std::logic_error{"Cannot create window"};
   }
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);
@@ -43,7 +41,7 @@ WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
   });
 }
 
-auto WindowHandler::createWindow(const Configurations& configs) -> void {
+void WindowHandler::createWindow(const Configurations& configs) {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -54,14 +52,14 @@ auto WindowHandler::createWindow(const Configurations& configs) -> void {
     = glfwCreateWindow(initialWidth, initialHeight, configs.windowTitle.c_str(), nullptr, nullptr);
 }
 
-auto WindowHandler::onKey(int key, int action, int mods) -> void {
-  const auto isCtrlP{key == GLFW_KEY_P and mods == GLFW_MOD_CONTROL};
-  const auto isCtrlQ{key == GLFW_KEY_Q and mods == GLFW_MOD_CONTROL};
-  const auto isCtrlR{key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL};
-  const auto isCtrlW{key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL};
-  const auto isAltF4{key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT};
-  const auto isF11{key == GLFW_KEY_F11 and mods == 0};
-  const auto isPressed{action == GLFW_PRESS};
+void WindowHandler::onKey(int key, int action, int mods) {
+  const bool isCtrlP{key == GLFW_KEY_P and mods == GLFW_MOD_CONTROL};
+  const bool isCtrlQ{key == GLFW_KEY_Q and mods == GLFW_MOD_CONTROL};
+  const bool isCtrlR{key == GLFW_KEY_R and mods == GLFW_MOD_CONTROL};
+  const bool isCtrlW{key == GLFW_KEY_W and mods == GLFW_MOD_CONTROL};
+  const bool isAltF4{key == GLFW_KEY_F4 and mods == GLFW_MOD_ALT};
+  const bool isF11{key == GLFW_KEY_F11 and mods == 0};
+  const bool isPressed{action == GLFW_PRESS};
   // Close window.
   if ((isCtrlQ or isCtrlW or isAltF4) and isPressed) {
     glfwSetWindowShouldClose(window, GL_TRUE);
@@ -76,10 +74,10 @@ auto WindowHandler::onKey(int key, int action, int mods) -> void {
     // Toggle fullscreen.
   } else if (isF11 and action == GLFW_PRESS) {
     isFullScreen = !isFullScreen;
-    auto primaryMonitor{glfwGetPrimaryMonitor()};
+    GLFWmonitor* primaryMonitor{glfwGetPrimaryMonitor()};
     if (isFullScreen) {
       glfwGetWindowPos(window, &position.x, &position.y);
-      const auto monitorMode{glfwGetVideoMode(primaryMonitor)};
+      const GLFWvidmode* monitorMode{glfwGetVideoMode(primaryMonitor)};
       glfwSetWindowMonitor(
         window, primaryMonitor, 0, 0, monitorMode->width, monitorMode->height,
         monitorMode->refreshRate
@@ -93,7 +91,7 @@ auto WindowHandler::onKey(int key, int action, int mods) -> void {
   }
 }
 
-auto WindowHandler::onMove(int x, int y) -> void {
+void WindowHandler::onMove(int x, int y) {
   if (isFullScreen) {
     return;
   }
@@ -101,7 +99,7 @@ auto WindowHandler::onMove(int x, int y) -> void {
   position.y = y;
 }
 
-auto WindowHandler::onResize(int width, int height) -> void {
+void WindowHandler::onResize(int width, int height) {
   if (isFullScreen) {
     return;
   }

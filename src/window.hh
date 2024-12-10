@@ -7,20 +7,20 @@ namespace graphics {
 struct Configurations;
 
 struct Position {
-  int x{0};
-  int y{0};
+  int x{};
+  int y{};
 };
 
 struct Dimensions {
-  int width{0};
-  int height{0};
+  int width{};
+  int height{};
 };
 
 class WindowHandler {
 public:
   WindowHandler(Configurations& configs);
-  auto getWindow() -> GLFWwindow* { return window; }
-  auto getIsAnimationPaused() -> bool { return isAnimationPaused; }
+  GLFWwindow* getWindow() { return window; }
+  bool getIsAnimationPaused() { return isAnimationPaused; }
 
 private:
   GLFWwindow* window;
@@ -28,14 +28,14 @@ private:
   bool isFullScreen{false};
   bool isAnimationPaused{false};
   Position initialPosition{};
-  Dimensions initialSize{400u, 400u};
+  Dimensions initialSize{400, 400};
   Position position;
   Dimensions size;
 
-  auto createWindow(const Configurations& configs) -> void;
-  auto onKey(int key, int action, int mods) -> void;
-  auto onMove(int x, int y) -> void;
-  auto onResize(int width, int height) -> void;
+  void createWindow(const Configurations& configs) ;
+  void onKey(int key, int action, int mods);
+  void onMove(int x, int y);
+  void onResize(int width, int height);
 };
 } // namespace graphics
 

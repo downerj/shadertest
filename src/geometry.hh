@@ -1,30 +1,30 @@
 #ifndef GEOMETRY_HH
 #define GEOMETRY_HH
 
-#include <array> // array
+#include <array>
 
 namespace graphics {
-auto vertices{std::array<float, 8>{
-  -1.f,
-  -1.f,
-  -1.f,
-  1.f,
-  1.f,
-  1.f,
-  1.f,
-  -1.f,
-}};
+std::array<GLfloat, 8> vertices{
+  -1.,
+  -1.,
+  -1.,
+  1.,
+  1.,
+  1.,
+  1.,
+  -1.,
+};
 
-auto indices{std::array<unsigned int, 6>{
+std::array<GLuint, 6> indices{
   // Left triangle
-  0u,
-  1u,
-  2u,
+  0,
+  1,
+  2,
   // Right triangle
-  0u,
-  2u,
-  3u,
-}};
+  0,
+  2,
+  3,
+};
 } // namespace graphics
 
 #endif // GEOMETRY_HH
