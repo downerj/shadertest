@@ -1,12 +1,10 @@
-#include <algorithm> // find_if
-#include <filesystem> // current_path
-#include <fstream> // ifstream
-#include <iostream> // cout, cerr
-#include <sstream> // istringstream, ostringstream
-#include <stdexcept> // exception, invalid_argument
-#include <string> // string
-#include <tuple> // tie
-#include <vector> // vector
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "compatibility.hh"
 #include "configurations.hh"
@@ -17,19 +15,19 @@
 using namespace std::string_literals;
 
 namespace application {
-auto readShaderFromFile(const std::string& fileName) -> std::string {
-  auto fileIn{std::ifstream{fileName.c_str()}};
+std::string readShaderFromFile(const std::string& fileName) {
+  std::ifstream fileIn{fileName.c_str()};
   if (fileIn.bad() or fileIn.fail()) {
     throw std::invalid_argument{"Unable to open shader input file " + fileName};
   }
-  auto textStream{std::ostringstream{}};
+  std::ostringstream textStream{};
   textStream << fileIn.rdbuf();
   fileIn.close();
 
   return textStream.str();
 }
 
-auto printUsage() -> void {
+void printUsage() {
   std::cout << R"str(Usage: shadertest [OPTIONS] <fragmentFilePath>
 
 OPTIONS include:
@@ -38,9 +36,9 @@ OPTIONS include:
 )str";
 }
 
-auto parseArguments(const std::vector<std::string>& args) -> graphics::Configurations {
-  auto configs{graphics::Configurations{}};
-  if (args.size() < 2u) {
+graphics::Configurations parseArguments(const std::vector<std::string>& args) {
+  graphics::Configurations configs{};
+  if (args.size() < 2) {
     throw std::invalid_argument{"Please provide a fragment shader file."};
   } else {
     auto argsIter{args.cbegin()};
@@ -48,7 +46,7 @@ auto parseArguments(const std::vector<std::string>& args) -> graphics::Configura
     argsIter++;
 
     for (/**/; argsIter != args.cend(); ++argsIter) {
-      const auto& arg{*argsIter};
+      const std::string& arg{*argsIter};
       if (arg == "--info-only") {
         configs.wantInfoOnly = true;
       } else if (arg == "--help") {
@@ -67,39 +65,39 @@ auto parseArguments(const std::vector<std::string>& args) -> graphics::Configura
 }
 
 // https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
-auto ltrim(const std::string& s, const std::string& characters) -> std::string {
+std::string ltrim(const std::string& s, const std::string& characters) {
   auto start{s.find_first_not_of(characters)};
   return (start == std::string::npos) ? ""s : s.substr(start);
 }
 
-auto rtrim(const std::string& s, const std::string& characters) -> std::string {
+std::string rtrim(const std::string& s, const std::string& characters) {
   auto end{s.find_last_not_of(characters)};
-  return (end == std::string::npos) ? ""s : s.substr(0u, end + 1u);
+  return (end == std::string::npos) ? ""s : s.substr(0, end + 1);
 }
 
-const auto whitespace{" \n\r\t\f\v"s};
-auto trim(const std::string& s, const std::string& characters = whitespace) -> std::string {
+const std::string whitespace{" \n\r\t\f\v"s};
+std::string trim(const std::string& s, const std::string& characters = whitespace) {
   return rtrim(ltrim(s, characters), characters);
 }
 
-auto preprocess(const std::string& fragmentSource, const std::filesystem::path& path) -> std::string {
-  const auto originalPath{std::filesystem::current_path()};
+std::string preprocess(const std::string& fragmentSource, const std::filesystem::path& path) {
+  const std::filesystem::path originalPath{std::filesystem::current_path()};
   std::filesystem::current_path(path);
-  auto fragmentIn{std::istringstream{fragmentSource}};
-  auto fragmentOut{std::ostringstream{}};
-  auto line{std::string{}};
-  for (auto l{1u}; std::getline(fragmentIn, line); ++l) {
+  std::istringstream fragmentIn{fragmentSource};
+  std::ostringstream fragmentOut{};
+  std::string line{};
+  for (int l{1}; std::getline(fragmentIn, line); ++l) {
     line = trim(line);
     if (line.starts_with("#pragma include"s)) {
-      auto segment{line.substr(15)};
+      std::string segment{line.substr(15)};
       segment = trim(segment);
       segment = trim(segment, "\""s);
-      auto fileIn{std::ifstream{segment}};
+      std::ifstream fileIn{segment};
       if (not fileIn.good()) {
         throw std::runtime_error{
           "Fragment shader line "s + std::to_string(l) + ": Unable to open file \""s + segment + "\""s};
       }
-      for (auto fileLine{""s}; std::getline(fileIn, fileLine); fragmentOut << fileLine << '\n') {
+      for (std::string fileLine{""s}; std::getline(fileIn, fileLine); fragmentOut << fileLine << '\n') {
       }
     } else {
       fragmentOut << line << '\n';
@@ -109,14 +107,14 @@ auto preprocess(const std::string& fragmentSource, const std::filesystem::path& 
   return fragmentOut.str();
 }
 
-auto main(const std::vector<std::string>& args) -> int {
+int main(const std::vector<std::string>& args) {
   try {
-    auto configs{parseArguments(args)};
+    graphics::Configurations configs{parseArguments(args)};
     if (configs.wantHelpOnly) {
       printUsage();
       return EXIT_SUCCESS;
     }
-    auto windowHandler{graphics::WindowHandler{configs}};
+    graphics::WindowHandler windowHandler{configs};
     graphics::printInfo();
     if (configs.wantInfoOnly) {
       return EXIT_SUCCESS;
@@ -125,7 +123,7 @@ auto main(const std::vector<std::string>& args) -> int {
     if (configs.fragmentFilePath.empty()) {
       throw std::invalid_argument{"Please specify a fragment shader path"};
     }
-    const auto fragmentRaw{readShaderFromFile(configs.fragmentFilePath)};
+    const std::string fragmentRaw{readShaderFromFile(configs.fragmentFilePath)};
     const auto fragmentDir{std::filesystem::path{configs.fragmentFilePath}.parent_path()};
     configs.fragmentSource = preprocess(fragmentRaw, fragmentDir);
     configs.vertexSource = graphics::initializeVertexSource(configs.fragmentSource);
@@ -141,7 +139,7 @@ auto main(const std::vector<std::string>& args) -> int {
 }
 } // namespace application
 
-auto main(int argc, char** argv) -> int {
-  const auto args{std::vector<std::string>{argv, argv + argc}};
+int main(int argc, char** argv) {
+  const std::vector<std::string> args{argv, argv + argc};
   return application::main(args);
 }

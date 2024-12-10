@@ -1,30 +1,27 @@
 #include "runtime.hh"
 
-#include <iostream> // cerr
-#include <stdexcept> // logic_error
-
 #include "configurations.hh"
 #include "core.hh"
 #include "geometry.hh"
 #include "window.hh"
 
 namespace graphics {
-auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
+void run(WindowHandler& windowHandler, const Configurations& configs) {
 #ifdef DEBUG
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(messageCallback, 0);
 #endif // DEBUG
 
-  auto program{createProgram(configs.vertexSource, configs.fragmentSource)};
-  auto vertexBuffer{
+  GLuint program{createProgram(configs.vertexSource, configs.fragmentSource)};
+  GLuint vertexBuffer{
     createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW)};
-  auto indexBuffer{
+  GLuint indexBuffer{
     createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW)};
-  auto vertexLocation{glGetAttribLocation(program, "vertex")};
-  auto resolutionLocation{glGetUniformLocation(program, "resolution")};
-  auto timeLocation{glGetUniformLocation(program, "time")};
+  GLint vertexLocation{glGetAttribLocation(program, "vertex")};
+  GLint resolutionLocation{glGetUniformLocation(program, "resolution")};
+  GLint timeLocation{glGetUniformLocation(program, "time")};
 
-  auto vao{GLuint{}};
+  GLuint vao{};
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -35,17 +32,17 @@ auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
   glClearDepthf(1.f);
   glUseProgram(program);
 
-  const auto window{windowHandler.getWindow()};
-  auto previousTime{0.};
+  GLFWwindow* const window{windowHandler.getWindow()};
+  double previousTime{0.};
   while (not glfwWindowShouldClose(window)) {
-    auto width{int{}};
-    auto height{int{}};
+    int width{};
+    int height{};
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUniform2f(resolutionLocation, width, height);
-    const auto time{!windowHandler.getIsAnimationPaused() ? glfwGetTime() : previousTime};
+    const double time{!windowHandler.getIsAnimationPaused() ? glfwGetTime() : previousTime};
     previousTime = time;
     glUniform1f(timeLocation, time);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

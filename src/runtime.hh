@@ -7,7 +7,7 @@ namespace graphics {
 struct Configurations;
 class WindowHandler;
 
-auto run(WindowHandler& windowHandler, const Configurations& configs) -> void;
+void run(WindowHandler& windowHandler, const Configurations& configs);
 } // namespace graphics
 
 #endif // RUNTIME_HH

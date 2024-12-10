@@ -1,7 +1,7 @@
 #ifndef CONFIGS_HH
 #define CONFIGS_HH
 
-#include <string> // string
+#include <string>
 
 #include "compatibility.hh"
 #include "gl-includes.hh"
