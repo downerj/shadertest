@@ -5,17 +5,15 @@
 #include "compatibility.hh"
 #include "configurations.hh"
 
-using namespace std;
-
 namespace graphics {
 WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
   if (not glfwInit()) {
-    throw logic_error{"Cannot initialize GLFW"};
+    throw std::logic_error{"Cannot initialize GLFW"};
   }
   createWindow(configs);
 
   if (not window) {
-    throw logic_error{"Cannot create window"};
+    throw std::logic_error{"Cannot create window"};
   }
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);

@@ -5,7 +5,7 @@
 #include <iostream>
 #define DEBUG_LOG(x) \
   do { \
-    std::cout << x << std::endl; \
+    std::cout << x << '\n'; \
   } while (0);
 #endif // DEBUG
 

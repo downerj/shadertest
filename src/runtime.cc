@@ -1,14 +1,12 @@
 #include "runtime.hh"
 
-#include <iostream> // cerr, endl
+#include <iostream> // cerr
 #include <stdexcept> // logic_error
 
 #include "configurations.hh"
 #include "core.hh"
 #include "geometry.hh"
 #include "window.hh"
-
-using namespace std;
 
 namespace graphics {
 auto run(WindowHandler& windowHandler, const Configurations& configs) -> void {
