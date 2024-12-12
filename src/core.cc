@@ -75,7 +75,7 @@ bool doesGLSLVersionUseInOut(const std::string& versionLine) {
   int version{};
   try {
     version = std::stoi(input);
-  } catch (std::exception& _e) {
+  } catch (std::exception&) {
     throw std::invalid_argument{"Invalid GLSL version \"" + versionLine + "\""};
   }
   // See if there's an "es" next.
