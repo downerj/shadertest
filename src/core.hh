@@ -23,7 +23,7 @@ std::tuple<std::string, std::string, std::string, std::string> getInfo();
 void printInfo();
 std::tuple<int, int> parseGLVersion(const std::string& arg);
 bool doesGLSLVersionUseInOut(const std::string& versionLine);
-GLuint createBuffer(GLenum target, size_t size, void* data, GLenum usage);
+GLuint createBuffer(GLenum target, size_t size, const void* data, GLenum usage);
 GLuint createShader(GLenum type, const std::string& source);
 GLuint createProgram(const std::string& vertexSource, const std::string& fragmentSource);
 std::string initializeVertexSource(const std::string& fragmentSource);

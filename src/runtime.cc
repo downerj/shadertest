@@ -12,14 +12,14 @@ void run(WindowHandler& windowHandler, const Configurations& configs) {
   glDebugMessageCallback(messageCallback, 0);
 #endif // DEBUG
 
-  GLuint program{createProgram(configs.vertexSource, configs.fragmentSource)};
-  GLuint vertexBuffer{
+  const GLuint program{createProgram(configs.vertexSource, configs.fragmentSource)};
+  const GLuint vertexBuffer{
     createBuffer(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW)};
-  GLuint indexBuffer{
+  const GLuint indexBuffer{
     createBuffer(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW)};
-  GLint vertexLocation{glGetAttribLocation(program, "vertex")};
-  GLint resolutionLocation{glGetUniformLocation(program, "resolution")};
-  GLint timeLocation{glGetUniformLocation(program, "time")};
+  const GLint vertexLocation{glGetAttribLocation(program, "vertex")};
+  const GLint resolutionLocation{glGetUniformLocation(program, "resolution")};
+  const GLint timeLocation{glGetUniformLocation(program, "time")};
 
   GLuint vao{};
   glGenVertexArrays(1, &vao);

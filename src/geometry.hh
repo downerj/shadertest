@@ -4,26 +4,18 @@
 #include <array>
 
 namespace graphics {
-std::array<GLfloat, 8> vertices{
-  -1.,
-  -1.,
-  -1.,
-  1.,
-  1.,
-  1.,
-  1.,
-  -1.,
+constexpr std::array<GLfloat, 8> vertices{
+  -1., -1.,
+  -1., 1.,
+  1., 1.,
+  1., -1.,
 };
 
-std::array<GLuint, 6> indices{
+constexpr std::array<GLuint, 6> indices{
   // Left triangle
-  0,
-  1,
-  2,
+  0, 1, 2,
   // Right triangle
-  0,
-  2,
-  3,
+  0, 2, 3,
 };
 } // namespace graphics
 

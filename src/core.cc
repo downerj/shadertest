@@ -121,7 +121,7 @@ bool doesGLSLVersionUseInOut(const std::string& versionLine) {
   }
 }
 
-GLuint createBuffer(GLenum target, size_t size, void* data, GLenum usage) {
+GLuint createBuffer(GLenum target, size_t size, const void* data, GLenum usage) {
   GLuint buffer{};
   glGenBuffers(1, &buffer);
   glBindBuffer(target, buffer);
