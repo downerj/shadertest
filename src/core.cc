@@ -1,12 +1,11 @@
 #include "core.hh"
 
+#include <array>
 #include <iostream>
-#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <vector>
 
 #include "configurations.hh"
 
@@ -132,9 +131,8 @@ GLuint createBuffer(GLenum target, size_t size, const void* data, GLenum usage) 
 
 GLuint createShader(GLenum type, const std::string& source) {
   GLuint shader{glCreateShader(type)};
-  auto sources{std::make_unique<const char*[]>(1)};
-  sources[0] = source.c_str();
-  glShaderSource(shader, 1, sources.get(), nullptr);
+  const std::array<const char*, 1> sources{source.c_str()};
+  glShaderSource(shader, 1, sources.data(), nullptr);
   glCompileShader(shader);
   return shader;
 }
@@ -152,30 +150,27 @@ GLuint createProgram(const std::string& vertexSource, const std::string& fragmen
   if (not linkStatus) {
     GLsizei programLogLength{};
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &programLogLength);
-    std::vector<GLchar> programLog{};
+    std::basic_string<GLchar> programLog{};
     programLog.resize(programLogLength);
-    glGetProgramInfoLog(program, programLogLength, &programLogLength, programLog.data());
-    std::cerr << "Program linker: " << std::string(programLog.begin(), programLog.end());
-    std::cerr << '\n';
+    glGetProgramInfoLog(program, programLogLength, nullptr, programLog.data());
+    std::cerr << "Program linker: " << programLog << '\n';
 
     GLsizei vertexLogLength{};
     glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &vertexLogLength);
     if (vertexLogLength > 0) {
-      std::vector<GLchar> vertexLog{};
-      programLog.resize(vertexLogLength);
-      glGetShaderInfoLog(vertexShader, vertexLogLength, &vertexLogLength, vertexLog.data());
-      std::cerr << "Vertex shader compiler: ";
-      std::cerr << std::string(vertexLog.begin(), vertexLog.end()) << '\n';
+      std::basic_string<GLchar> vertexLog{};
+      vertexLog.resize(vertexLogLength);
+      glGetShaderInfoLog(vertexShader, vertexLogLength, nullptr, vertexLog.data());
+      std::cerr << "Vertex shader compiler: " << vertexLog << '\n';
     }
 
     GLsizei fragmentLogLength{};
     glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &fragmentLogLength);
     if (fragmentLogLength > 0) {
-      std::vector<GLchar> fragmentLog{};
+      std::basic_string<GLchar> fragmentLog{};
       fragmentLog.resize(fragmentLogLength);
-      glGetShaderInfoLog(fragmentShader, fragmentLogLength, &fragmentLogLength, fragmentLog.data());
-      std::cerr << "Fragment shader compiler: ";
-      std::cerr << std::string(fragmentLog.begin(), fragmentLog.end()) << '\n';
+      glGetShaderInfoLog(fragmentShader, fragmentLogLength, nullptr, fragmentLog.data());
+      std::cerr << "Fragment shader compiler: " << fragmentLog << '\n';
     }
   }
 
