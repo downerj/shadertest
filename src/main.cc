@@ -12,7 +12,7 @@
 #include "runtime.hh"
 #include "window.hh"
 
-using namespace std::string_literals;
+using namespace std::literals;
 
 namespace application {
 std::string readShaderFromFile(const std::string& fileName) {
