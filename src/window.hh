@@ -1,7 +1,8 @@
 #ifndef WINDOW_HH
 #define WINDOW_HH
 
-#include "gl-includes.hh"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 namespace graphics {
 struct Configurations;

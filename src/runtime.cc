@@ -1,5 +1,7 @@
 #include "runtime.hh"
 
+#include <glad/gl.h>
+
 #include "configurations.hh"
 #include "core.hh"
 #include "geometry.hh"

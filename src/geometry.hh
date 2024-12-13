@@ -3,6 +3,8 @@
 
 #include <array>
 
+#include <glad/gl.h>
+
 namespace graphics {
 constexpr std::array<GLfloat, 8> vertices{
   -1., -1.,

@@ -4,7 +4,6 @@
 #include <string>
 
 #include "compatibility.hh"
-#include "gl-includes.hh"
 
 namespace graphics {
 using namespace std::literals;

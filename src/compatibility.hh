@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include "gl-includes.hh"
+#include <glad/gl.h>
 
 namespace graphics {
 constexpr std::array<GLuint, 26> possibleGLVersions{

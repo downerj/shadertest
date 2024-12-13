@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <glad/gl.h>
+
 #include "compatibility.hh"
 #include "configurations.hh"
 
@@ -17,6 +19,9 @@ WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
   }
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);
+  if (not gladLoadGL(glfwGetProcAddress)) {
+    throw std::runtime_error{"Failed to initialize the OpenGL context!"};
+  }
   auto& [initialX, initialY]{initialPosition};
   glfwGetWindowPos(window, &initialX, &initialY);
   position = initialPosition;
@@ -42,10 +47,16 @@ WindowHandler::WindowHandler(Configurations& configs) : configs{configs} {
 }
 
 void WindowHandler::createWindow(const Configurations& configs) {
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+  glfwWindowHint(GLFW_DECORATED, true);
+#ifdef DEBUG
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+#endif
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
+#endif
 
   const auto& [initialWidth, initialHeight]{initialSize};
   window

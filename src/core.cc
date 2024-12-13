@@ -9,6 +9,14 @@
 
 #include "configurations.hh"
 
+// Include GLAD using GLAD_GL_IMPLEMENTATION in order to load the OpenGL
+// function defintions (not just the declarations). This is necessary for the
+// linking stage. Note that using the macro must happen exactly once.
+// Otherwise, the One Definition Rule (ODR) will be violated, resulting in
+// the linker complaining about multiple GLAD function definitions.
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
+
 namespace graphics {
 #ifdef DEBUG
 void GLAPIENTRY messageCallback(
@@ -87,9 +95,6 @@ bool doesGLSLVersionUseInOut(const std::string& versionLine) {
 
   if (not isESSL) {
     switch (version) {
-    // Technically #version 100 is ESSL, but for simplicity's sake we'll
-    // put it here.
-    case 100:
     case 110:
     case 120:
       return false;
@@ -110,6 +115,7 @@ bool doesGLSLVersionUseInOut(const std::string& versionLine) {
     }
   } else {
     switch (version) {
+    case 100:
     case 300:
     case 310:
     case 320:

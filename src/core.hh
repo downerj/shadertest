@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-#include "gl-includes.hh"
+#include <glad/gl.h>
 
 namespace graphics {
 #ifdef DEBUG
