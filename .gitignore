@@ -1,7 +1,9 @@
+# Third-party libraries
+include/
+lib/
 # Object files
 obj/
-
-# Binaries
+# Executables
 bin/
 
 # VSCode

@@ -2,74 +2,60 @@
 
 STATIC_BUILD ?= 0
 
-EXE_DIR = bin
-OBJ_DIR = obj
-SRC_DIR = src
-INCL_DIR = src
-EXEC = $(EXE_DIR)/shadertest
-DIST = $(EXE_DIR)/ShaderTest.zip
-WARNS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
-CXX_STD = -std=c++20
-DEFINES =
+EXECUTABLE_DIRECTORY = bin
+OBJECT_DIRECTORY = obj
+SOURCE_DIRECTORY = src
+LIBRARY_DIRECTORY = lib
+INCLUDE_DIRECTORY = include
+SHADERS_DIRECTORY = shaders
+EXECUTABLE = ${EXECUTABLE_DIRECTORY}/shadertest
+DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest.zip
+WARNINGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
+CXX_STANDARD = -std=c++17
 
-ifeq ($(STATIC_BUILD), 1)
-GLFW_PREFIX ?= /usr/local/src/glfw
-INCL_GLFW_DIR = $(GLFW_PREFIX)/include
-LIB_GLFW_DIR = $(GLFW_PREFIX)/build/release/src
-LIB_GLFW = -L"$(LIB_GLFW_DIR)" -l:libglfw3.a
-LIB_INCLUDES = -I"$(INCL_GLFW_DIR)"
+ifeq (${STATIC_BUILD}, 1)
+GLFW_LIBRARY = -L"${LIBRARY_DIRECTORY}" -l:libglfw3.a
 else
-LIB_GLFW = $$(pkg-config --libs glfw3)
-LIB_INCLUDES =
+GLFW_LIBRARY = $$(pkg-config --libs glfw3)
 endif
-LIB_OPENGLES = $$(pkg-config --libs glesv2)
-LIBS = $(LIB_GLFW) $(LIB_OPENGLES)
+INCLUDES = -I${INCLUDE_DIRECTORY} ${GLFW_INCLUDE}
+LIBRARIES = ${GLFW_LIBRARY}
+
+MAIN_CXX = ${SOURCE_DIRECTORY}/main.cxx
+MAIN_OBJ = ${OBJECT_DIRECTORY}/main.o
 
 release: DEFINES =
-release: OPTIMIZE = -O3
-release: $(EXEC)
+release: OPTIMIZATIONS = -O3
+release: ${EXECUTABLE}
 
 debug: DEFINES = -DDEBUG -g
-debug: OPTIMIZE = -Og
-debug: $(EXEC)
+debug: OPTIMIZATIONS = -Og
+debug: ${EXECUTABLE}
 
-SHADERS_DIR = shaders
-dist: $(EXEC)
-	zip -r $(DIST) $(EXEC) $(SHADERS_DIR)
+dist: ${DISTRIBUTABLE}
 
-COMPATIBILITY_HH = $(INCL_DIR)/compatibility.hh
-CONFIGURATIONS_HH = $(INCL_DIR)/configurations.hh
-CORE_HH = $(INCL_DIR)/core.hh
-CORE_CC = $(SRC_DIR)/core.cc
-CORE_OBJ = $(OBJ_DIR)/core.o
-DEBUG_HH = $(SRC_DIR)/debug.hh
-GEOMETRY_HH = $(INCL_DIR)/geometry.hh
-GL_INCLUDES_HH = $(INCL_DIR)/gl-includes.hh
-MAIN_CC = $(SRC_DIR)/main.cc
-MAIN_OBJ = $(OBJ_DIR)/main.o
-RUNTIME_HH = $(INCL_DIR)/runtime.hh
-RUNTIME_CC = $(SRC_DIR)/runtime.cc
-RUNTIME_OBJ = $(OBJ_DIR)/runtime.o
-WINDOW_HH = $(INCL_DIR)/window.hh
-WINDOW_CC = $(SRC_DIR)/window.cc
-WINDOW_OBJ = $(OBJ_DIR)/window.o
+ifeq (${STATIC_BUILD}, 0)
+libglfw: bin/libglfw.so
+bin/libglfw.so:
+	cp $$(dpkg -L libglfw3-dev | grep libglfw.so) ${EXECUTABLE_DIRECTORY}/
+else
+libglfw:
+endif
 
-$(EXEC): $(MAIN_OBJ) $(CORE_OBJ) $(RUNTIME_OBJ) $(WINDOW_OBJ)
-	mkdir -p $(EXE_DIR)
-	$(CXX) -o $@ $^ $(LIBS)
+${DISTRIBUTABLE}: ${EXECUTABLE}
+	zip -r ${DISTRIBUTABLE} ${EXECUTABLE} ${EXECUTABLE_DIRECTORY}/*.so ${SHADERS_DIRECTORY}
 
-$(MAIN_OBJ): $(MAIN_CC) $(COMPATIBILITY_HH) $(CONFIGURATIONS_HH) $(CORE_HH) $(RUNTIME_HH) $(WINDOW_HH) $(DEBUG_HH)
-	mkdir -p $(OBJ_DIR)
-	$(CXX) -c -o $@ $< $(WARNS) $(DEFINES) $(OPTIMIZE) $(CXX_STD) $(LIB_INCLUDES)
+${EXECUTABLE}: ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY} ${MAIN_OBJ} libglfw
+	${CXX} -o $@ ${OBJECT_DIRECTORY}/*.o ${LIBRARIES}
 
-$(CORE_OBJ): $(CORE_CC) $(CORE_HH) $(CONFIGURATIONS_HH) $(GL_INCLUDES_HH) $(DEBUG_HH)
-	$(CXX) -c -o $@ $< $(WARNS) $(DEFINES) $(OPTIMIZE) $(CXX_STD) $(LIB_INCLUDES)
+${EXECUTABLE_DIRECTORY}:
+	mkdir -p ${EXECUTABLE_DIRECTORY}
 
-$(RUNTIME_OBJ): $(RUNTIME_CC) $(RUNTIME_HH) $(CONFIGURATIONS_HH) $(CORE_HH) $(GEOMETRY_HH) $(GL_INCLUDES_HH) $(DEBUG_HH)
-	$(CXX) -c -o $@ $< $(WARNS) $(DEFINES) $(OPTIMIZE) $(CXX_STD) $(LIB_INCLUDES)
+${OBJECT_DIRECTORY}:
+	mkdir -p ${OBJECT_DIRECTORY}
 
-$(WINDOW_OBJ): $(WINDOW_CC) $(WINDOW_HH) $(COMPATIBILITY_HH) $(CONFIGURATIONS_HH) $(GL_INCLUDES_HH) $(DEBUG_HH)
-	$(CXX) -c -o $@ $< $(WARNS) $(DEFINES) $(OPTIMIZE) $(CXX_STD) $(LIB_INCLUDES)
+${MAIN_OBJ}: ${MAIN_CXX}
+	${CXX} -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
 
 clean:
-	rm -rf $(EXE_DIR) $(OBJ_DIR)
+	rm -rf ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY}
