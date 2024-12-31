@@ -9,3 +9,9 @@ bin/
 # VSCode
 settings.json
 .vscode/
+
+# Visual Studio
+.vs/
+x86/
+x64/
+**/*.vcxproj.user
