@@ -11,8 +11,34 @@
 
 #include "debug.hxx"
 
+constexpr const char* defaultVertexSource{R"(#version 110
+#define positionOut gl_Position
+#if __VERSION__ <= 130
+attribute vec4 position;
+#else
+in vec4 position;
+#endif
+
+void main(void) {
+  positionOut = position;
+}
+)"};
+
+constexpr const char* defaultFragmentSource{R"(#version 110
+#define fragCoordIn gl_FragCoord
+#if __VERSION__ <= 130
+#define fragColorOut gl_FragColor
+#else
+out vec4 fragColorOut;
+#endif
+
+void main(void) {
+  fragColorOut = vec4(1., 0., 0., 1.);
+}
+)"};
+
 #ifdef DEBUG
-void debugMessageCallbackGL(
+auto debugMessageCallbackGL(
   GLenum source,
   GLenum type,
   GLuint id,
@@ -20,41 +46,34 @@ void debugMessageCallbackGL(
   GLsizei length,
   const GLchar* message,
   const void* userParam
-);
+) -> void;
 
-void errorCallbackGLFW(int error, const char* description);
+auto errorCallbackGLFW(int error, const char* description) -> void;
 #endif // DEBUG
 
-struct ProgramData {
+struct ShaderData {
   GLuint program;
   GLuint vao;
   GLsizei vertexCount;
 
-  ProgramData() = delete;
-  ProgramData(GLuint program, GLuint vao, GLsizei vertexCount) :
+  ShaderData() = delete;
+  ShaderData(GLuint program, GLuint vao, GLsizei vertexCount) :
     program{program},
     vao{vao},
     vertexCount{vertexCount} {}
 };
 
-struct GraphicsSettings {
-  std::string vertexShaderPath;
-  std::string fragmentShaderPath;
-
-  GraphicsSettings() = delete;
-  GraphicsSettings(
-    std::string vertexShaderPath,
-    std::string fragmentShaderPath
-  ) : 
-    vertexShaderPath{vertexShaderPath},
-    fragmentShaderPath{fragmentShaderPath} {}
-};
-
-GLuint createShader(GLenum type, std::string_view source);
-std::optional<GLuint> createProgram(
+auto createShader(GLenum type, std::string_view source) -> GLuint;
+auto createProgram(
   std::string_view vertexSource,
   std::string_view fragmentSource
-);
-std::optional<ProgramData> resetGraphics(const GraphicsSettings& settings);
+) -> std::optional<GLuint>;
+auto initializeWindow() -> GLFWwindow*;
+auto generateShaderData(
+  std::string_view vertexSource,
+  std::string_view fragmentSource
+) -> std::optional<ShaderData>;
+auto render(GLFWwindow* window, const ShaderData& shaderData) -> void;
+auto cleanup(GLFWwindow* window, ShaderData& shaderData) -> void;
 
 #endif // GRAPHICS_HXX

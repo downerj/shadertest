@@ -6,7 +6,7 @@
 #include "io.hxx"
 
 #ifdef DEBUG
-void debugMessageCallbackGL(
+auto debugMessageCallbackGL(
   GLenum /*source*/,
   GLenum /*type*/,
   GLuint /*id*/,
@@ -14,16 +14,16 @@ void debugMessageCallbackGL(
   GLsizei /*length*/,
   const GLchar* message,
   const void* /*userParam*/
-) {
+) -> void {
   LOG_ERROR("GL error: " << message << '\n');
 }
 
-void errorCallbackGLFW(int /*error*/, const char* description) {
+auto errorCallbackGLFW(int /*error*/, const char* description) -> void {
   LOG_ERROR("GLFW error: " << description << '\n');
 }
 #endif
 
-GLuint createShader(GLenum type, std::string_view source) {
+auto createShader(GLenum type, std::string_view source) -> GLuint {
   GLuint shader{glCreateShader(type)};
   const GLchar* sources[]{source.data()};
   const GLint lengths[]{static_cast<GLint>(source.size())};
@@ -32,10 +32,10 @@ GLuint createShader(GLenum type, std::string_view source) {
   return shader;
 }
 
-std::optional<GLuint> createProgram(
+auto createProgram(
   std::string_view vertexSource,
   std::string_view fragmentSource
-) {
+) -> std::optional<GLuint> {
   GLuint vertexShader{createShader(GL_VERTEX_SHADER, vertexSource)};
   GLuint fragmentShader{createShader(GL_FRAGMENT_SHADER, fragmentSource)};
   GLuint program{glCreateProgram()};
@@ -97,21 +97,71 @@ std::optional<GLuint> createProgram(
   return program;
 }
 
-std::optional<ProgramData> resetGraphics(const GraphicsSettings& settings) {
-  std::optional<std::string> vertexSource{
-    readFile(settings.vertexShaderPath)
-  };
-  if (!vertexSource) {
+auto initializeWindow() -> GLFWwindow* {
+  if (!glfwInit()) {
+    LOG_ERROR("Failed to initialize GLFW\n");
+    return nullptr;
+  }
+#ifdef DEBUG
+  glfwSetErrorCallback(errorCallbackGLFW);
+#endif
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_DECORATED, true);
+#ifdef DEBUG
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+#endif
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
+#endif
+  GLFWwindow* window{glfwCreateWindow(640, 480, "Hello", nullptr, nullptr)};
+  if (!window) {
+    LOG_ERROR("Failed to create GLFW window\n");
+    glfwTerminate();
+    return nullptr;
+  }
+  glfwMakeContextCurrent(window);
+  gladLoadGL(glfwGetProcAddress);
+#ifdef DEBUG
+  if (GLAD_GL_ARB_debug_output) {
+    LOG("GL extension GL_ARB_debug_output available\n");
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+    glDebugMessageCallbackARB(debugMessageCallbackGL, nullptr /*userParam*/);
+  }
+  else {
+    LOG("GL extension GL_ARB_debug_output unavailable\n");
+  }
+#endif
+  return window;
+}
+
+auto generateShaderData(
+  std::string_view vertexSource,
+  std::string_view fragmentSource
+) -> std::optional<ShaderData> {
+  std::optional<GLuint> program{createProgram(vertexSource, fragmentSource)};
+  if (!program) {
     return {};
   }
-  std::optional<std::string> fragmentSource{
-    readFile(settings.fragmentShaderPath)
-  };
-  if (!fragmentSource) {
-    return {};
-  }
-  std::optional<GLuint> program{createProgram(*vertexSource, *fragmentSource)};
   GLuint vao{};
   glGenVertexArrays(1, &vao);
-  return ProgramData{*program, vao, 3};
+  return ShaderData{*program, vao, 3};
+}
+
+auto render(GLFWwindow* window, const ShaderData&) -> void {
+  int width{};
+  int height{};
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+  glClearColor(0., .5, 1., 1.);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glfwSwapBuffers(window);
+  glfwPollEvents();
+}
+
+auto cleanup(GLFWwindow* window, ShaderData& shaderData) -> void {
+  glfwDestroyWindow(window);
+  glDeleteVertexArrays(1, &shaderData.vao);
+  glfwTerminate();
 }

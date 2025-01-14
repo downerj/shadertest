@@ -6,7 +6,7 @@
 
 #include "debug.hxx"
 
-std::optional<std::string> readFile(std::string_view filePath) {
+auto readFile(std::string_view filePath) -> std::optional<std::string> {
   if (!std::filesystem::exists(filePath)) {
     LOG_ERROR("File does not exist: " << filePath << '\n');
     return {};

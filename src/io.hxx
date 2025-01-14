@@ -5,6 +5,6 @@
 #include <string>
 #include <string_view>
 
-std::optional<std::string> readFile(std::string_view filePath);
+auto readFile(std::string_view filePath) -> std::optional<std::string>;
 
 #endif // IO_HXX
