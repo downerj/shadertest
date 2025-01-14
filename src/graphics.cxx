@@ -5,6 +5,26 @@
 
 #include "io.hxx"
 
+const std::array<GLfloat, 12> Rectangle::vertices{
+  -1., -1., 0.,
+  1., -1., 0.,
+  1., 1., 0.,
+  -1., 1., 0.,
+};
+
+const std::array<GLshort, 6> Rectangle::indices{
+  0, 1, 2,
+  0, 2, 3,
+};
+
+auto Rectangle::getVertices() const -> const std::array<GLfloat, 12>& {
+  return vertices;
+};
+
+auto Rectangle::getIndices() const -> const std::array<GLshort, 6>& {
+  return indices;
+};
+
 #ifdef DEBUG
 auto debugMessageCallbackGL(
   GLenum /*source*/,
@@ -124,14 +144,16 @@ auto initializeWindow() -> GLFWwindow* {
   glfwMakeContextCurrent(window);
   gladLoadGL(glfwGetProcAddress);
 #ifdef DEBUG
-  if (GLAD_GL_ARB_debug_output) {
-    LOG("GL extension GL_ARB_debug_output available\n");
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-    glDebugMessageCallbackARB(debugMessageCallbackGL, nullptr /*userParam*/);
-  }
-  else {
-    LOG("GL extension GL_ARB_debug_output unavailable\n");
-  }
+  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  glDebugMessageCallback(debugMessageCallbackGL, nullptr);
+  // if (GLAD_GL_ARB_debug_output) {
+  //   LOG("GL extension GL_ARB_debug_output available\n");
+  //   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+  //   glDebugMessageCallbackARB(debugMessageCallbackGL, nullptr /*userParam*/);
+  // }
+  // else {
+  //   LOG("GL extension GL_ARB_debug_output unavailable\n");
+  // }
 #endif
   return window;
 }
@@ -144,18 +166,59 @@ auto generateShaderData(
   if (!program) {
     return {};
   }
+  const GLint positionLocation{glGetAttribLocation(*program, "position")};
+  const Rectangle model{};
+
   GLuint vao{};
   glGenVertexArrays(1, &vao);
-  return ShaderData{*program, vao, 3};
+  glBindVertexArray(vao);
+
+  GLuint vertexBuffer;
+  glGenBuffers(1, &vertexBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    sizeof(GLfloat)*model.getVertexCount(),
+    model.getVertices().data(),
+    GL_STATIC_DRAW
+  );
+
+  GLuint indexBuffer;
+  glGenBuffers(1, &indexBuffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+  glBufferData(
+    GL_ELEMENT_ARRAY_BUFFER,
+    sizeof(GLshort)*model.getIndexCount(),
+    model.getIndices().data(),
+    GL_STATIC_DRAW
+  );
+
+  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+  glVertexAttribPointer(positionLocation, 3, GL_FLOAT, false, 0, 0);
+  glEnableVertexAttribArray(positionLocation);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  return ShaderData{*program, vao, model.getIndexCount()};
 }
 
-auto render(GLFWwindow* window, const ShaderData&) -> void {
+auto render(GLFWwindow* window, const ShaderData& shaderData) -> void {
   int width{};
   int height{};
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
   glClearColor(0., .5, 1., 1.);
   glClear(GL_COLOR_BUFFER_BIT);
+  glUseProgram(shaderData.program);
+  glBindVertexArray(shaderData.vao);
+  glDrawElements(
+    GL_TRIANGLES,
+    shaderData.indexCount,
+    GL_UNSIGNED_SHORT,
+    nullptr
+  );
+  glBindVertexArray(0);
   glfwSwapBuffers(window);
   glfwPollEvents();
 }
@@ -163,5 +226,6 @@ auto render(GLFWwindow* window, const ShaderData&) -> void {
 auto cleanup(GLFWwindow* window, ShaderData& shaderData) -> void {
   glfwDestroyWindow(window);
   glDeleteVertexArrays(1, &shaderData.vao);
+  glDeleteProgram(shaderData.program);
   glfwTerminate();
 }
