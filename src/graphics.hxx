@@ -20,6 +20,9 @@ attribute vec3 position;
 in vec3 position;
 #endif
 
+uniform float time;
+uniform vec2 resolution;
+
 void main(void) {
   positionOut = vec4(position, 1.);
 }
@@ -33,8 +36,24 @@ constexpr const char* defaultFragmentSource{R"(#version 110
 out vec4 fragColorOut;
 #endif
 
+uniform float time;
+uniform vec2 resolution;
+
+vec4 hsv2rgba(in vec3 hsv) {
+  float h = hsv.x;
+  float s = hsv.y;
+  float v = hsv.z;
+  vec3 k = vec3(1., 2./3., 1./3.);
+  vec3 p = clamp(abs(6.*fract(h - k) - 3.) - 1., 0., 1.);
+  return vec4(v * mix(k.xxx, p, s), 1.);
+}
+
 void main(void) {
-  fragColorOut = vec4(1., 1., 0., 1.);
+  vec2 center = resolution*.5;
+  float scale = min(resolution.x, resolution.y);
+  vec2 newCenter = (fragCoordIn.xy - center)/scale;
+  vec3 hsv = vec3(newCenter.y - newCenter.x + time/10., 1., 1.);
+  fragColorOut = hsv2rgba(hsv);
 }
 )"};
 
@@ -75,12 +94,22 @@ struct ShaderData {
   GLuint program;
   GLuint vao;
   GLsizei indexCount;
+  GLint timeLocation;
+  GLint resolutionLocation;
 
   ShaderData() = delete;
-  ShaderData(GLuint program, GLuint vao, GLsizei indexCount) :
+  ShaderData(
+    GLuint program,
+    GLuint vao,
+    GLsizei indexCount,
+    GLint timeLocation,
+    GLint resolutionLocation
+  ) :
     program{program},
     vao{vao},
-    indexCount{indexCount} {}
+    indexCount{indexCount},
+    timeLocation{timeLocation},
+    resolutionLocation{resolutionLocation} {}
 };
 
 auto createShader(GLenum type, std::string_view source) -> GLuint;

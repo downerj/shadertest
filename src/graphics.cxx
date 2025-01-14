@@ -192,7 +192,7 @@ auto generateShaderData(
     model.getIndices().data(),
     GL_STATIC_DRAW
   );
-
+  
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
   glVertexAttribPointer(positionLocation, 3, GL_FLOAT, false, 0, 0);
   glEnableVertexAttribArray(positionLocation);
@@ -200,7 +200,16 @@ auto generateShaderData(
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  return ShaderData{*program, vao, model.getIndexCount()};
+  GLint timeLocation{glGetUniformLocation(*program, "time")};
+  GLint resolutionLocation{glGetUniformLocation(*program, "resolution")};
+
+  return ShaderData{
+    *program,
+    vao,
+    model.getIndexCount(),
+    timeLocation,
+    resolutionLocation
+  };
 }
 
 auto render(GLFWwindow* window, const ShaderData& shaderData) -> void {
@@ -211,6 +220,8 @@ auto render(GLFWwindow* window, const ShaderData& shaderData) -> void {
   glClearColor(0., .5, 1., 1.);
   glClear(GL_COLOR_BUFFER_BIT);
   glUseProgram(shaderData.program);
+  glUniform1f(shaderData.timeLocation, glfwGetTime());
+  glUniform2f(shaderData.resolutionLocation, width, height);
   glBindVertexArray(shaderData.vao);
   glDrawElements(
     GL_TRIANGLES,
