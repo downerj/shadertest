@@ -52,7 +52,8 @@ This project uses the GLFW window and context management library. It can be link
    - For dynamic linking:
      - `lib/glfw3dll.lib`
      - `lib/glfw3.dll`
-1. For dynamic linking:   1. Navigate to **Project** > **ShaderTest Properties**.
+1. For dynamic linking:
+   1. Navigate to **Project** > **ShaderTest Properties**.
    1. Set the configuration to **All Configurations**.
    1. Under **Linker** > **Input** > **Additional Dependencies**, change `glfw3.lib` to `glfw3dll.lib`.
    1. Under **Build Events** > **Post-Build Event**:

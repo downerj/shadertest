@@ -21,7 +21,7 @@ in vec3 position;
 #endif
 
 uniform float time;
-uniform vec2 resolution;
+uniform ivec2 resolution;
 
 void main(void) {
   positionOut = vec4(position, 1.);
@@ -37,7 +37,7 @@ out vec4 fragColorOut;
 #endif
 
 uniform float time;
-uniform vec2 resolution;
+uniform ivec2 resolution;
 
 vec4 hsv2rgba(in vec3 hsv) {
   float h = hsv.x;
@@ -49,8 +49,8 @@ vec4 hsv2rgba(in vec3 hsv) {
 }
 
 void main(void) {
-  vec2 center = resolution*.5;
-  float scale = min(resolution.x, resolution.y);
+  vec2 center = vec2(resolution)*.5;
+  float scale = min(float(resolution.x), float(resolution.y));
   vec2 newCenter = (fragCoordIn.xy - center)/scale;
   vec3 hsv = vec3(newCenter.y - newCenter.x + time/10., 1., 1.);
   fragColorOut = hsv2rgba(hsv);

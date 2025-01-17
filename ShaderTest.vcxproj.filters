@@ -18,5 +18,22 @@
     <ClCompile Include="src\main.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\debug.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
