@@ -153,6 +153,8 @@
     <ClCompile Include="src\main.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\default.frag" />
+    <ClInclude Include="src\default.vert" />
     <ClInclude Include="src\debug.hxx" />
     <ClInclude Include="src\graphics.hxx" />
     <ClInclude Include="src\io.hxx" />

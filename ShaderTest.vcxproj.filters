@@ -35,5 +35,11 @@
     <ClInclude Include="src\io.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\default.frag">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\default.vert">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
