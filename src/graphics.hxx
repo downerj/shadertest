@@ -1,10 +1,10 @@
 #ifndef GRAPHICS_HXX
 #define GRAPHICS_HXX
 
-#include <array>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
@@ -18,25 +18,6 @@ constexpr const char* defaultVertexSource{
 
 constexpr const char* defaultFragmentSource{
 #include "default.frag"
-};
-
-template<GLsizei V, GLsizei I>
-class Model {
-public:
-  virtual auto getVertices() const -> const std::array<GLfloat, V>& = 0;
-  virtual auto getIndices() const -> const std::array<GLshort, I>& = 0;
-  auto getVertexCount() const -> GLsizei { return V; }
-  auto getIndexCount() const -> GLsizei { return I; }
-};
-
-class Rectangle : public Model<12, 6> {
-public:
-  auto getVertices() const -> const std::array<GLfloat, 12>& final;
-  auto getIndices() const -> const std::array<GLshort, 6>& final;
-
-private:
-  const static std::array<GLfloat, 12> vertices;
-  const static std::array<GLshort, 6> indices;
 };
 
 #ifdef DEBUG

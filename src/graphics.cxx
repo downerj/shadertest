@@ -1,29 +1,12 @@
 #include "graphics.hxx"
 
+#include <memory>
+
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
 
 #include "io.hxx"
-
-const std::array<GLfloat, 12> Rectangle::vertices{
-  -1., -1., 0.,
-  1., -1., 0.,
-  1., 1., 0.,
-  -1., 1., 0.,
-};
-
-const std::array<GLshort, 6> Rectangle::indices{
-  0, 1, 2,
-  0, 2, 3,
-};
-
-auto Rectangle::getVertices() const -> const std::array<GLfloat, 12>& {
-  return vertices;
-};
-
-auto Rectangle::getIndices() const -> const std::array<GLshort, 6>& {
-  return indices;
-};
+#include "models.hxx"
 
 #ifdef DEBUG
 auto debugMessageCallbackGL(
@@ -167,7 +150,7 @@ auto generateShaderData(
     return {};
   }
   const GLint positionLocation{glGetAttribLocation(*program, "position")};
-  const Rectangle model{};
+  const std::unique_ptr<Model> model{std::make_unique<Triangle>()};
 
   GLuint vao{};
   glGenVertexArrays(1, &vao);
@@ -178,8 +161,8 @@ auto generateShaderData(
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
-    sizeof(GLfloat)*model.getVertexCount(),
-    model.getVertices().data(),
+    sizeof(GLfloat)*model->getVertices().size(),
+    model->getVertices().data(),
     GL_STATIC_DRAW
   );
 
@@ -188,8 +171,8 @@ auto generateShaderData(
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
-    sizeof(GLshort)*model.getIndexCount(),
-    model.getIndices().data(),
+    sizeof(GLshort)*model->getIndices().size(),
+    model->getIndices().data(),
     GL_STATIC_DRAW
   );
   
@@ -206,7 +189,7 @@ auto generateShaderData(
   return ShaderData{
     *program,
     vao,
-    model.getIndexCount(),
+    static_cast<GLsizei>(model->getIndices().size()),
     timeLocation,
     resolutionLocation
   };
