@@ -1,7 +1,5 @@
 #include "graphics.hxx"
 
-#include <memory>
-
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
 
@@ -150,7 +148,8 @@ auto generateShaderData(
     return {};
   }
   const GLint positionLocation{glGetAttribLocation(*program, "position")};
-  const std::unique_ptr<Model> model{std::make_unique<Triangle>()};
+  const ModelSupplier supplier{};
+  const Model& model{supplier.supplyTriangle()};
 
   GLuint vao{};
   glGenVertexArrays(1, &vao);
@@ -161,8 +160,8 @@ auto generateShaderData(
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
-    sizeof(GLfloat)*model->getVertices().size(),
-    model->getVertices().data(),
+    sizeof(GLfloat)*model.getVertices().size(),
+    model.getVertices().data(),
     GL_STATIC_DRAW
   );
 
@@ -171,8 +170,8 @@ auto generateShaderData(
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
-    sizeof(GLshort)*model->getIndices().size(),
-    model->getIndices().data(),
+    sizeof(GLshort)*model.getIndices().size(),
+    model.getIndices().data(),
     GL_STATIC_DRAW
   );
   
@@ -189,7 +188,7 @@ auto generateShaderData(
   return ShaderData{
     *program,
     vao,
-    static_cast<GLsizei>(model->getIndices().size()),
+    static_cast<GLsizei>(model.getIndices().size()),
     timeLocation,
     resolutionLocation
   };

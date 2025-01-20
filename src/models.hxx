@@ -5,28 +5,60 @@
 
 class Model {
 public:
-  virtual auto getVertices() const -> const std::vector<float>& = 0;
-  virtual auto getIndices() const -> const std::vector<unsigned short>& = 0;
-};
+  Model(
+    const std::vector<float>& vertices,
+    const std::vector<unsigned short>& indices
+  );
+  Model() = delete;
+  Model(const Model&) = delete;
+  Model(Model&&) = delete;
+  Model operator=(const Model&) = delete;
+  Model operator=(Model&&) = delete;
 
-class Triangle : public Model {
-public:
-  auto getVertices() const -> const std::vector<float>& final;
-  auto getIndices() const -> const std::vector<unsigned short>& final;
-
-private:
-  const static std::vector<float> vertices;
-  const static std::vector<unsigned short> indices;
-};
-
-class Rectangle : public Model {
-public:
-  auto getVertices() const -> const std::vector<float>& final;
-  auto getIndices() const -> const std::vector<unsigned short>& final;
+  auto getVertices() const -> const std::vector<float>&;
+  auto getIndices() const -> const std::vector<unsigned short>&;
 
 private:
-  const static std::vector<float> vertices;
-  const static std::vector<unsigned short> indices;
+  const std::vector<float>& vertices;
+  const std::vector<unsigned short>& indices;
+};
+
+class ModelSupplier {
+public:
+  ModelSupplier() = default;
+  ModelSupplier(const ModelSupplier&) = delete;
+  ModelSupplier(ModelSupplier&&) = delete;
+  ModelSupplier operator=(const ModelSupplier&) = delete;
+  ModelSupplier operator=(ModelSupplier&&) = delete;
+
+  auto supplyTriangle() const -> const Model&;
+  auto supplyRectangle() const -> const Model&;
+
+private:
+  const std::vector<float> triangleVertices{
+    -1., -1., 0.,
+    1., -1., 0.,
+    0., 1., 0.
+  };
+
+  const std::vector<unsigned short> triangleIndices{
+    0, 1, 2
+  };
+
+  const std::vector<float> rectangleVertices{
+    -1., -1., 0.,
+    1., -1., 0.,
+    1., 1., 0.,
+    -1., 1., 0.
+  };
+
+  const std::vector<unsigned short> rectangleIndices{
+    0, 1, 2,
+    0, 2, 3
+  };
+
+  const Model triangle{triangleVertices, triangleIndices};
+  const Model rectangle{rectangleVertices, rectangleIndices};
 };
 
 #endif // MODELS_HXX
