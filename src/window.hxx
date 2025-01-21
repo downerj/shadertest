@@ -17,6 +17,9 @@ public:
 
 private:
   GLFWwindow* window;
+  auto onKey(
+    GLFWwindow* window, int key, int scancode, int action, int mods
+  ) -> void;
 };
 
 #endif // WINDOW_HXX

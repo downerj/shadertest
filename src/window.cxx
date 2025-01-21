@@ -38,6 +38,21 @@ WindowOwner::WindowOwner() {
     throw std::runtime_error{"Failed to create GLFW window"};
   }
   glfwMakeContextCurrent(window);
+
+  glfwSetKeyCallback(window, [](
+    GLFWwindow* window,
+    int key,
+    int scancode,
+    int action,
+    int mods
+  ) -> void {
+    const auto windowOwner{
+      static_cast<WindowOwner*>(glfwGetWindowUserPointer(window))
+    };
+    windowOwner->onKey(window, key, scancode, action, mods);
+  });
+
+  glfwSetWindowUserPointer(window, this);
 }
 
 WindowOwner::~WindowOwner() {
@@ -51,4 +66,19 @@ auto WindowOwner::getWindow() -> GLFWwindow* {
 
 auto WindowOwner::isActive() -> bool {
   return !glfwWindowShouldClose(window);
+}
+
+auto WindowOwner::onKey(
+  GLFWwindow* window, int key, int /*scancode*/, int action, int mods
+) -> void {
+  const int keyUp{action & GLFW_KEY_UP};
+  const bool keyQ{key == GLFW_KEY_Q};
+  const bool keyW{key == GLFW_KEY_W};
+  const bool keyF4{key == GLFW_KEY_F4};
+  const int keyCtrl{mods & GLFW_MOD_CONTROL};
+  const int keyAlt{mods & GLFW_MOD_ALT};
+  if (keyUp && ((keyCtrl && (keyQ || keyW)) || (keyAlt && keyF4))) {
+    glfwSetWindowShouldClose(window, true);
+    return;
+  }
 }
