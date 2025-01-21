@@ -7,7 +7,6 @@
 #include <glad/gl.h>
 
 #include "debug.hxx"
-#include "io.hxx"
 #include "models.hxx"
 
 #ifdef DEBUG
