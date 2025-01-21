@@ -18,6 +18,7 @@ constexpr const char* defaultFragmentSource{
 struct CLIParameters {
   std::optional<std::string> vertexShaderPath{};
   std::optional<std::string> fragmentShaderPath{};
+  bool echo{true};
 };
 
 auto parseCLIArguments(int argc, char** argv) -> CLIParameters;

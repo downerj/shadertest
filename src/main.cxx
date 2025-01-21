@@ -24,7 +24,15 @@ auto main(int argc, char** argv) -> int {
       windowOwner.getWindow(),
       sources
     };
-    LOG("Running...\n");
+    if (parameters.echo && sources.vertexSource && sources.fragmentSource) {
+      std::cout << "##### BEGIN VERTEX SHADER #####\n";
+      std::cout << *sources.vertexSource << '\n';
+      std::cout << "##### END VERTEX SHADER #####\n\n";
+
+      std::cout << "##### BEGIN FRAGMENT SHADER #####\n";
+      std::cout << *sources.fragmentSource << '\n';
+      std::cout << "##### END FRAGMENT SHADER #####\n";
+    }
     while (windowOwner.isActive()) {
       graphics.render();
     }

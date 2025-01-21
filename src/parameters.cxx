@@ -37,6 +37,8 @@ auto parseCLIArguments(int argc, char** argv) -> CLIParameters {
       } else {
         parameters.fragmentShaderPath = value;
       }
+    } else if (arg.find("--no-echo", 0) == 0) {
+      parameters.echo = false;
     } else {
       std::cerr << "Unknown argument \"" << arg << "\"\n";
     }
