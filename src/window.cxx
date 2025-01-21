@@ -1,6 +1,6 @@
 #include "window.hxx"
 
-#include <exception>
+#include <stdexcept>
 
 #include <GLFW/glfw3.h>
 

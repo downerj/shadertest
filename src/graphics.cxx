@@ -1,6 +1,6 @@
 #include "graphics.hxx"
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 #define GLAD_GL_IMPLEMENTATION
