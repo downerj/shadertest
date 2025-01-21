@@ -32,22 +32,23 @@ struct ShaderData {
 
 class GraphicsEngine {
 public:
-  GraphicsEngine();
+  GraphicsEngine(GLFWwindow* window);
   GraphicsEngine(
+    GLFWwindow* window,
     std::string_view vertexSource,
     std::string_view fragmentSource
   );
+  GraphicsEngine() = delete;
   GraphicsEngine(const GraphicsEngine&) = delete;
   GraphicsEngine(GraphicsEngine&&) = delete;
   GraphicsEngine operator=(const GraphicsEngine&) = delete;
   GraphicsEngine operator=(GraphicsEngine&&) = delete;
   ~GraphicsEngine();
 
-  auto isActive() -> bool;
+  static auto initializeGL() -> bool;
   auto render() -> void;
 
 private:
-  static auto initializeWindow() -> GLFWwindow*;
   static auto createShader(GLenum type, std::string_view source) -> GLuint;
   static auto createProgram(
     std::string_view vertexSource,

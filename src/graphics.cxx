@@ -22,13 +22,6 @@ auto debugMessageCallbackGL(
 ) -> void {
   LOG_ERROR("GL error: " << message << '\n');
 }
-
-auto errorCallbackGLFW(
-  int /*error*/,
-  const char* description
-) -> void {
-  LOG_ERROR("GLFW error: " << description << '\n');
-}
 #endif
 
 constexpr const char* defaultVertexSource{
@@ -39,49 +32,24 @@ constexpr const char* defaultFragmentSource{
 #include "default.frag"
 };
 
-GraphicsEngine::GraphicsEngine() :
-  GraphicsEngine(defaultVertexSource, defaultFragmentSource) {}
+GraphicsEngine::GraphicsEngine(GLFWwindow* window) :
+  GraphicsEngine(window, defaultVertexSource, defaultFragmentSource) {}
 
 GraphicsEngine::GraphicsEngine(
+  GLFWwindow* window,
   std::string_view vertexSource,
   std::string_view fragmentSource
-) :
-  window{initializeWindow()},
-  shaderData{
-    generateShaderData(vertexSource, fragmentSource)
+) : window{window} {
+  if (!initializeGL()) {
+    throw std::runtime_error{"Failed to initialize OpenGL"};
   }
-{
-  if (!window || !shaderData) {
-    throw std::runtime_error{""};
-  }
+  shaderData = generateShaderData(vertexSource, fragmentSource);
 }
 
-auto GraphicsEngine::initializeWindow() -> GLFWwindow* {
-  if (!glfwInit()) {
-    LOG_ERROR("Failed to initialize GLFW\n");
-    return nullptr;
+auto GraphicsEngine::initializeGL() -> bool {
+  if (!gladLoadGL(glfwGetProcAddress)) {
+    return false;
   }
-#ifdef DEBUG
-  glfwSetErrorCallback(errorCallbackGLFW);
-#endif
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_DECORATED, true);
-#ifdef DEBUG
-  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-#endif
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
-#endif
-  GLFWwindow* window{glfwCreateWindow(640, 480, "Hello", nullptr, nullptr)};
-  if (!window) {
-    LOG_ERROR("Failed to create GLFW window\n");
-    glfwTerminate();
-    return nullptr;
-  }
-  glfwMakeContextCurrent(window);
-  gladLoadGL(glfwGetProcAddress);
 #ifdef DEBUG
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
   glDebugMessageCallback(debugMessageCallbackGL, nullptr);
@@ -94,7 +62,7 @@ auto GraphicsEngine::initializeWindow() -> GLFWwindow* {
   //   LOG("GL extension GL_ARB_debug_output unavailable\n");
   // }
 #endif
-  return window;
+  return true;
 }
 
 auto GraphicsEngine::createShader(
@@ -229,10 +197,6 @@ auto GraphicsEngine::generateShaderData(
   };
 }
 
-auto GraphicsEngine::isActive() -> bool {
-  return !glfwWindowShouldClose(window);
-}
-
 auto GraphicsEngine::render() -> void {
   int width{};
   int height{};
@@ -240,24 +204,27 @@ auto GraphicsEngine::render() -> void {
   glViewport(0, 0, width, height);
   glClearColor(0., .5, 1., 1.);
   glClear(GL_COLOR_BUFFER_BIT);
-  glUseProgram(shaderData->program);
-  glUniform1f(shaderData->timeLocation, static_cast<GLfloat>(glfwGetTime()));
-  glUniform2i(shaderData->resolutionLocation, width, height);
-  glBindVertexArray(shaderData->vao);
-  glDrawElements(
-    GL_TRIANGLES,
-    shaderData->indexCount,
-    GL_UNSIGNED_SHORT,
-    nullptr
-  );
-  glBindVertexArray(0);
+  if (shaderData) {
+    glUseProgram(shaderData->program);
+    glUniform1f(shaderData->timeLocation, static_cast<GLfloat>(glfwGetTime()));
+    glUniform2i(shaderData->resolutionLocation, width, height);
+    glBindVertexArray(shaderData->vao);
+    glDrawElements(
+      GL_TRIANGLES,
+      shaderData->indexCount,
+      GL_UNSIGNED_SHORT,
+      nullptr
+    );
+    glBindVertexArray(0);
+  }
   glfwSwapBuffers(window);
   glfwPollEvents();
 }
 
 GraphicsEngine::~GraphicsEngine() {
-  glfwDestroyWindow(window);
+  if (!shaderData) {
+    return;
+  }
   glDeleteVertexArrays(1, &shaderData->vao);
   glDeleteProgram(shaderData->program);
-  glfwTerminate();
 }
