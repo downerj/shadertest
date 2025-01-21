@@ -1,9 +1,17 @@
+# Third-party libraries
+include/
+lib/
 # Object files
 obj/
-
-# Binaries
+# Executables
 bin/
 
 # VSCode
 settings.json
 .vscode/
+
+# Visual Studio
+.vs/
+x86/
+x64/
+**/*.vcxproj.user
