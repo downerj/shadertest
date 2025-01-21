@@ -1,24 +1,19 @@
 #include <cstdlib>
+#include <exception>
 
 #include "debug.hxx"
 #include "graphics.hxx"
 #include "io.hxx"
 
 auto main(int, char**) -> int {
-  GLFWwindow* window{initializeWindow()};
-  if (!window) {
+  try {
+    GraphicsEngine graphics{};
+    LOG("Running...\n");
+    while (graphics.isActive()) {
+      graphics.render();
+    }
+    LOG("Goodbye.\n");
+  } catch (std::exception&) {
     std::exit(EXIT_FAILURE);
   }
-  std::optional<ShaderData> shaderData{
-    generateShaderData(defaultVertexSource, defaultFragmentSource)
-  };
-  if (!shaderData) {
-    std::exit(EXIT_FAILURE);
-  }
-  LOG("Running...\n");
-  while (!glfwWindowShouldClose(window)) {
-    render(window, *shaderData);
-  }
-  cleanup(window, *shaderData);
-  LOG("Goodbye.\n");
 }

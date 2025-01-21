@@ -31,9 +31,6 @@ public:
   ModelSupplier operator=(const ModelSupplier&) = delete;
   ModelSupplier operator=(ModelSupplier&&) = delete;
 
-  auto supplyTriangle() const -> const Model&;
-  auto supplyRectangle() const -> const Model&;
-
 private:
   const std::vector<float> triangleVertices{
     -1., -1., 0.,
@@ -57,6 +54,7 @@ private:
     0, 2, 3
   };
 
+public:
   const Model triangle{triangleVertices, triangleIndices};
   const Model rectangle{rectangleVertices, rectangleIndices};
 };
