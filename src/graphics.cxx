@@ -24,26 +24,14 @@ auto debugMessageCallbackGL(
 }
 #endif
 
-constexpr const char* defaultVertexSource{
-#include "default.vert"
-};
-
-constexpr const char* defaultFragmentSource{
-#include "default.frag"
-};
-
-GraphicsEngine::GraphicsEngine(GLFWwindow* window) :
-  GraphicsEngine(window, defaultVertexSource, defaultFragmentSource) {}
-
 GraphicsEngine::GraphicsEngine(
   GLFWwindow* window,
-  std::string_view vertexSource,
-  std::string_view fragmentSource
+  const ShaderSources& sources
 ) : window{window} {
   if (!initializeGL()) {
     throw std::runtime_error{"Failed to initialize OpenGL"};
   }
-  shaderData = generateShaderData(vertexSource, fragmentSource);
+  shaderData = generateShaderData(sources);
 }
 
 auto GraphicsEngine::initializeGL() -> bool {
@@ -143,10 +131,14 @@ auto GraphicsEngine::createProgram(
 }
 
 auto GraphicsEngine::generateShaderData(
-  std::string_view vertexSource,
-  std::string_view fragmentSource
+  const ShaderSources& sources
 ) -> std::optional<ShaderData> {
-  std::optional<GLuint> program{createProgram(vertexSource, fragmentSource)};
+  if (!sources.vertexSource || !sources.fragmentSource) {
+    return {};
+  }
+  std::optional<GLuint> program{
+    createProgram(*sources.vertexSource, *sources.fragmentSource)
+  };
   if (!program) {
     return {};
   }

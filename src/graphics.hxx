@@ -2,12 +2,18 @@
 #define GRAPHICS_HXX
 
 #include <optional>
+#include <string>
 #include <string_view>
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
 
 struct GLFWwindow;
+
+struct ShaderSources {
+  std::optional<std::string> vertexSource{};
+  std::optional<std::string> fragmentSource{};
+};
 
 struct ShaderData {
   GLuint program;
@@ -33,11 +39,9 @@ struct ShaderData {
 
 class GraphicsEngine {
 public:
-  GraphicsEngine(GLFWwindow* window);
   GraphicsEngine(
     GLFWwindow* window,
-    std::string_view vertexSource,
-    std::string_view fragmentSource
+    const ShaderSources& sources
   );
   GraphicsEngine() = delete;
   GraphicsEngine(const GraphicsEngine&) = delete;
@@ -56,8 +60,7 @@ private:
     std::string_view fragmentSource
   ) -> std::optional<GLuint>;
   static auto generateShaderData(
-    std::string_view vertexSource,
-    std::string_view fragmentSource
+    const ShaderSources& sources
   ) -> std::optional<ShaderData>;
 
   GLFWwindow* window;
