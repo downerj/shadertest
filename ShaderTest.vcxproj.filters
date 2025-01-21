@@ -15,17 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\io.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="src\debug.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -35,11 +24,42 @@
     <ClInclude Include="src\io.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\default.frag">
+    <ClInclude Include="src\models.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\default.vert">
+    <ClInclude Include="src\parameters.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\window.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\default.frag">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\default.vert">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\graphics.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\models.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parameters.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\window.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

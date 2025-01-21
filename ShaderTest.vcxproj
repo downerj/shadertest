@@ -18,6 +18,26 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\debug.hxx" />
+    <ClInclude Include="src\graphics.hxx" />
+    <ClInclude Include="src\io.hxx" />
+    <ClInclude Include="src\models.hxx" />
+    <ClInclude Include="src\parameters.hxx" />
+    <ClInclude Include="src\window.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\default.frag" />
+    <None Include="src\default.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\graphics.cxx" />
+    <ClCompile Include="src\io.cxx" />
+    <ClCompile Include="src\main.cxx" />
+    <ClCompile Include="src\models.cxx" />
+    <ClCompile Include="src\parameters.cxx" />
+    <ClCompile Include="src\window.cxx" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <ProjectGuid>{64A767B4-566B-46D4-9EC3-64A125F938FC}</ProjectGuid>
@@ -108,7 +128,7 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /y /e /i "$(SolutionDir)shaders" "$(OutDir)shaders"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)examples" "$(OutDir)examples"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,21 +164,9 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /y /e /i "$(SolutionDir)shaders" "$(OutDir)shaders"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)examples" "$(OutDir)examples"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\graphics.cxx" />
-    <ClCompile Include="src\io.cxx" />
-    <ClCompile Include="src\main.cxx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\default.frag" />
-    <ClInclude Include="src\default.vert" />
-    <ClInclude Include="src\debug.hxx" />
-    <ClInclude Include="src\graphics.hxx" />
-    <ClInclude Include="src\io.hxx" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
