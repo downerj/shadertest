@@ -1,5 +1,5 @@
 # shadertest
-An interactive GLSL shader playground.
+An interactive GLSL vertex/fragment shader playground in C++17.
 
 ## Building
 This version of the software successfully builds with debug flags on Ubuntu Linux 24.10 (GNU Make + GCC) and Windows 11 (Visual Studio + MSVC).
