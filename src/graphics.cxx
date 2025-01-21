@@ -102,7 +102,7 @@ auto GraphicsEngine::createProgram(
       nullptr,
       log.data()
     );
-    LOG_ERROR("GL program error: " << log << '\n');
+    std::cerr << "GL program error: " << log << '\n';
     log.clear();
 
     glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLength);
@@ -114,7 +114,7 @@ auto GraphicsEngine::createProgram(
         nullptr,
         log.data()
       );
-      LOG_ERROR("GL vertex shader error: " << log << '\n');
+      std::cerr << "GL vertex shader error: " << log << '\n';
       log.clear();
     }
 
@@ -127,7 +127,7 @@ auto GraphicsEngine::createProgram(
         nullptr,
         log.data()
       );
-      LOG_ERROR("GL fragment shader error: " << log << '\n');
+      std::cerr << "GL fragment shader error: " << log << '\n';
       log.clear();
     }
   }
