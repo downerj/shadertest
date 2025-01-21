@@ -32,7 +32,7 @@ WindowOwner::WindowOwner() {
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 #endif
-  window = glfwCreateWindow(640, 480, "Hello", nullptr, nullptr);
+  window = glfwCreateWindow(400, 400, "ShaderTest", nullptr, nullptr);
   if (!window) {
     glfwTerminate();
     throw std::runtime_error{"Failed to create GLFW window"};
