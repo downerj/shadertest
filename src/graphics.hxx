@@ -65,6 +65,7 @@ private:
 
   GLFWwindow* window;
   std::optional<ShaderData> shaderData;
+  GLfloat initialTime{};
 };
 
 #endif // GRAPHICS_HXX

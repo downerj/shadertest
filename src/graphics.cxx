@@ -32,6 +32,7 @@ GraphicsEngine::GraphicsEngine(
     throw std::runtime_error{"Failed to initialize OpenGL"};
   }
   shaderData = generateShaderData(sources);
+  initialTime = static_cast<GLfloat>(glfwGetTime());
 }
 
 auto GraphicsEngine::initializeGL() -> bool {
@@ -198,7 +199,8 @@ auto GraphicsEngine::render() -> void {
   glClear(GL_COLOR_BUFFER_BIT);
   if (shaderData) {
     glUseProgram(shaderData->program);
-    glUniform1f(shaderData->timeLocation, static_cast<GLfloat>(glfwGetTime()));
+    const GLfloat elapsed = static_cast<GLfloat>(glfwGetTime()) - initialTime;
+    glUniform1f(shaderData->timeLocation, elapsed);
     glUniform2i(shaderData->resolutionLocation, width, height);
     glBindVertexArray(shaderData->vao);
     glDrawElements(
