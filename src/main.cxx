@@ -9,6 +9,10 @@
 
 auto main(int argc, char** argv) -> int {
   CLIParameters parameters{parseCLIArguments(argc, argv)};
+  if (parameters.helpOnly) {
+    std::cout << usageString << '\n';
+    std::exit(EXIT_SUCCESS);
+  }
   ShaderSources sources{};
   if (!parameters.vertexShaderPath && !parameters.fragmentShaderPath) {
     sources = {defaultVertexSource, defaultFragmentSource};

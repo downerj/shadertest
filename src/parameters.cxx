@@ -39,6 +39,8 @@ auto parseCLIArguments(int argc, char** argv) -> CLIParameters {
       }
     } else if (arg.find("--no-echo", 0) == 0) {
       parameters.echo = false;
+    } else if (arg == "-h" || arg.find("--help", 0) == 0) {
+      parameters.helpOnly = true;
     } else {
       std::cerr << "Unknown argument \"" << arg << "\"\n";
     }
