@@ -3,8 +3,10 @@
 #ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+precision highp int;
 #else
 precision mediump float;
+precision mediump int;
 #endif
 #endif
 
@@ -13,7 +15,7 @@ precision mediump float;
 #define varying out
 #endif
 
-uniform vec2 resolution;
+uniform ivec2 resolution;
 uniform float time;
 
 #define fragCoordIn gl_FragCoord
@@ -47,8 +49,8 @@ vec4 hsvCycled2rgba(in vec3 hsv, in float spread, in float speed) {
  */
 
 void setColor(out vec4 fragColor, in vec4 fragCoord) {
-  vec2 c = resolution*.5;
-  vec2 uv = (fragCoord.xy - c) / min(resolution.x, resolution.y);
+  vec2 c = vec2(resolution)*.5;
+  vec2 uv = (fragCoord.xy - c) / min(float(resolution.x), float(resolution.y));
   float d = distance(vec2(0.), uv);
   float width = .5;
   float hue = d*2. + time/10.;

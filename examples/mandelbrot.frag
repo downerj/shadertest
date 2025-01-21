@@ -3,8 +3,10 @@
 #ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+precision highp int;
 #else
 precision mediump float;
+precision mediump int;
 #endif
 #endif
 
@@ -13,7 +15,7 @@ precision mediump float;
 #define varying out
 #endif
 
-uniform vec2 resolution;
+uniform ivec2 resolution;
 uniform float time;
 
 #define fragCoordIn gl_FragCoord
@@ -67,8 +69,8 @@ Params params = Params(vec2(-1., 0.), -.5);
 #endif
 
 void setColor(out vec4 fragColor, in vec4 fragCoord) {
-  vec2 c = resolution*.5;
-  float scale = resolution.y;
+  vec2 c = vec2(resolution)*.5;
+  float scale = float(resolution.y);
   vec2 uv = fragCoord.xy;
   vec2 p = (uv - c)/(scale*pow(10., params.zoom)) + params.offset;
   int iterations = mandelbrot(p);

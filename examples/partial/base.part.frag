@@ -1,8 +1,10 @@
 #ifdef GL_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+precision highp int;
 #else
 precision mediump float;
+precision mediump int;
 #endif
 #endif
 
@@ -11,7 +13,7 @@ precision mediump float;
 #define varying out
 #endif
 
-uniform vec2 resolution;
+uniform ivec2 resolution;
 uniform float time;
 
 #define fragCoordIn gl_FragCoord
