@@ -1,7 +1,7 @@
 #ifndef WINDOW_HXX
 #define WINDOW_HXX
 
-#include "GLFW/glfw3.h"
+struct GLFWwindow;
 
 class WindowOwner {
 public:

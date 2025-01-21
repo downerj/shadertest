@@ -3,7 +3,7 @@
 
 #include "debug.hxx"
 #include "graphics.hxx"
-#include "io.hxx"
+// #include "io.hxx"
 #include "window.hxx"
 
 auto main(int, char**) -> int {

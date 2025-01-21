@@ -2,6 +2,8 @@
 
 #include <exception>
 
+#include <GLFW/glfw3.h>
+
 #include "debug.hxx"
 
 #ifdef DEBUG
