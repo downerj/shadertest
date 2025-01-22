@@ -1,5 +1,6 @@
 #include "graphics.hxx"
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -144,8 +145,7 @@ auto GraphicsEngine::generateShaderData(
     return {};
   }
   const GLint positionLocation{glGetAttribLocation(*program, "position")};
-  const ModelSupplier supplier{};
-  const Model& model{supplier.rectangle};
+  const std::unique_ptr<Model> model{std::make_unique<Rectangle>()};
 
   GLuint vao{};
   glGenVertexArrays(1, &vao);
@@ -156,8 +156,8 @@ auto GraphicsEngine::generateShaderData(
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
-    sizeof(GLfloat)*model.getVertices().size(),
-    model.getVertices().data(),
+    sizeof(GLfloat)*model->getVertexCount(),
+    model->getVertices(),
     GL_STATIC_DRAW
   );
 
@@ -166,8 +166,8 @@ auto GraphicsEngine::generateShaderData(
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
-    sizeof(GLshort)*model.getIndices().size(),
-    model.getIndices().data(),
+    sizeof(GLshort)*model->getIndexCount(),
+    model->getIndices(),
     GL_STATIC_DRAW
   );
   
@@ -184,7 +184,7 @@ auto GraphicsEngine::generateShaderData(
   return ShaderData{
     *program,
     vao,
-    static_cast<GLsizei>(model.getIndices().size()),
+    static_cast<GLsizei>(model->getIndexCount()),
     timeLocation,
     resolutionLocation
   };

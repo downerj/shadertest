@@ -1,62 +1,38 @@
 #ifndef MODELS_HXX
 #define MODELS_HXX
 
-#include <vector>
+#include <array>
 
 class Model {
 public:
-  Model(
-    const std::vector<float>& vertices,
-    const std::vector<unsigned short>& indices
-  );
-  Model() = delete;
-  Model(const Model&) = delete;
-  Model(Model&&) = delete;
-  Model operator=(const Model&) = delete;
-  Model operator=(Model&&) = delete;
-
-  auto getVertices() const -> const std::vector<float>&;
-  auto getIndices() const -> const std::vector<unsigned short>&;
-
-private:
-  const std::vector<float>& vertices;
-  const std::vector<unsigned short>& indices;
+  virtual auto getVertices() const -> const float* = 0;
+  virtual auto getIndices() const -> const unsigned short* = 0;
+  virtual auto getVertexCount() const -> int = 0;
+  virtual auto getIndexCount() const -> int = 0;
 };
 
-class ModelSupplier {
+class Triangle : public Model {
 public:
-  ModelSupplier() = default;
-  ModelSupplier(const ModelSupplier&) = delete;
-  ModelSupplier(ModelSupplier&&) = delete;
-  ModelSupplier operator=(const ModelSupplier&) = delete;
-  ModelSupplier operator=(ModelSupplier&&) = delete;
+  auto getVertices() const -> const float* final;
+  auto getIndices() const -> const unsigned short* final;
+  auto getVertexCount() const -> int final;
+  auto getIndexCount() const -> int final;
 
 private:
-  const std::vector<float> triangleVertices{
-    -1., -1., 0.,
-    1., -1., 0.,
-    0., 1., 0.
-  };
+  static const std::array<float, 3*3> vertices;
+  static const std::array<unsigned short, 1*3> indices;
+};
 
-  const std::vector<unsigned short> triangleIndices{
-    0, 1, 2
-  };
-
-  const std::vector<float> rectangleVertices{
-    -1., -1., 0.,
-    1., -1., 0.,
-    1., 1., 0.,
-    -1., 1., 0.
-  };
-
-  const std::vector<unsigned short> rectangleIndices{
-    0, 1, 2,
-    0, 2, 3
-  };
-
+class Rectangle : public Model {
 public:
-  const Model triangle{triangleVertices, triangleIndices};
-  const Model rectangle{rectangleVertices, rectangleIndices};
+  auto getVertices() const -> const float* final;
+  auto getIndices() const -> const unsigned short* final;
+  auto getVertexCount() const -> int final;
+  auto getIndexCount() const -> int final;
+
+private:
+  static const std::array<float, 4*3> vertices;
+  static const std::array<unsigned short, 2*3> indices;
 };
 
 #endif // MODELS_HXX
