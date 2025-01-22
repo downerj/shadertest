@@ -33,6 +33,9 @@
     <ClInclude Include="src\window.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\icon.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\default.frag">

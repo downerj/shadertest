@@ -165,7 +165,8 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /y /e /i "$(SolutionDir)examples" "$(OutDir)examples"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)examples" "$(OutDir)examples"
+PowerShell -Command "Compress-Archive -Path '$(OutDir)*.dll', '$(OutDir)$(AssemblyName).exe', '$(OutDir)examples' -DestinationPath '$(OutDir)ShaderTest-Win64.zip' -Force"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
