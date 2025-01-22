@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="src\debug.hxx" />
     <ClInclude Include="src\graphics.hxx" />
+    <ClInclude Include="src\icon.hxx" />
     <ClInclude Include="src\io.hxx" />
     <ClInclude Include="src\models.hxx" />
     <ClInclude Include="src\parameters.hxx" />

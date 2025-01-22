@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "debug.hxx"
+#include "icon.hxx"
 
 #ifdef DEBUG
 auto errorCallbackGLFW(
@@ -53,6 +54,8 @@ WindowOwner::WindowOwner() {
   });
 
   glfwSetWindowUserPointer(window, this);
+  const GLFWimage icon_data{mainIconWidth, mainIconHeight, static_cast<unsigned char*>(mainIcon)};
+  glfwSetWindowIcon(window, 1, &icon_data);
 }
 
 WindowOwner::~WindowOwner() {
