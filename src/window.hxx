@@ -17,6 +17,9 @@ public:
 
 private:
   GLFWwindow* window;
+  const int initialWidth{400};
+  const int initialHeight{400};
+  const char* title{"ShaderTest"};
   auto onKey(
     GLFWwindow* window, int key, int scancode, int action, int mods
   ) -> void;

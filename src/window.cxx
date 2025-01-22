@@ -33,7 +33,13 @@ WindowOwner::WindowOwner() {
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 #endif
-  window = glfwCreateWindow(400, 400, "ShaderTest", nullptr, nullptr);
+  window = glfwCreateWindow(
+    initialWidth,
+    initialHeight,
+    title,
+    nullptr,
+    nullptr
+  );
   if (!window) {
     glfwTerminate();
     throw std::runtime_error{"Failed to create GLFW window"};
@@ -80,12 +86,16 @@ auto WindowOwner::onKey(
 ) -> void {
   const int keyUp{action & GLFW_KEY_UP};
   const bool keyQ{key == GLFW_KEY_Q};
+  const bool keyR{key == GLFW_KEY_R};
   const bool keyW{key == GLFW_KEY_W};
   const bool keyF4{key == GLFW_KEY_F4};
-  const int keyCtrl{mods & GLFW_MOD_CONTROL};
-  const int keyAlt{mods & GLFW_MOD_ALT};
+  const int keyCtrl{mods == GLFW_MOD_CONTROL};
+  const int keyAlt{mods == GLFW_MOD_ALT};
   if (keyUp && ((keyCtrl && (keyQ || keyW)) || (keyAlt && keyF4))) {
     glfwSetWindowShouldClose(window, true);
     return;
+  }
+  if (keyUp && (keyCtrl && keyR)) {
+    glfwSetWindowSize(window, initialWidth, initialHeight);
   }
 }
