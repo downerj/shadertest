@@ -16,6 +16,10 @@ auto errorCallbackGLFW(
 }
 #endif
 
+auto WindowActions::reset() -> void {
+  changeModelType = false;
+}
+
 WindowOwner::WindowOwner() {
   if (!glfwInit()) {
     throw std::runtime_error{"Failed to initialize GLFW"};
@@ -77,6 +81,10 @@ auto WindowOwner::getWindow() -> GLFWwindow* {
   return window;
 }
 
+auto WindowOwner::getActions() -> WindowActions& {
+  return actions;
+}
+
 auto WindowOwner::isActive() -> bool {
   return !glfwWindowShouldClose(window);
 }
@@ -84,18 +92,29 @@ auto WindowOwner::isActive() -> bool {
 auto WindowOwner::onKey(
   GLFWwindow* window, int key, int /*scancode*/, int action, int mods
 ) -> void {
-  const int keyUp{action & GLFW_KEY_UP};
+  const int actionUp{action & GLFW_KEY_UP};
+  const bool key1{key == GLFW_KEY_1};
+  const bool key2{key == GLFW_KEY_2};
   const bool keyQ{key == GLFW_KEY_Q};
   const bool keyR{key == GLFW_KEY_R};
   const bool keyW{key == GLFW_KEY_W};
   const bool keyF4{key == GLFW_KEY_F4};
-  const int keyCtrl{mods == GLFW_MOD_CONTROL};
-  const int keyAlt{mods == GLFW_MOD_ALT};
-  if (keyUp && ((keyCtrl && (keyQ || keyW)) || (keyAlt && keyF4))) {
+  const bool keyCtrl{mods == GLFW_MOD_CONTROL};
+  const bool keyAlt{mods == GLFW_MOD_ALT};
+  if (actionUp && ((keyCtrl && (keyQ || keyW)) || (keyAlt && keyF4))) {
     glfwSetWindowShouldClose(window, true);
-    return;
-  }
-  if (keyUp && (keyCtrl && keyR)) {
+  } else if (actionUp && (keyCtrl && keyR)) {
     glfwSetWindowSize(window, initialWidth, initialHeight);
+  }
+  if (actionUp && (keyAlt && key1)) {
+#ifdef DEBUG
+    actions.changeModelType = true;
+    actions.modelType = ModelType::Rectangle;
+#endif // DEBUG
+  } else if (actionUp && (keyAlt && key2)) {
+#ifdef DEBUG
+    actions.changeModelType = true;
+    actions.modelType = ModelType::Triangle;
+#endif // DEBUG
   }
 }

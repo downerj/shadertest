@@ -3,6 +3,11 @@
 
 #include <array>
 
+enum class ModelType {
+  Rectangle,
+  Triangle
+};
+
 class Model {
 public:
   virtual auto getVertices() const -> const float* = 0;

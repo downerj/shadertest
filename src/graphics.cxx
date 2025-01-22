@@ -25,14 +25,28 @@ auto debugMessageCallbackGL(
 }
 #endif
 
+ShaderData::ShaderData(
+  GLuint program,
+  GLuint vao,
+  GLsizei indexCount,
+  GLint timeLocation,
+  GLint resolutionLocation
+) :
+  program{program},
+  vao{vao},
+  indexCount{indexCount},
+  timeLocation{timeLocation},
+  resolutionLocation{resolutionLocation} {}
+
 GraphicsEngine::GraphicsEngine(
   GLFWwindow* window,
-  const ShaderSources& sources
+  const ShaderSources& sources,
+  ModelType modelType
 ) : window{window} {
   if (!initializeGL()) {
     throw std::runtime_error{"Failed to initialize OpenGL"};
   }
-  shaderData = generateShaderData(sources);
+  resetShaderData(sources, modelType);
   initialTime = static_cast<GLfloat>(glfwGetTime());
 }
 
@@ -53,6 +67,14 @@ auto GraphicsEngine::initializeGL() -> bool {
   // }
 #endif
   return true;
+}
+
+auto GraphicsEngine::resetShaderData(
+  const ShaderSources& sources,
+  ModelType modelType
+) -> void {
+  cleanupShaderData(shaderData);
+  shaderData = generateShaderData(sources, modelType);
 }
 
 auto GraphicsEngine::createShader(
@@ -83,7 +105,7 @@ auto GraphicsEngine::createProgram(
   if (!status) {
     GLsizei logLength{};
     std::string log{};
-    
+
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
     log.resize(logLength);
     glGetProgramInfoLog(
@@ -133,7 +155,8 @@ auto GraphicsEngine::createProgram(
 }
 
 auto GraphicsEngine::generateShaderData(
-  const ShaderSources& sources
+  const ShaderSources& sources,
+  ModelType modelType
 ) -> std::optional<ShaderData> {
   if (!sources.vertexSource || !sources.fragmentSource) {
     return {};
@@ -145,7 +168,13 @@ auto GraphicsEngine::generateShaderData(
     return {};
   }
   const GLint positionLocation{glGetAttribLocation(*program, "position")};
-  const std::unique_ptr<Model> model{std::make_unique<Rectangle>()};
+  const auto model{[&modelType]() -> std::unique_ptr<Model> {
+    if (modelType == ModelType::Rectangle) {
+      return std::make_unique<Rectangle>();
+    } else /* if (modelType == ModelType::Triangle) */ {
+      return std::make_unique<Triangle>();
+    }
+  }()};
 
   GLuint vao{};
   glGenVertexArrays(1, &vao);
@@ -170,7 +199,7 @@ auto GraphicsEngine::generateShaderData(
     model->getIndices(),
     GL_STATIC_DRAW
   );
-  
+
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
   glVertexAttribPointer(positionLocation, 3, GL_FLOAT, false, 0, 0);
   glEnableVertexAttribArray(positionLocation);
@@ -215,10 +244,16 @@ auto GraphicsEngine::render() -> void {
   glfwPollEvents();
 }
 
-GraphicsEngine::~GraphicsEngine() {
-  if (!shaderData) {
+auto GraphicsEngine::cleanupShaderData(
+  std::optional<ShaderData>& data
+) -> void {
+  if (!data) {
     return;
   }
-  glDeleteVertexArrays(1, &shaderData->vao);
-  glDeleteProgram(shaderData->program);
+  glDeleteVertexArrays(1, &data->vao);
+  glDeleteProgram(data->program);
+}
+
+GraphicsEngine::~GraphicsEngine() {
+  cleanupShaderData(shaderData);
 }

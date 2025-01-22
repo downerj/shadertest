@@ -27,7 +27,8 @@ auto main(int argc, char** argv) -> int {
     WindowOwner windowOwner{};
     GraphicsEngine graphics{
       windowOwner.getWindow(),
-      sources
+      sources,
+      windowOwner.getActions().modelType
     };
     if (parameters.echo && sources.vertexSource && sources.fragmentSource) {
       std::cout << "##### BEGIN VERTEX SHADER #####\n";
@@ -38,7 +39,12 @@ auto main(int argc, char** argv) -> int {
       std::cout << *sources.fragmentSource << '\n';
       std::cout << "##### END FRAGMENT SHADER #####\n";
     }
+    WindowActions& actions{windowOwner.getActions()};
     while (windowOwner.isActive()) {
+      if (actions.changeModelType) {
+        graphics.resetShaderData(sources, actions.modelType);
+      }
+      actions.reset();
       graphics.render();
     }
     LOG("Goodbye.\n");
