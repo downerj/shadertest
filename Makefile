@@ -2,6 +2,22 @@
 
 STATIC_BUILD ?= 0
 
+ifneq (${OS}, Windows_NT)
+	UNAME_S = $(shell uname -s)
+	ifeq (${UNAME_S}, Linux)
+		LINUX_ID = $(shell lsb_release --id --short)
+		LINUX_RELEASE = $(shell lsb_release --release --short)
+		SUFFIX = ${LINUX_ID}_${LINUX_RELEASE}
+	endif
+	ifeq (${UNAME_S}, Darwin)
+		# TODO: Target macOS
+		SUFFIX = macOS
+	endif
+else
+	# TODO: Target Win32 (e.g. MinGW, Cygwin)
+	SUFFIX = Win32
+endif
+
 EXECUTABLE_DIRECTORY = bin
 OBJECT_DIRECTORY = obj
 SOURCE_DIRECTORY = src
@@ -9,7 +25,7 @@ LIBRARY_DIRECTORY = lib
 INCLUDE_DIRECTORY = include
 SHADERS_DIRECTORY = examples
 EXECUTABLE = ${EXECUTABLE_DIRECTORY}/shadertest
-DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest.zip
+DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest_${SUFFIX}.zip
 WARNINGS = -Wall -Wextra -Wpedantic
 CXX_STANDARD = -std=c++17
 
