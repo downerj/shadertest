@@ -51,7 +51,7 @@ void setColor(out vec4 fragColor, in vec4 fragCoord) {
   vec2 c = vec2(resolution)*.5;
   float scale = min(float(resolution.x), float(resolution.y));
   vec2 p = (fragCoord.xy - c)/scale;
-  
+
 #ifdef FUNC_CIRCLES
   float value = sqrt(p.x*p.x + p.y*p.y);
 #elif defined FUNC_LINES

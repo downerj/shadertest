@@ -8,6 +8,9 @@
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
 
+#include "models.hxx"
+#include "window.hxx"
+
 struct GLFWwindow;
 
 struct ShaderSources {
@@ -29,19 +32,15 @@ struct ShaderData {
     GLsizei indexCount,
     GLint timeLocation,
     GLint resolutionLocation
-  ) :
-    program{program},
-    vao{vao},
-    indexCount{indexCount},
-    timeLocation{timeLocation},
-    resolutionLocation{resolutionLocation} {}
+  );
 };
 
 class GraphicsEngine {
 public:
   GraphicsEngine(
     GLFWwindow* window,
-    const ShaderSources& sources
+    const ShaderSources& sources,
+    ModelType modelType
   );
   GraphicsEngine() = delete;
   GraphicsEngine(const GraphicsEngine&) = delete;
@@ -51,6 +50,10 @@ public:
   ~GraphicsEngine();
 
   static auto initializeGL() -> bool;
+  auto resetShaderData(
+    const ShaderSources& sources,
+    ModelType modelType
+  ) -> void;
   auto render() -> void;
 
 private:
@@ -60,11 +63,13 @@ private:
     std::string_view fragmentSource
   ) -> std::optional<GLuint>;
   static auto generateShaderData(
-    const ShaderSources& sources
+    const ShaderSources& sources,
+    ModelType modelType
   ) -> std::optional<ShaderData>;
+  static auto cleanupShaderData(std::optional<ShaderData>& shaderData) -> void;
 
   GLFWwindow* window;
-  std::optional<ShaderData> shaderData;
+  std::optional<ShaderData> shaderData{};
   GLfloat initialTime{};
 };
 

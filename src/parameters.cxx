@@ -37,8 +37,8 @@ auto parseCLIArguments(int argc, char** argv) -> CLIParameters {
       } else {
         parameters.fragmentShaderPath = value;
       }
-    } else if (arg.find("--no-echo", 0) == 0) {
-      parameters.echo = false;
+    } else if (arg.find("--echo", 0) == 0) {
+      parameters.echo = true;
     } else if (arg == "-h" || arg.find("--help", 0) == 0) {
       parameters.helpOnly = true;
     } else {

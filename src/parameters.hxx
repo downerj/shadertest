@@ -23,8 +23,8 @@ Options:
         Set the vertex shader path
     -fs <path>, --fragment-shader=<path>
         Set the fragment shader path
-    --no-echo
-        Do not echo shaders to the console
+    --echo
+        Echo shaders to the console
     -h, --help
         Print this help message and quit
 
@@ -38,7 +38,7 @@ Notes:
 struct CLIParameters {
   std::optional<std::string> vertexShaderPath{};
   std::optional<std::string> fragmentShaderPath{};
-  bool echo{true};
+  bool echo{false};
   bool helpOnly{false};
 };
 

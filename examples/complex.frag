@@ -167,12 +167,12 @@ vec3 complex2hsv(vec2 point) {
 #else
   // Repeated edges.
   float val = 1. - .25*mod(r*.2, 2.);
-  
+
   // Checker grid.
   if (step(sin(x*5.), 0.) == step(sin(y*5.), 0.)) {
     val += .2;
   }
-  
+
   return vec3(hue, sat, val);
 #endif
 }
