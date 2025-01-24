@@ -9,7 +9,6 @@
 #include <GLFW/glfw3.h>
 
 #include "debug.hxx"
-#include "models.hxx"
 
 #ifdef DEBUG
 auto debugMessageCallbackGL(

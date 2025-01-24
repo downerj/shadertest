@@ -9,7 +9,6 @@
 #define GLFW_INCLUDE_NONE
 
 #include "models.hxx"
-#include "window.hxx"
 
 struct GLFWwindow;
 
