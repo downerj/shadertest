@@ -9,8 +9,7 @@
 
 #ifdef DEBUG
 auto errorCallbackGLFW(
-  int /*error*/,
-  const char* description
+  int /*error*/, const char* description
 ) -> void {
   LOG_ERROR("GLFW error: " << description << '\n');
 }
@@ -38,11 +37,7 @@ WindowOwner::WindowOwner() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 #endif
   window = glfwCreateWindow(
-    initialWidth,
-    initialHeight,
-    title,
-    nullptr,
-    nullptr
+    initialWidth, initialHeight, title, nullptr, nullptr
   );
   if (!window) {
     glfwTerminate();
@@ -51,11 +46,7 @@ WindowOwner::WindowOwner() {
   glfwMakeContextCurrent(window);
 
   glfwSetKeyCallback(window, [](
-    GLFWwindow* window,
-    int key,
-    int scancode,
-    int action,
-    int mods
+    GLFWwindow* window, int key, int scancode, int action, int mods
   ) -> void {
     const auto windowOwner{
       static_cast<WindowOwner*>(glfwGetWindowUserPointer(window))
@@ -65,9 +56,7 @@ WindowOwner::WindowOwner() {
 
   glfwSetWindowUserPointer(window, this);
   const GLFWimage icon_data{
-    mainIconWidth,
-    mainIconHeight,
-    static_cast<unsigned char*>(mainIcon)
+    mainIconWidth, mainIconHeight, static_cast<unsigned char*>(mainIcon)
   };
   glfwSetWindowIcon(window, 1, &icon_data);
 }

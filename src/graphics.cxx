@@ -12,30 +12,18 @@
 
 #ifdef DEBUG
 auto debugMessageCallbackGL(
-  GLenum /*source*/,
-  GLenum /*type*/,
-  GLuint /*id*/,
-  GLenum /*severity*/,
-  GLsizei /*length*/,
-  const GLchar* message,
-  const void* /*userParam*/
+  GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum /*severity*/,
+  GLsizei /*length*/, const GLchar* message, const void* /*userParam*/
 ) -> void {
   LOG_ERROR("GL error: " << message << '\n');
 }
 #endif
 
 ShaderData::ShaderData(
-  GLuint program,
-  GLuint vao,
-  GLsizei indexCount,
-  GLint timeLocation,
+  GLuint program, GLuint vao, GLsizei indexCount, GLint timeLocation,
   GLint resolutionLocation
-) :
-  program{program},
-  vao{vao},
-  indexCount{indexCount},
-  timeLocation{timeLocation},
-  resolutionLocation{resolutionLocation} {}
+) : program{program}, vao{vao}, indexCount{indexCount},
+    timeLocation{timeLocation}, resolutionLocation{resolutionLocation} {}
 
 GraphicsEngine::GraphicsEngine(
   GLFWwindow* window,
@@ -69,16 +57,14 @@ auto GraphicsEngine::initializeGL() -> bool {
 }
 
 auto GraphicsEngine::resetShaderData(
-  const ShaderSources& sources,
-  ModelType modelType
+  const ShaderSources& sources, ModelType modelType
 ) -> void {
   cleanupShaderData(shaderData);
   shaderData = generateShaderData(sources, modelType);
 }
 
 auto GraphicsEngine::createShader(
-  GLenum type,
-  std::string_view source
+  GLenum type, std::string_view source
 ) -> GLuint {
   GLuint shader{glCreateShader(type)};
   const GLchar* sources[]{source.data()};
@@ -89,8 +75,7 @@ auto GraphicsEngine::createShader(
 }
 
 auto GraphicsEngine::createProgram(
-  std::string_view vertexSource,
-  std::string_view fragmentSource
+  std::string_view vertexSource, std::string_view fragmentSource
 ) -> std::optional<GLuint> {
   GLuint vertexShader{createShader(GL_VERTEX_SHADER, vertexSource)};
   GLuint fragmentShader{createShader(GL_FRAGMENT_SHADER, fragmentSource)};
@@ -107,24 +92,14 @@ auto GraphicsEngine::createProgram(
 
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
     log.resize(logLength);
-    glGetProgramInfoLog(
-      program,
-      logLength,
-      nullptr,
-      log.data()
-    );
+    glGetProgramInfoLog(program, logLength, nullptr, log.data());
     std::cerr << "GL program error: " << log << '\n';
     log.clear();
 
     glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 0) {
       log.resize(logLength);
-      glGetShaderInfoLog(
-        vertexShader,
-        logLength,
-        nullptr,
-        log.data()
-      );
+      glGetShaderInfoLog(vertexShader, logLength, nullptr, log.data());
       std::cerr << "GL vertex shader error: " << log << '\n';
       log.clear();
     }
@@ -132,12 +107,7 @@ auto GraphicsEngine::createProgram(
     glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 0) {
       log.resize(logLength);
-      glGetShaderInfoLog(
-        fragmentShader,
-        logLength,
-        nullptr,
-        log.data()
-      );
+      glGetShaderInfoLog(fragmentShader, logLength, nullptr, log.data());
       std::cerr << "GL fragment shader error: " << log << '\n';
       log.clear();
     }
@@ -154,8 +124,7 @@ auto GraphicsEngine::createProgram(
 }
 
 auto GraphicsEngine::generateShaderData(
-  const ShaderSources& sources,
-  ModelType modelType
+  const ShaderSources& sources, ModelType modelType
 ) -> std::optional<ShaderData> {
   if (!sources.vertexSource || !sources.fragmentSource) {
     return {};
@@ -183,20 +152,16 @@ auto GraphicsEngine::generateShaderData(
   glGenBuffers(1, &vertexBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
   glBufferData(
-    GL_ARRAY_BUFFER,
-    sizeof(GLfloat)*model->getVertexCount(),
-    model->getVertices(),
-    GL_STATIC_DRAW
+    GL_ARRAY_BUFFER, sizeof(GLfloat)*model->getVertexCount(),
+    model->getVertices(), GL_STATIC_DRAW
   );
 
   GLuint indexBuffer;
   glGenBuffers(1, &indexBuffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER,
-    sizeof(GLshort)*model->getIndexCount(),
-    model->getIndices(),
-    GL_STATIC_DRAW
+    GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*model->getIndexCount(),
+    model->getIndices(), GL_STATIC_DRAW
   );
 
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -210,11 +175,8 @@ auto GraphicsEngine::generateShaderData(
   GLint resolutionLocation{glGetUniformLocation(*program, "resolution")};
 
   return ShaderData{
-    *program,
-    vao,
-    static_cast<GLsizei>(model->getIndexCount()),
-    timeLocation,
-    resolutionLocation
+    *program, vao, static_cast<GLsizei>(model->getIndexCount()),
+    timeLocation, resolutionLocation
   };
 }
 
@@ -232,10 +194,7 @@ auto GraphicsEngine::render() -> void {
     glUniform2i(shaderData->resolutionLocation, width, height);
     glBindVertexArray(shaderData->vao);
     glDrawElements(
-      GL_TRIANGLES,
-      shaderData->indexCount,
-      GL_UNSIGNED_SHORT,
-      nullptr
+      GL_TRIANGLES, shaderData->indexCount, GL_UNSIGNED_SHORT, nullptr
     );
     glBindVertexArray(0);
   }

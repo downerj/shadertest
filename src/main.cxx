@@ -26,9 +26,7 @@ auto main(int argc, char** argv) -> int {
   try {
     WindowOwner windowOwner{};
     GraphicsEngine graphics{
-      windowOwner.getWindow(),
-      sources,
-      windowOwner.getActions().modelType
+      windowOwner.getWindow(), sources, windowOwner.getActions().modelType
     };
     if (parameters.echo && sources.vertexSource && sources.fragmentSource) {
       std::cout << "##### BEGIN VERTEX SHADER #####\n";

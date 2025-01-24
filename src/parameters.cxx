@@ -52,10 +52,10 @@ auto loadShaderSources(const CLIParameters& parameters) -> ShaderSources {
   if (!parameters.vertexShaderPath || !parameters.fragmentShaderPath) {
     return {};
   }
-  std::optional<std::string> vertexSource {
+  std::optional<std::string> vertexSource{
     readFile(*parameters.vertexShaderPath)
   };
-  std::optional<std::string> fragmentSource {
+  std::optional<std::string> fragmentSource{
     readFile(*parameters.fragmentShaderPath)
   };
   return {vertexSource, fragmentSource};
