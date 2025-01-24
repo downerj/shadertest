@@ -9,13 +9,9 @@
 #define GLFW_INCLUDE_NONE
 
 #include "models.hxx"
+#include "parameters.hxx"
 
 struct GLFWwindow;
-
-struct ShaderSources {
-  std::optional<std::string> vertexSource{};
-  std::optional<std::string> fragmentSource{};
-};
 
 struct ShaderData {
   GLuint program;
@@ -34,7 +30,8 @@ struct ShaderData {
 class GraphicsEngine {
 public:
   GraphicsEngine(
-    GLFWwindow* window, const ShaderSources& sources, ModelType modelType
+    GLFWwindow* window, const std::optional<ShaderSources>& sources,
+    ModelType modelType
   );
   GraphicsEngine() = delete;
   GraphicsEngine(const GraphicsEngine&) = delete;
@@ -44,24 +41,28 @@ public:
   ~GraphicsEngine();
 
   static auto initializeGL() -> bool;
-  auto resetShaderData(
-    const ShaderSources& sources, ModelType modelType
+  auto resetWith(
+    const std::optional<ShaderSources>& shaderSources,
+    const std::optional<ModelType>& modelType
   ) -> void;
+  auto hasValidData() -> bool;
   auto render() -> void;
 
 private:
   static auto createShader(GLenum type, std::string_view source) -> GLuint;
   static auto createProgram(
-    std::string_view vertexSource, std::string_view fragmentSource
+    const ShaderSources& sources
   ) -> std::optional<GLuint>;
-  static auto generateShaderData(
-    const ShaderSources& sources, ModelType modelType
-  ) -> std::optional<ShaderData>;
-  static auto cleanupShaderData(std::optional<ShaderData>& shaderData) -> void;
+  static auto createVertexArrayForModel(
+    GLuint program, const Model* model
+  ) -> GLuint;
+
+  auto resetTime() -> void;
 
   GLFWwindow* window;
   std::optional<ShaderData> shaderData{};
   GLfloat initialTime{};
+  std::unique_ptr<Model> model{};
 };
 
 #endif // GRAPHICS_HXX

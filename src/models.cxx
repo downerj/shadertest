@@ -1,5 +1,13 @@
 #include "models.hxx"
 
+auto Model::createModelFromType(ModelType type) -> std::unique_ptr<Model> {
+  if (type == ModelType::Rectangle) {
+    return std::make_unique<Rectangle>();
+  } else /* if (type == ModelType::Triangle) */ {
+    return std::make_unique<Triangle>();
+  }
+}
+
 auto Triangle::getVertices() const -> const float* {
   return vertices.data();
 }

@@ -78,6 +78,11 @@ auto WindowOwner::isActive() -> bool {
   return !glfwWindowShouldClose(window);
 }
 
+auto WindowOwner::update() -> void {
+  glfwSwapBuffers(window);
+  glfwPollEvents();
+}
+
 auto WindowOwner::onKey(
   GLFWwindow* window, int key, int /*scancode*/, int action, int mods
 ) -> void {

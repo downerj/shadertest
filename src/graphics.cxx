@@ -26,15 +26,23 @@ ShaderData::ShaderData(
     timeLocation{timeLocation}, resolutionLocation{resolutionLocation} {}
 
 GraphicsEngine::GraphicsEngine(
-  GLFWwindow* window,
-  const ShaderSources& sources,
+  GLFWwindow* window, const std::optional<ShaderSources>& sources,
   ModelType modelType
 ) : window{window} {
   if (!initializeGL()) {
     throw std::runtime_error{"Failed to initialize OpenGL"};
   }
-  resetShaderData(sources, modelType);
-  initialTime = static_cast<GLfloat>(glfwGetTime());
+  if (sources) {
+    resetWith(sources, modelType);
+  }
+}
+
+GraphicsEngine::~GraphicsEngine() {
+  if (!shaderData) {
+    return;
+  }
+  glDeleteVertexArrays(1, &shaderData->vao);
+  glDeleteProgram(shaderData->program);
 }
 
 auto GraphicsEngine::initializeGL() -> bool {
@@ -56,11 +64,72 @@ auto GraphicsEngine::initializeGL() -> bool {
   return true;
 }
 
-auto GraphicsEngine::resetShaderData(
-  const ShaderSources& sources, ModelType modelType
+auto GraphicsEngine::resetWith(
+  const std::optional<ShaderSources>& shaderSources,
+  const std::optional<ModelType>& modelType
 ) -> void {
-  cleanupShaderData(shaderData);
-  shaderData = generateShaderData(sources, modelType);
+  if (!shaderData && !shaderSources) {
+    return;
+  }
+  if (!shaderSources && !modelType) {
+    return;
+  }
+
+  if (shaderData) {
+    if (shaderSources) {
+      glDeleteProgram(shaderData->program);
+    }
+    if (modelType) {
+      glDeleteVertexArrays(1, &shaderData->vao);
+    }
+  }
+  const std::optional<GLuint> program{
+    (shaderSources || !shaderData)
+    ? createProgram(*shaderSources)
+    : shaderData->program
+  };
+  if (modelType) {
+    model = Model::createModelFromType(*modelType);
+  }
+  if (program) {
+    const GLuint vao{createVertexArrayForModel(*program, model.get())};
+    const GLint timeLocation{glGetUniformLocation(*program, "time")};
+    const GLint resolutionLocation{
+      glGetUniformLocation(*program, "resolution")
+    };
+    shaderData = {
+      *program, vao, static_cast<GLsizei>(model->getIndexCount()),
+      timeLocation, resolutionLocation
+    };
+    resetTime();
+  }
+}
+
+auto GraphicsEngine::hasValidData() -> bool {
+  return shaderData.has_value();
+}
+
+auto GraphicsEngine::render() -> void {
+  if (!shaderData) {
+    return;
+  }
+  int width{};
+  int height{};
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+  glClearColor(0., .5, 1., 1.);
+  glClear(GL_COLOR_BUFFER_BIT);
+  if (shaderData) {
+    glUseProgram(shaderData->program);
+    const GLfloat elapsed = static_cast<GLfloat>(glfwGetTime()) - initialTime;
+    glUniform1f(shaderData->timeLocation, elapsed);
+    glUniform2i(shaderData->resolutionLocation, width, height);
+    glBindVertexArray(shaderData->vao);
+    glDrawElements(
+      GL_TRIANGLES, shaderData->indexCount, GL_UNSIGNED_SHORT, nullptr
+    );
+    glBindVertexArray(0);
+  }
 }
 
 auto GraphicsEngine::createShader(
@@ -75,10 +144,10 @@ auto GraphicsEngine::createShader(
 }
 
 auto GraphicsEngine::createProgram(
-  std::string_view vertexSource, std::string_view fragmentSource
+  const ShaderSources& sources
 ) -> std::optional<GLuint> {
-  GLuint vertexShader{createShader(GL_VERTEX_SHADER, vertexSource)};
-  GLuint fragmentShader{createShader(GL_FRAGMENT_SHADER, fragmentSource)};
+  GLuint vertexShader{createShader(GL_VERTEX_SHADER, sources.vertex)};
+  GLuint fragmentShader{createShader(GL_FRAGMENT_SHADER, sources.fragment)};
   GLuint program{glCreateProgram()};
   glAttachShader(program, vertexShader);
   glAttachShader(program, fragmentShader);
@@ -123,27 +192,10 @@ auto GraphicsEngine::createProgram(
   return program;
 }
 
-auto GraphicsEngine::generateShaderData(
-  const ShaderSources& sources, ModelType modelType
-) -> std::optional<ShaderData> {
-  if (!sources.vertexSource || !sources.fragmentSource) {
-    return {};
-  }
-  std::optional<GLuint> program{
-    createProgram(*sources.vertexSource, *sources.fragmentSource)
-  };
-  if (!program) {
-    return {};
-  }
-  const GLint positionLocation{glGetAttribLocation(*program, "position")};
-  const auto model{[&modelType]() -> std::unique_ptr<Model> {
-    if (modelType == ModelType::Rectangle) {
-      return std::make_unique<Rectangle>();
-    } else /* if (modelType == ModelType::Triangle) */ {
-      return std::make_unique<Triangle>();
-    }
-  }()};
-
+auto GraphicsEngine::createVertexArrayForModel(
+  GLuint program, const Model* model
+) -> GLuint {
+  const GLint positionLocation{glGetAttribLocation(program, "position")};
   GLuint vao{};
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -171,47 +223,9 @@ auto GraphicsEngine::generateShaderData(
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  GLint timeLocation{glGetUniformLocation(*program, "time")};
-  GLint resolutionLocation{glGetUniformLocation(*program, "resolution")};
-
-  return ShaderData{
-    *program, vao, static_cast<GLsizei>(model->getIndexCount()),
-    timeLocation, resolutionLocation
-  };
+  return vao;
 }
 
-auto GraphicsEngine::render() -> void {
-  int width{};
-  int height{};
-  glfwGetFramebufferSize(window, &width, &height);
-  glViewport(0, 0, width, height);
-  glClearColor(0., .5, 1., 1.);
-  glClear(GL_COLOR_BUFFER_BIT);
-  if (shaderData) {
-    glUseProgram(shaderData->program);
-    const GLfloat elapsed = static_cast<GLfloat>(glfwGetTime()) - initialTime;
-    glUniform1f(shaderData->timeLocation, elapsed);
-    glUniform2i(shaderData->resolutionLocation, width, height);
-    glBindVertexArray(shaderData->vao);
-    glDrawElements(
-      GL_TRIANGLES, shaderData->indexCount, GL_UNSIGNED_SHORT, nullptr
-    );
-    glBindVertexArray(0);
-  }
-  glfwSwapBuffers(window);
-  glfwPollEvents();
-}
-
-auto GraphicsEngine::cleanupShaderData(
-  std::optional<ShaderData>& data
-) -> void {
-  if (!data) {
-    return;
-  }
-  glDeleteVertexArrays(1, &data->vao);
-  glDeleteProgram(data->program);
-}
-
-GraphicsEngine::~GraphicsEngine() {
-  cleanupShaderData(shaderData);
+auto GraphicsEngine::resetTime() -> void {
+  initialTime = static_cast<GLfloat>(glfwGetTime());
 }

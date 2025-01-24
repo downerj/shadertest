@@ -24,6 +24,7 @@ public:
   auto getWindow() -> GLFWwindow*;
   auto getActions() -> WindowActions&;
   auto isActive() -> bool;
+  auto update() -> void;
 
 private:
   GLFWwindow* window;

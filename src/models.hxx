@@ -2,6 +2,7 @@
 #define MODELS_HXX
 
 #include <array>
+#include <memory>
 
 enum class ModelType {
   Rectangle,
@@ -10,6 +11,7 @@ enum class ModelType {
 
 class Model {
 public:
+  static auto createModelFromType(ModelType type) -> std::unique_ptr<Model>;
   virtual auto getVertices() const -> const float* = 0;
   virtual auto getIndices() const -> const unsigned short* = 0;
   virtual auto getVertexCount() const -> int = 0;

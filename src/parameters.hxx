@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "graphics.hxx"
-
 constexpr const char* defaultVertexSource{
 #include "default.vert"
 };
@@ -36,13 +34,23 @@ Notes:
 )"};
 
 struct CLIParameters {
-  std::optional<std::string> vertexShaderPath{};
-  std::optional<std::string> fragmentShaderPath{};
+  std::optional<std::string> vertexPath{};
+  std::optional<std::string> fragmentPath{};
   bool echo{false};
   bool helpOnly{false};
 };
 
+struct ShaderSources {
+  std::string vertex;
+  std::string fragment;
+
+  ShaderSources(std::string vertex, std::string fragment);
+  ShaderSources() = delete;
+};
+
 auto parseCLIArguments(int argc, char** argv) -> CLIParameters;
-auto loadShaderSources(const CLIParameters& parameters) -> ShaderSources;
+auto loadShaderSources(
+  const CLIParameters& parameters
+) -> std::optional<ShaderSources>;
 
 #endif // PARAMETERS_HXX

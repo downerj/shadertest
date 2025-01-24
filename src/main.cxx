@@ -8,16 +8,25 @@
 #include "parameters.hxx"
 #include "window.hxx"
 
+auto echoSources(const ShaderSources& sources) -> void {
+  std::cout << "##### BEGIN VERTEX SHADER #####\n";
+  std::cout << sources.vertex << '\n';
+  std::cout << "##### END VERTEX SHADER #####\n\n";
+  std::cout << "##### BEGIN FRAGMENT SHADER #####\n";
+  std::cout << sources.fragment << '\n';
+  std::cout << "##### END FRAGMENT SHADER #####\n";
+}
+
 auto main(int argc, char** argv) -> int {
   CLIParameters parameters{parseCLIArguments(argc, argv)};
   if (parameters.helpOnly) {
     std::cout << usageString << '\n';
     std::exit(EXIT_SUCCESS);
   }
-  ShaderSources sources{};
-  if (!parameters.vertexShaderPath && !parameters.fragmentShaderPath) {
+  std::optional<ShaderSources> sources{};
+  if (!parameters.vertexPath && !parameters.fragmentPath) {
     sources = {defaultVertexSource, defaultFragmentSource};
-  } else if (parameters.vertexShaderPath && parameters.fragmentShaderPath) {
+  } else if (parameters.vertexPath && parameters.fragmentPath) {
     sources = loadShaderSources(parameters);
   } else {
     std::cerr << "Please pass in both a vertex shader and a fragment shader\n";
@@ -28,24 +37,19 @@ auto main(int argc, char** argv) -> int {
     GraphicsEngine graphics{
       windowOwner.getWindow(), sources, windowOwner.getActions().modelType
     };
-    if (parameters.echo && sources.vertexSource && sources.fragmentSource) {
-      std::cout << "##### BEGIN VERTEX SHADER #####\n";
-      std::cout << *sources.vertexSource << '\n';
-      std::cout << "##### END VERTEX SHADER #####\n\n";
-
-      std::cout << "##### BEGIN FRAGMENT SHADER #####\n";
-      std::cout << *sources.fragmentSource << '\n';
-      std::cout << "##### END FRAGMENT SHADER #####\n";
+    if (parameters.echo && sources) {
+      echoSources(*sources);
     }
     WindowActions& actions{windowOwner.getActions()};
     while (windowOwner.isActive()) {
       if (actions.changeModelType) {
-        graphics.resetShaderData(sources, actions.modelType);
+        graphics.resetWith({}, actions.modelType);
       }
       actions.reset();
       graphics.render();
+      windowOwner.update();
     }
-    LOG("Goodbye.\n");
+    std::cout << "Goodbye.\n";
   } catch (std::exception& ex) {
     std::cerr << ex.what() << '\n';
     std::exit(EXIT_FAILURE);
