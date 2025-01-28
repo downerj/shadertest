@@ -8,6 +8,9 @@ struct GLFWwindow;
 struct WindowActions {
   bool changeModelType{false};
   ModelType modelType{ModelType::Rectangle};
+  bool closeWindow{false};
+  bool resetWindowSize{false};
+  bool pauseResume{false};
 
   auto reset() -> void;
 };
@@ -24,6 +27,8 @@ public:
   auto getWindow() -> GLFWwindow*;
   auto getActions() -> WindowActions&;
   auto isActive() -> bool;
+  auto closeWindow() -> void;
+  auto resetWindowSize() -> void;
   auto update() -> void;
 
 private:
@@ -32,8 +37,12 @@ private:
   const int initialHeight{400};
   const char* title{"ShaderTest"};
   WindowActions actions{};
-  auto onKey(
+
+  static auto onKeyGLFW(
     GLFWwindow* window, int key, int scancode, int action, int mods
+  ) -> void;
+  auto onKey(
+    int key, int action, int mods
   ) -> void;
 };
 
