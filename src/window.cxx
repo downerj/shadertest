@@ -19,6 +19,7 @@ auto WindowActions::reset() -> void {
   changeModelType = false;
   closeWindow = false;
   resetWindowSize = false;
+  pauseResume = false;
 }
 
 WindowOwner::WindowOwner() {
@@ -116,6 +117,9 @@ auto WindowOwner::onKey(
   const bool model2Key{
     action == GLFW_RELEASE && mods == GLFW_MOD_ALT && key == GLFW_KEY_2
   };
+  const bool pauseResumeKey{
+    action == GLFW_RELEASE && mods == 0 && key == GLFW_KEY_SPACE
+  };
 
   if (closeKey1 || closeKey2 || closeKey3) {
     actions.closeWindow = true;
@@ -127,5 +131,7 @@ auto WindowOwner::onKey(
   } else if (model2Key) {
     actions.changeModelType = true;
     actions.modelType = ModelType::Triangle;
+  } else if (pauseResumeKey) {
+    actions.pauseResume = true;
   }
 }

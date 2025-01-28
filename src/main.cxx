@@ -41,6 +41,7 @@ auto main(int argc, char** argv) -> int {
       echoSources(*sources);
     }
     WindowActions& actions{windowOwner.getActions()};
+    bool paused{false};
     while (windowOwner.isActive()) {
       if (actions.changeModelType) {
         graphics.resetWith({}, actions.modelType);
@@ -48,9 +49,13 @@ auto main(int argc, char** argv) -> int {
         windowOwner.closeWindow();
       } else if (actions.resetWindowSize) {
         windowOwner.resetWindowSize();
+      } else if (actions.pauseResume) {
+        paused = !paused;
       }
       actions.reset();
-      graphics.render();
+      if (!paused) {
+        graphics.render();
+      }
       windowOwner.update();
     }
     std::cout << "Goodbye.\n";

@@ -10,6 +10,7 @@ struct WindowActions {
   ModelType modelType{ModelType::Rectangle};
   bool closeWindow{false};
   bool resetWindowSize{false};
+  bool pauseResume{false};
 
   auto reset() -> void;
 };
