@@ -32,6 +32,10 @@ private:
   const int initialHeight{400};
   const char* title{"ShaderTest"};
   WindowActions actions{};
+
+  static auto onKeyGLFW(
+    GLFWwindow* window, int key, int scancode, int action, int mods
+  ) -> void;
   auto onKey(
     GLFWwindow* window, int key, int scancode, int action, int mods
   ) -> void;

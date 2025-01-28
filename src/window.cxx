@@ -44,16 +44,7 @@ WindowOwner::WindowOwner() {
     throw std::runtime_error{"Failed to create GLFW window"};
   }
   glfwMakeContextCurrent(window);
-
-  glfwSetKeyCallback(window, [](
-    GLFWwindow* window, int key, int scancode, int action, int mods
-  ) -> void {
-    const auto windowOwner{
-      static_cast<WindowOwner*>(glfwGetWindowUserPointer(window))
-    };
-    windowOwner->onKey(window, key, scancode, action, mods);
-  });
-
+  glfwSetKeyCallback(window, WindowOwner::onKeyGLFW);
   glfwSetWindowUserPointer(window, this);
   const GLFWimage icon_data{
     mainIconWidth, mainIconHeight, static_cast<unsigned char*>(mainIcon)
@@ -83,32 +74,46 @@ auto WindowOwner::update() -> void {
   glfwPollEvents();
 }
 
+auto WindowOwner::onKeyGLFW(
+  GLFWwindow* window, int key, int scancode, int action, int mods
+) -> void {
+  const auto windowOwner{
+    static_cast<WindowOwner*>(glfwGetWindowUserPointer(window))
+  };
+  windowOwner->onKey(window, key, scancode, action, mods);
+}
+
 auto WindowOwner::onKey(
   GLFWwindow* window, int key, int /*scancode*/, int action, int mods
 ) -> void {
-  const int actionUp{action & GLFW_KEY_UP};
-  const bool key1{key == GLFW_KEY_1};
-  const bool key2{key == GLFW_KEY_2};
-  const bool keyQ{key == GLFW_KEY_Q};
-  const bool keyR{key == GLFW_KEY_R};
-  const bool keyW{key == GLFW_KEY_W};
-  const bool keyF4{key == GLFW_KEY_F4};
-  const bool keyCtrl{mods == GLFW_MOD_CONTROL};
-  const bool keyAlt{mods == GLFW_MOD_ALT};
-  if (actionUp && ((keyCtrl && (keyQ || keyW)) || (keyAlt && keyF4))) {
+  const bool closeKey1{
+    action == GLFW_RELEASE && mods == GLFW_MOD_CONTROL && key == GLFW_KEY_Q
+  };
+  const bool closeKey2{
+    action == GLFW_RELEASE && mods == GLFW_MOD_CONTROL && key == GLFW_KEY_W
+  };
+  const bool closeKey3{
+    action == GLFW_RELEASE && mods == GLFW_MOD_ALT && key == GLFW_KEY_F4
+  };
+  const bool resetWindowKey{
+    action == GLFW_RELEASE && mods == GLFW_MOD_CONTROL && key == GLFW_KEY_R
+  };
+  const bool model1Key{
+    action == GLFW_RELEASE && mods == GLFW_MOD_ALT && key == GLFW_KEY_1
+  };
+  const bool model2Key{
+    action == GLFW_RELEASE && mods == GLFW_MOD_ALT && key == GLFW_KEY_2
+  };
+
+  if (closeKey1 || closeKey2 || closeKey3) {
     glfwSetWindowShouldClose(window, true);
-  } else if (actionUp && (keyCtrl && keyR)) {
+  } else if (resetWindowKey) {
     glfwSetWindowSize(window, initialWidth, initialHeight);
-  }
-  if (actionUp && (keyAlt && key1)) {
-#ifdef DEBUG
+  } else if (model1Key) {
     actions.changeModelType = true;
     actions.modelType = ModelType::Rectangle;
-#endif // DEBUG
-  } else if (actionUp && (keyAlt && key2)) {
-#ifdef DEBUG
+  } else if (model2Key) {
     actions.changeModelType = true;
     actions.modelType = ModelType::Triangle;
-#endif // DEBUG
   }
 }
