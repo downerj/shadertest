@@ -44,6 +44,10 @@ auto main(int argc, char** argv) -> int {
     while (windowOwner.isActive()) {
       if (actions.changeModelType) {
         graphics.resetWith({}, actions.modelType);
+      } else if (actions.closeWindow) {
+        windowOwner.closeWindow();
+      } else if (actions.resetWindowSize) {
+        windowOwner.resetWindowSize();
       }
       actions.reset();
       graphics.render();

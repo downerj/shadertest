@@ -17,6 +17,8 @@ auto errorCallbackGLFW(
 
 auto WindowActions::reset() -> void {
   changeModelType = false;
+  closeWindow = false;
+  resetWindowSize = false;
 }
 
 WindowOwner::WindowOwner() {
@@ -69,22 +71,32 @@ auto WindowOwner::isActive() -> bool {
   return !glfwWindowShouldClose(window);
 }
 
+auto WindowOwner::closeWindow() -> void {
+  glfwSetWindowShouldClose(window, true);
+}
+
+auto WindowOwner::resetWindowSize() -> void {
+  glfwSetWindowSize(window, initialWidth, initialHeight);
+}
+
 auto WindowOwner::update() -> void {
   glfwSwapBuffers(window);
   glfwPollEvents();
 }
 
 auto WindowOwner::onKeyGLFW(
-  GLFWwindow* window, int key, int scancode, int action, int mods
+  GLFWwindow* window, int key, int /*scancode*/, int action, int mods
 ) -> void {
   const auto windowOwner{
     static_cast<WindowOwner*>(glfwGetWindowUserPointer(window))
   };
-  windowOwner->onKey(window, key, scancode, action, mods);
+  if (windowOwner) {
+    windowOwner->onKey(key, action, mods);
+  }
 }
 
 auto WindowOwner::onKey(
-  GLFWwindow* window, int key, int /*scancode*/, int action, int mods
+  int key, int action, int mods
 ) -> void {
   const bool closeKey1{
     action == GLFW_RELEASE && mods == GLFW_MOD_CONTROL && key == GLFW_KEY_Q
@@ -106,9 +118,9 @@ auto WindowOwner::onKey(
   };
 
   if (closeKey1 || closeKey2 || closeKey3) {
-    glfwSetWindowShouldClose(window, true);
+    actions.closeWindow = true;
   } else if (resetWindowKey) {
-    glfwSetWindowSize(window, initialWidth, initialHeight);
+    actions.resetWindowSize = true;
   } else if (model1Key) {
     actions.changeModelType = true;
     actions.modelType = ModelType::Rectangle;

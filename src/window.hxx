@@ -8,6 +8,8 @@ struct GLFWwindow;
 struct WindowActions {
   bool changeModelType{false};
   ModelType modelType{ModelType::Rectangle};
+  bool closeWindow{false};
+  bool resetWindowSize{false};
 
   auto reset() -> void;
 };
@@ -24,6 +26,8 @@ public:
   auto getWindow() -> GLFWwindow*;
   auto getActions() -> WindowActions&;
   auto isActive() -> bool;
+  auto closeWindow() -> void;
+  auto resetWindowSize() -> void;
   auto update() -> void;
 
 private:
@@ -37,7 +41,7 @@ private:
     GLFWwindow* window, int key, int scancode, int action, int mods
   ) -> void;
   auto onKey(
-    GLFWwindow* window, int key, int scancode, int action, int mods
+    int key, int action, int mods
   ) -> void;
 };
 
