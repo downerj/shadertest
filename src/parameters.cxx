@@ -5,8 +5,8 @@
 #include "io.hxx"
 
 ShaderSources::ShaderSources(
-  std::string vertex, std::string fragment
-) : vertex{vertex}, fragment{fragment} {}
+  std::string vertex_, std::string fragment_
+) : vertex{vertex_}, fragment{fragment_} {}
 
 auto parseCLIArguments(int argc, char** argv) -> CLIParameters {
   std::vector<std::string> args{argv, argv + argc};

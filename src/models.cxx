@@ -9,55 +9,55 @@ auto Model::createModelFromType(ModelType type) -> std::unique_ptr<Model> {
 }
 
 auto Triangle::getVertices() const -> const float* {
-  return vertices.data();
+  return _vertices.data();
 }
 
 auto Triangle::getIndices() const -> const unsigned short* {
-  return indices.data();
+  return _indices.data();
 }
 
 auto Triangle::getVertexCount() const -> int {
-  return vertices.size();
+  return _vertices.size();
 }
 
 auto Triangle::getIndexCount() const -> int {
-  return indices.size();
+  return _indices.size();
 }
 
-const std::array<float, 3*3> Triangle::vertices{
+const std::array<float, 3*3> Triangle::_vertices{
   -1., -1., 0.,
   1., -1., 0.,
   0., 1., 0.
 };
 
-const std::array<unsigned short, 1*3> Triangle::indices{
+const std::array<unsigned short, 1*3> Triangle::_indices{
   0, 1, 2
 };
 
 auto Rectangle::getVertices() const -> const float* {
-  return vertices.data();
+  return _vertices.data();
 }
 
 auto Rectangle::getIndices() const -> const unsigned short* {
-  return indices.data();
+  return _indices.data();
 }
 
 auto Rectangle::getVertexCount() const -> int {
-  return vertices.size();
+  return _vertices.size();
 }
 
 auto Rectangle::getIndexCount() const -> int {
-  return indices.size();
+  return _indices.size();
 }
 
-const std::array<float, 4*3> Rectangle::vertices{
+const std::array<float, 4*3> Rectangle::_vertices{
   -1., -1., 0.,
   1., -1., 0.,
   1., 1., 0.,
   -1., 1., 0.
 };
 
-const std::array<unsigned short, 2*3> Rectangle::indices{
+const std::array<unsigned short, 2*3> Rectangle::_indices{
   0, 1, 2,
   0, 2, 3
 };

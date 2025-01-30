@@ -39,49 +39,49 @@ WindowOwner::WindowOwner() {
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 #endif
-  window = glfwCreateWindow(
-    initialWidth, initialHeight, title, nullptr, nullptr
+  _window = glfwCreateWindow(
+    _initialWidth, _initialHeight, _title, nullptr, nullptr
   );
-  if (!window) {
+  if (!_window) {
     glfwTerminate();
     throw std::runtime_error{"Failed to create GLFW window"};
   }
-  glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, WindowOwner::onKeyGLFW);
-  glfwSetWindowUserPointer(window, this);
+  glfwMakeContextCurrent(_window);
+  glfwSetKeyCallback(_window, WindowOwner::onKeyGLFW);
+  glfwSetWindowUserPointer(_window, this);
   const GLFWimage icon_data{
     mainIconWidth, mainIconHeight, static_cast<unsigned char*>(mainIcon)
   };
-  glfwSetWindowIcon(window, 1, &icon_data);
+  glfwSetWindowIcon(_window, 1, &icon_data);
 }
 
 WindowOwner::~WindowOwner() {
-  glfwDestroyWindow(window);
+  glfwDestroyWindow(_window);
   glfwTerminate();
 }
 
 auto WindowOwner::getWindow() -> GLFWwindow* {
-  return window;
+  return _window;
 }
 
 auto WindowOwner::getActions() -> WindowActions& {
-  return actions;
+  return _actions;
 }
 
 auto WindowOwner::isActive() -> bool {
-  return !glfwWindowShouldClose(window);
+  return !glfwWindowShouldClose(_window);
 }
 
 auto WindowOwner::closeWindow() -> void {
-  glfwSetWindowShouldClose(window, true);
+  glfwSetWindowShouldClose(_window, true);
 }
 
 auto WindowOwner::resetWindowSize() -> void {
-  glfwSetWindowSize(window, initialWidth, initialHeight);
+  glfwSetWindowSize(_window, _initialWidth, _initialHeight);
 }
 
 auto WindowOwner::update() -> void {
-  glfwSwapBuffers(window);
+  glfwSwapBuffers(_window);
   glfwPollEvents();
 }
 
@@ -122,16 +122,16 @@ auto WindowOwner::onKey(
   };
 
   if (closeKey1 || closeKey2 || closeKey3) {
-    actions.closeWindow = true;
+    _actions.closeWindow = true;
   } else if (resetWindowKey) {
-    actions.resetWindowSize = true;
+    _actions.resetWindowSize = true;
   } else if (model1Key) {
-    actions.changeModelType = true;
-    actions.modelType = ModelType::Rectangle;
+    _actions.changeModelType = true;
+    _actions.modelType = ModelType::Rectangle;
   } else if (model2Key) {
-    actions.changeModelType = true;
-    actions.modelType = ModelType::Triangle;
+    _actions.changeModelType = true;
+    _actions.modelType = ModelType::Triangle;
   } else if (pauseResumeKey) {
-    actions.pauseResume = true;
+    _actions.pauseResume = true;
   }
 }

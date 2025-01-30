@@ -59,10 +59,10 @@ private:
 
   auto resetTime() -> void;
 
-  GLFWwindow* window;
-  std::optional<ShaderData> shaderData{};
-  GLfloat initialTime{};
-  std::unique_ptr<Model> model{};
+  GLFWwindow* _window;
+  std::optional<ShaderData> _shaderData{};
+  GLfloat _initialTime{};
+  std::unique_ptr<Model> _model{};
 };
 
 #endif // GRAPHICS_HXX

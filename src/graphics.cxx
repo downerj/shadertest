@@ -20,15 +20,15 @@ auto debugMessageCallbackGL(
 #endif
 
 ShaderData::ShaderData(
-  GLuint program, GLuint vao, GLsizei indexCount, GLint timeLocation,
-  GLint resolutionLocation
-) : program{program}, vao{vao}, indexCount{indexCount},
-    timeLocation{timeLocation}, resolutionLocation{resolutionLocation} {}
+  GLuint program_, GLuint vao_, GLsizei indexCount_, GLint timeLocation_,
+  GLint resolutionLocation_
+) : program{program_}, vao{vao_}, indexCount{indexCount_},
+    timeLocation{timeLocation_}, resolutionLocation{resolutionLocation_} {}
 
 GraphicsEngine::GraphicsEngine(
   GLFWwindow* window, const std::optional<ShaderSources>& sources,
   ModelType modelType
-) : window{window} {
+) : _window{window} {
   if (!initializeGL()) {
     throw std::runtime_error{"Failed to initialize OpenGL"};
   }
@@ -38,11 +38,11 @@ GraphicsEngine::GraphicsEngine(
 }
 
 GraphicsEngine::~GraphicsEngine() {
-  if (!shaderData) {
+  if (!_shaderData) {
     return;
   }
-  glDeleteVertexArrays(1, &shaderData->vao);
-  glDeleteProgram(shaderData->program);
+  glDeleteVertexArrays(1, &_shaderData->vao);
+  glDeleteProgram(_shaderData->program);
 }
 
 auto GraphicsEngine::initializeGL() -> bool {
@@ -68,37 +68,37 @@ auto GraphicsEngine::resetWith(
   const std::optional<ShaderSources>& shaderSources,
   const std::optional<ModelType>& modelType
 ) -> void {
-  if (!shaderData && !shaderSources) {
+  if (!_shaderData && !shaderSources) {
     return;
   }
   if (!shaderSources && !modelType) {
     return;
   }
 
-  if (shaderData) {
+  if (_shaderData) {
     if (shaderSources) {
-      glDeleteProgram(shaderData->program);
+      glDeleteProgram(_shaderData->program);
     }
     if (modelType) {
-      glDeleteVertexArrays(1, &shaderData->vao);
+      glDeleteVertexArrays(1, &_shaderData->vao);
     }
   }
   const std::optional<GLuint> program{
-    (shaderSources || !shaderData)
+    (shaderSources || !_shaderData)
     ? createProgram(*shaderSources)
-    : shaderData->program
+    : _shaderData->program
   };
   if (modelType) {
-    model = Model::createModelFromType(*modelType);
+    _model = Model::createModelFromType(*modelType);
   }
   if (program) {
-    const GLuint vao{createVertexArrayForModel(*program, model.get())};
+    const GLuint vao{createVertexArrayForModel(*program, _model.get())};
     const GLint timeLocation{glGetUniformLocation(*program, "time")};
     const GLint resolutionLocation{
       glGetUniformLocation(*program, "resolution")
     };
-    shaderData = {
-      *program, vao, static_cast<GLsizei>(model->getIndexCount()),
+    _shaderData = {
+      *program, vao, static_cast<GLsizei>(_model->getIndexCount()),
       timeLocation, resolutionLocation
     };
     resetTime();
@@ -106,27 +106,27 @@ auto GraphicsEngine::resetWith(
 }
 
 auto GraphicsEngine::hasValidData() -> bool {
-  return shaderData.has_value();
+  return _shaderData.has_value();
 }
 
 auto GraphicsEngine::render() -> void {
-  if (!shaderData) {
+  if (!_shaderData) {
     return;
   }
   int width{};
   int height{};
-  glfwGetFramebufferSize(window, &width, &height);
+  glfwGetFramebufferSize(_window, &width, &height);
   glViewport(0, 0, width, height);
   glClearColor(0., .5, 1., 1.);
   glClear(GL_COLOR_BUFFER_BIT);
-  if (shaderData) {
-    glUseProgram(shaderData->program);
-    const GLfloat elapsed = static_cast<GLfloat>(glfwGetTime()) - initialTime;
-    glUniform1f(shaderData->timeLocation, elapsed);
-    glUniform2i(shaderData->resolutionLocation, width, height);
-    glBindVertexArray(shaderData->vao);
+  if (_shaderData) {
+    glUseProgram(_shaderData->program);
+    const GLfloat elapsed = static_cast<GLfloat>(glfwGetTime()) - _initialTime;
+    glUniform1f(_shaderData->timeLocation, elapsed);
+    glUniform2i(_shaderData->resolutionLocation, width, height);
+    glBindVertexArray(_shaderData->vao);
     glDrawElements(
-      GL_TRIANGLES, shaderData->indexCount, GL_UNSIGNED_SHORT, nullptr
+      GL_TRIANGLES, _shaderData->indexCount, GL_UNSIGNED_SHORT, nullptr
     );
     glBindVertexArray(0);
   }
@@ -227,5 +227,5 @@ auto GraphicsEngine::createVertexArrayForModel(
 }
 
 auto GraphicsEngine::resetTime() -> void {
-  initialTime = static_cast<GLfloat>(glfwGetTime());
+  _initialTime = static_cast<GLfloat>(glfwGetTime());
 }

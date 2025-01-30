@@ -26,7 +26,7 @@ INCLUDE_DIRECTORY = include
 SHADERS_DIRECTORY = examples
 EXECUTABLE = ${EXECUTABLE_DIRECTORY}/shadertest
 DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest_${SUFFIX}.zip
-WARNINGS = -Wall -Wextra -Wpedantic
+WARNINGS = -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wunreachable-code
 CXX_STANDARD = -std=c++17
 
 ifeq (${STATIC_BUILD}, 1)

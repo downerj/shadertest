@@ -26,8 +26,8 @@ public:
   auto getIndexCount() const -> int final;
 
 private:
-  static const std::array<float, 3*3> vertices;
-  static const std::array<unsigned short, 1*3> indices;
+  static const std::array<float, 3*3> _vertices;
+  static const std::array<unsigned short, 1*3> _indices;
 };
 
 class Rectangle : public Model {
@@ -38,8 +38,8 @@ public:
   auto getIndexCount() const -> int final;
 
 private:
-  static const std::array<float, 4*3> vertices;
-  static const std::array<unsigned short, 2*3> indices;
+  static const std::array<float, 4*3> _vertices;
+  static const std::array<unsigned short, 2*3> _indices;
 };
 
 #endif // MODELS_HXX

@@ -32,11 +32,11 @@ public:
   auto update() -> void;
 
 private:
-  GLFWwindow* window;
-  const int initialWidth{400};
-  const int initialHeight{400};
-  const char* title{"ShaderTest"};
-  WindowActions actions{};
+  GLFWwindow* _window;
+  const int _initialWidth{400};
+  const int _initialHeight{400};
+  const char* _title{"ShaderTest"};
+  WindowActions _actions{};
 
   static auto onKeyGLFW(
     GLFWwindow* window, int key, int scancode, int action, int mods
