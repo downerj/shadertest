@@ -1,21 +1,20 @@
 .PHONY: clean
 
-STATIC_BUILD ?= 0
-
-ifneq (${OS}, Windows_NT)
-	UNAME_S = $(shell uname -s)
+DIST_SUFFIX =
+ifeq (${OS}, Windows_NT)
+	# TODO: Target Win32 (e.g. MinGW, Cygwin)
+	DIST_SUFFIX += Win32
+else
+	UNAME_S = $(shell uname --kernel-name)
 	ifeq (${UNAME_S}, Linux)
 		LINUX_ID = $(shell lsb_release --id --short)
 		LINUX_RELEASE = $(shell lsb_release --release --short)
-		SUFFIX = ${LINUX_ID}_${LINUX_RELEASE}
+		DIST_SUFFIX += ${LINUX_ID}_${LINUX_RELEASE}
 	endif
 	ifeq (${UNAME_S}, Darwin)
 		# TODO: Target macOS
-		SUFFIX = macOS
+		DIST_SUFFIX += macOS
 	endif
-else
-	# TODO: Target Win32 (e.g. MinGW, Cygwin)
-	SUFFIX = Win32
 endif
 
 EXECUTABLE_DIRECTORY = bin
@@ -25,34 +24,25 @@ LIBRARY_DIRECTORY = lib
 INCLUDE_DIRECTORY = include
 SHADERS_DIRECTORY = examples
 EXECUTABLE = ${EXECUTABLE_DIRECTORY}/shadertest
-DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest_${SUFFIX}.zip
+DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest_${DIST_SUFFIX}.zip
 WARNINGS = -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wunreachable-code
 CXX_STANDARD = -std=c++17
+
+STATIC_BUILD ?= 0
 
 ifeq (${STATIC_BUILD}, 1)
 GLFW_LIBRARY = -L"${LIBRARY_DIRECTORY}" -l:libglfw3.a
 else
-GLFW_LIBRARY = $$(pkg-config --libs glfw3)
+GLFW_LIBRARY = -lglfw
 endif
 INCLUDES = -I${INCLUDE_DIRECTORY} ${GLFW_INCLUDE}
 LIBRARIES = ${GLFW_LIBRARY}
-
+DEPS = $(wildcard ${OBJECT_DIRECTORY}/*.d)
 HEADERS = $(wildcard ${SOURCE_DIRECTORY}/*.hxx)
-GRAPHICS_CXX = ${SOURCE_DIRECTORY}/graphics.cxx
-GRAPHICS_OBJ = ${OBJECT_DIRECTORY}/graphics.o
-IO_CXX = ${SOURCE_DIRECTORY}/io.cxx
-IO_OBJ = ${OBJECT_DIRECTORY}/io.o
-MAIN_CXX = ${SOURCE_DIRECTORY}/main.cxx
-MAIN_OBJ = ${OBJECT_DIRECTORY}/main.o
-MODELS_CXX = ${SOURCE_DIRECTORY}/models.cxx
-MODELS_OBJ = ${OBJECT_DIRECTORY}/models.o
-PARAMETERS_CXX = ${SOURCE_DIRECTORY}/parameters.cxx
-PARAMETERS_OBJ = ${OBJECT_DIRECTORY}/parameters.o
-WINDOW_CXX = ${SOURCE_DIRECTORY}/window.cxx
-WINDOW_OBJ = ${OBJECT_DIRECTORY}/window.o
+SOURCES = $(wildcard ${SOURCE_DIRECTORY}/*.cxx)
+TARGETS = $(patsubst ${SOURCE_DIRECTORY}/%.cxx, ${OBJECT_DIRECTORY}/%.o, ${SOURCES})
 
-DEFAULT_FRAG = ${SOURCE_DIRECTORY}/default.frag
-DEFAULT_VERT = ${SOURCE_DIRECTORY}/default.vert
+all: release dist
 
 release: DEFINES =
 release: OPTIMIZATIONS = -O3
@@ -64,21 +54,16 @@ debug: ${EXECUTABLE}
 
 dist: ${DISTRIBUTABLE}
 
-ifeq (${STATIC_BUILD}, 0)
-LIBGLFW = bin/libglfw.so
-${LIBGLFW}:
-	cp $$(dpkg -L libglfw3-dev | grep libglfw.so) ${EXECUTABLE_DIRECTORY}/
-else
-LIBGLFW = bin/libglfw.stub
-${LIBGLFW}:
-	touch "$@"
-endif
-
 ${DISTRIBUTABLE}: ${EXECUTABLE}
-	zip -r ${DISTRIBUTABLE} ${EXECUTABLE} ${EXECUTABLE_DIRECTORY}/*.so ${SHADERS_DIRECTORY}
+	zip -r ${DISTRIBUTABLE} ${EXECUTABLE} ${SHADERS_DIRECTORY}
 
-${EXECUTABLE}: ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY} ${GRAPHICS_OBJ} ${IO_OBJ} ${MAIN_OBJ} ${MODELS_OBJ} ${PARAMETERS_OBJ} ${WINDOW_OBJ} ${LIBGLFW}
-	${CXX} -o $@ ${OBJECT_DIRECTORY}/*.o ${LIBRARIES}
+ifeq (${STATIC_BUILD}, 0)
+${EXECUTABLE}: ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY} ${LIBGLFW}
+else
+${EXECUTABLE}: ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY}
+endif
+${EXECUTABLE}: ${TARGETS}
+	${CXX} -o $@ ${TARGETS} ${LIBRARIES}
 
 ${EXECUTABLE_DIRECTORY}:
 	mkdir -p ${EXECUTABLE_DIRECTORY}
@@ -86,27 +71,11 @@ ${EXECUTABLE_DIRECTORY}:
 ${OBJECT_DIRECTORY}:
 	mkdir -p ${OBJECT_DIRECTORY}
 
-DEPS = $(wildcard ${OBJECT_DIRECTORY}/*.d)
 ifneq (${DEPS},)
 include ${DEPS}
 endif
 
-${GRAPHICS_OBJ}: ${GRAPHICS_CXX}
-	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
-
-${IO_OBJ}: ${IO_CXX}
-	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
-
-${MAIN_OBJ}: ${MAIN_CXX}
-	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
-
-${MODELS_OBJ}: ${MODELS_CXX}
-	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
-
-${PARAMETERS_OBJ}: ${PARAMETERS_CXX}
-	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
-
-${WINDOW_OBJ}: ${WINDOW_CXX}
+${OBJECT_DIRECTORY}/%.o: ${SOURCE_DIRECTORY}/%.cxx
 	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
 
 clean:
