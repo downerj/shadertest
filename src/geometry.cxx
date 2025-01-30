@@ -1,9 +1,9 @@
-#include "models.hxx"
+#include "geometry.hxx"
 
-auto Model::createModelFromType(ModelType type) -> std::unique_ptr<Model> {
-  if (type == ModelType::Rectangle) {
+auto Model::createModelFromType(GeometryType type) -> std::unique_ptr<Model> {
+  if (type == GeometryType::Rectangle) {
     return std::make_unique<Rectangle>();
-  } else /* if (type == ModelType::Triangle) */ {
+  } else /* if (type == GeometryType::Triangle) */ {
     return std::make_unique<Triangle>();
   }
 }

@@ -8,7 +8,7 @@
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
 
-#include "models.hxx"
+#include "geometry.hxx"
 #include "parameters.hxx"
 
 struct GLFWwindow;
@@ -31,7 +31,7 @@ class GraphicsEngine {
 public:
   GraphicsEngine(
     GLFWwindow* window, const std::optional<ShaderSources>& sources,
-    ModelType modelType
+    GeometryType modelType
   );
   GraphicsEngine() = delete;
   GraphicsEngine(const GraphicsEngine&) = delete;
@@ -43,7 +43,7 @@ public:
   static auto initializeGL() -> bool;
   auto resetWith(
     const std::optional<ShaderSources>& shaderSources,
-    const std::optional<ModelType>& modelType
+    const std::optional<GeometryType>& modelType
   ) -> void;
   auto hasValidData() -> bool;
   auto render() -> void;

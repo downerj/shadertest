@@ -27,7 +27,7 @@ ShaderData::ShaderData(
 
 GraphicsEngine::GraphicsEngine(
   GLFWwindow* window, const std::optional<ShaderSources>& sources,
-  ModelType modelType
+  GeometryType modelType
 ) : _window{window} {
   if (!initializeGL()) {
     throw std::runtime_error{"Failed to initialize OpenGL"};
@@ -66,7 +66,7 @@ auto GraphicsEngine::initializeGL() -> bool {
 
 auto GraphicsEngine::resetWith(
   const std::optional<ShaderSources>& shaderSources,
-  const std::optional<ModelType>& modelType
+  const std::optional<GeometryType>& modelType
 ) -> void {
   if (!_shaderData && !shaderSources) {
     return;

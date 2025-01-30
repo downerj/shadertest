@@ -4,14 +4,14 @@
 #include <array>
 #include <memory>
 
-enum class ModelType {
+enum class GeometryType {
   Rectangle,
   Triangle
 };
 
 class Model {
 public:
-  static auto createModelFromType(ModelType type) -> std::unique_ptr<Model>;
+  static auto createModelFromType(GeometryType type) -> std::unique_ptr<Model>;
   virtual auto getVertices() const -> const float* = 0;
   virtual auto getIndices() const -> const unsigned short* = 0;
   virtual auto getVertexCount() const -> int = 0;

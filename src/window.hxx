@@ -1,13 +1,13 @@
 #ifndef WINDOW_HXX
 #define WINDOW_HXX
 
-#include "models.hxx"
+#include "geometry.hxx"
 
 struct GLFWwindow;
 
 struct WindowActions {
   bool changeModelType{false};
-  ModelType modelType{ModelType::Rectangle};
+  GeometryType modelType{GeometryType::Rectangle};
   bool closeWindow{false};
   bool resetWindowSize{false};
   bool pauseResume{false};

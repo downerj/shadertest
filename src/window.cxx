@@ -127,10 +127,10 @@ auto WindowOwner::onKey(
     _actions.resetWindowSize = true;
   } else if (model1Key) {
     _actions.changeModelType = true;
-    _actions.modelType = ModelType::Rectangle;
+    _actions.modelType = GeometryType::Rectangle;
   } else if (model2Key) {
     _actions.changeModelType = true;
-    _actions.modelType = ModelType::Triangle;
+    _actions.modelType = GeometryType::Triangle;
   } else if (pauseResumeKey) {
     _actions.pauseResume = true;
   }
