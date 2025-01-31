@@ -20,10 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.hxx" />
+    <ClInclude Include="src\geometry.hxx" />
     <ClInclude Include="src\graphics.hxx" />
     <ClInclude Include="src\icon.hxx" />
     <ClInclude Include="src\io.hxx" />
-    <ClInclude Include="src\models.hxx" />
     <ClInclude Include="src\parameters.hxx" />
     <ClInclude Include="src\window.hxx" />
   </ItemGroup>
@@ -32,10 +32,10 @@
     <None Include="src\default.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\geometry.cxx" />
     <ClCompile Include="src\graphics.cxx" />
     <ClCompile Include="src\io.cxx" />
     <ClCompile Include="src\main.cxx" />
-    <ClCompile Include="src\models.cxx" />
     <ClCompile Include="src\parameters.cxx" />
     <ClCompile Include="src\window.cxx" />
   </ItemGroup>
