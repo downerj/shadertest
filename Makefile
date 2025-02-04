@@ -1,82 +1,109 @@
 .PHONY: clean
 
-DIST_SUFFIX =
+# Environment variables.
+
+STATIC_BUILD ?= 0
+DEBUG_BUILD ?= 0
+
+# Zip file.
+
+ZIP_SUFFIX =
 ifeq (${OS}, Windows_NT)
 	# TODO: Target Win32 (e.g. MinGW, Cygwin)
-	DIST_SUFFIX += Win32
+	ZIP_SUFFIX += Win32
 else
 	UNAME_S = $(shell uname --kernel-name)
 	ifeq (${UNAME_S}, Linux)
 		LINUX_ID = $(shell lsb_release --id --short)
 		LINUX_RELEASE = $(shell lsb_release --release --short)
-		DIST_SUFFIX += ${LINUX_ID}_${LINUX_RELEASE}
+		ZIP_SUFFIX += ${LINUX_ID}_${LINUX_RELEASE}
 	endif
 	ifeq (${UNAME_S}, Darwin)
 		# TODO: Target macOS
-		DIST_SUFFIX += macOS
+		ZIP_SUFFIX += macOS
 	endif
 endif
+ZIP_NAME = ShaderTest_${ZIP_SUFFIX}.zip
+ZIP = ${EXE_DIR}/${ZIP_NAME}
 
-EXECUTABLE_DIRECTORY = bin
-OBJECT_DIRECTORY = obj
-SOURCE_DIRECTORY = src
-LIBRARY_DIRECTORY = lib
-INCLUDE_DIRECTORY = include
-SHADERS_DIRECTORY = examples
-EXECUTABLE = ${EXECUTABLE_DIRECTORY}/shadertest
-DISTRIBUTABLE = ${EXECUTABLE_DIRECTORY}/ShaderTest_${DIST_SUFFIX}.zip
+# Executable and object directories.
+
+EXE_DIR_PREFIX = bin
+OBJ_DIR_PREFIX = obj
+EXE_DIR =
+OBJ_DIR =
+ifeq (${DEBUG_BUILD}, 1)
+	EXE_DIR += ${EXE_DIR_PREFIX}/debug
+	OBJ_DIR += ${OBJ_DIR_PREFIX}/debug
+else
+	EXE_DIR += ${EXE_DIR_PREFIX}/release
+	OBJ_DIR += ${OBJ_DIR_PREFIX}/release
+endif
+EXE_NAME = shadertest
+EXE = ${EXE_DIR}/${EXE_NAME}
+
+# Other directories.
+
+SRC_DIR = src
+LIB_DIR = lib
+INCL_DIR = include
+EXAMPLES_DIR = examples
+
+# Source dependencies & object targets.
+
+DEPS = $(wildcard ${OBJ_DIR}/*.d)
+HEADERS = $(wildcard ${SRC_DIR}/*.hxx)
+SOURCES = $(wildcard ${SRC_DIR}/*.cxx)
+TARGETS = $(patsubst ${SRC_DIR}/%.cxx, ${OBJ_DIR}/%.o, ${SOURCES})
+
+# Compiler flags.
+
 WARNINGS = -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wunreachable-code
 CXX_STANDARD = -std=c++17
+DEFINES =
+OPTIMIZATIONS =
+ifeq (${DEBUG_BUILD}, 1)
+	DEFINES += -DDEBUG -g
+	OPTIMIZATIONS += -Og
+else
+	OPTIMIZATIONS += -O3
+endif
 
-STATIC_BUILD ?= 0
+# Libraries.
 
+GLFW_LIBRARY =
 ifeq (${STATIC_BUILD}, 1)
-GLFW_LIBRARY = -L"${LIBRARY_DIRECTORY}" -l:libglfw3.a
+	GLFW_LIBRARY += -L"${LIB_DIR}" -l:libglfw3.a
 else
-GLFW_LIBRARY = -lglfw
+	GLFW_LIBRARY += -lglfw
 endif
-INCLUDES = -I${INCLUDE_DIRECTORY} ${GLFW_INCLUDE}
+INCLUDES = -I${INCL_DIR} ${GLFW_INCLUDE}
 LIBRARIES = ${GLFW_LIBRARY}
-DEPS = $(wildcard ${OBJECT_DIRECTORY}/*.d)
-HEADERS = $(wildcard ${SOURCE_DIRECTORY}/*.hxx)
-SOURCES = $(wildcard ${SOURCE_DIRECTORY}/*.cxx)
-TARGETS = $(patsubst ${SOURCE_DIRECTORY}/%.cxx, ${OBJECT_DIRECTORY}/%.o, ${SOURCES})
 
-all: release dist
+# Recipes.
 
-release: DEFINES =
-release: OPTIMIZATIONS = -O3
-release: ${EXECUTABLE}
+all: prebuild dist
 
-debug: DEFINES = -DDEBUG -g
-debug: OPTIMIZATIONS = -Og
-debug: ${EXECUTABLE}
+prebuild:
+	mkdir -p ${EXE_DIR}
+	mkdir -p ${OBJ_DIR}
 
-dist: ${DISTRIBUTABLE}
+dist: ${ZIP}
 
-${DISTRIBUTABLE}: ${EXECUTABLE}
-	zip -r ${DISTRIBUTABLE} ${EXECUTABLE} ${SHADERS_DIRECTORY}
+${ZIP}: exe
+	zip -r ${ZIP} ${EXE} ${EXAMPLES_DIR}
 
-ifeq (${STATIC_BUILD}, 0)
-${EXECUTABLE}: ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY} ${LIBGLFW}
-else
-${EXECUTABLE}: ${EXECUTABLE_DIRECTORY} ${OBJECT_DIRECTORY}
-endif
-${EXECUTABLE}: ${TARGETS}
-	${CXX} -o $@ ${TARGETS} ${LIBRARIES}
+exe: ${EXE}
 
-${EXECUTABLE_DIRECTORY}:
-	mkdir -p ${EXECUTABLE_DIRECTORY}
-
-${OBJECT_DIRECTORY}:
-	mkdir -p ${OBJECT_DIRECTORY}
+${EXE}: ${TARGETS}
+	${CXX} -o $@ $^ ${LIBRARIES}
 
 ifneq (${DEPS},)
 include ${DEPS}
 endif
 
-${OBJECT_DIRECTORY}/%.o: ${SOURCE_DIRECTORY}/%.cxx
+${OBJ_DIR}/%.o: ${SRC_DIR}/%.cxx
 	${CXX} -MMD -c -o $@ $< ${WARNINGS} ${DEFINES} ${OPTIMIZATIONS} ${CXX_STANDARD} ${INCLUDES}
 
 clean:
-	${RM} -v ${EXECUTABLE_DIRECTORY}/* ${OBJECT_DIRECTORY}/*
+	${RM} -v ${EXE_DIR}/* ${OBJ_DIR}/*
