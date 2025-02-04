@@ -1,6 +1,9 @@
 # shadertest
 An interactive GLSL vertex/fragment shader playground in C++17.
 
+## Usage
+At the moment, all shaders and options must be passed in as command-line arguments. Consult the help string (e.g. `shadertest --help`) for more information.
+
 ## Building
 This version of the software successfully builds with debug flags on Ubuntu Linux 24.10 (GNU Make + GCC) and Windows 11 (Visual Studio + MSVC).
 
@@ -35,9 +38,11 @@ This project uses the GLFW window and context management library. It can be link
 1. If you built GLFW from source (e.g. for static linking), copy the header and library files into the following (new) locations:
    - `include/GLFW/glfw3.h`
    - `lib/libglfw3.a`
-1. For static linking, set the environment variable `STATIC_BUILD=1`.
-1. Compile using `make debug` or `make release`.
-1. Run the app using `bin/shadertest`.
+1. Set/`export` the following environment variables, as needed:
+   - For static linking, set `STATIC_BUILD=1`.
+   - For debug builds, set `DEBUG_BUILD=1`.
+1. Compile using `make`.
+1. Run the app using either `bin/release/shadertest` (or `bin/debug/shadertest` if `DEBUG_BUILD=1` was set).
 1. Bundle the app using `make dist`.
 
 ### Windows (Visual Studio)
