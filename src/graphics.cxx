@@ -89,7 +89,7 @@ auto GraphicsEngine::resetWith(
     : _shaderData->program
   };
   if (modelType) {
-    _model = Model::createModelFromType(*modelType);
+    _model = Geometry::createGeometryFromType(*modelType);
   }
   if (program) {
     const GLuint vao{createVertexArrayForModel(*program, _model.get())};
@@ -193,7 +193,7 @@ auto GraphicsEngine::createProgram(
 }
 
 auto GraphicsEngine::createVertexArrayForModel(
-  GLuint program, const Model* model
+  GLuint program, const Geometry* model
 ) -> GLuint {
   const GLint positionLocation{glGetAttribLocation(program, "position")};
   GLuint vao{};

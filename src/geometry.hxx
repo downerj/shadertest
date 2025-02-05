@@ -9,16 +9,17 @@ enum class GeometryType {
   Triangle
 };
 
-class Model {
+class Geometry {
 public:
-  static auto createModelFromType(GeometryType type) -> std::unique_ptr<Model>;
+  static auto createGeometryFromType(GeometryType type) -> std::unique_ptr<Geometry>;
   virtual auto getVertices() const -> const float* = 0;
   virtual auto getIndices() const -> const unsigned short* = 0;
   virtual auto getVertexCount() const -> int = 0;
   virtual auto getIndexCount() const -> int = 0;
+  virtual ~Geometry();
 };
 
-class Triangle : public Model {
+class Triangle : public Geometry {
 public:
   auto getVertices() const -> const float* final;
   auto getIndices() const -> const unsigned short* final;
@@ -30,7 +31,7 @@ private:
   static const std::array<unsigned short, 1*3> _indices;
 };
 
-class Rectangle : public Model {
+class Rectangle : public Geometry {
 public:
   auto getVertices() const -> const float* final;
   auto getIndices() const -> const unsigned short* final;

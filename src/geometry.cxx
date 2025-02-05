@@ -1,12 +1,14 @@
 #include "geometry.hxx"
 
-auto Model::createModelFromType(GeometryType type) -> std::unique_ptr<Model> {
+auto Geometry::createGeometryFromType(GeometryType type) -> std::unique_ptr<Geometry> {
   if (type == GeometryType::Rectangle) {
     return std::make_unique<Rectangle>();
   } else /* if (type == GeometryType::Triangle) */ {
     return std::make_unique<Triangle>();
   }
 }
+
+Geometry::~Geometry() {}
 
 auto Triangle::getVertices() const -> const float* {
   return _vertices.data();
