@@ -54,7 +54,7 @@ private:
     const ShaderSources& sources
   ) -> std::optional<GLuint>;
   static auto createVertexArrayForModel(
-    GLuint program, const Model* model
+    GLuint program, const Geometry* model
   ) -> GLuint;
 
   auto resetTime() -> void;
@@ -62,7 +62,7 @@ private:
   GLFWwindow* _window;
   std::optional<ShaderData> _shaderData{};
   GLfloat _initialTime{};
-  std::unique_ptr<Model> _model{};
+  std::unique_ptr<Geometry> _model{};
 };
 
 #endif // GRAPHICS_HXX
