@@ -11,7 +11,9 @@ enum class GeometryType {
 
 class Geometry {
 public:
-  static auto createGeometryFromType(GeometryType type) -> std::unique_ptr<Geometry>;
+  static auto createGeometryFromType(
+    GeometryType type
+  ) -> std::unique_ptr<Geometry>;
   virtual auto getVertices() const -> const float* = 0;
   virtual auto getIndices() const -> const unsigned short* = 0;
   virtual auto getVertexCount() const -> int = 0;

@@ -1,6 +1,8 @@
 #include "geometry.hxx"
 
-auto Geometry::createGeometryFromType(GeometryType type) -> std::unique_ptr<Geometry> {
+auto Geometry::createGeometryFromType(
+  GeometryType type
+) -> std::unique_ptr<Geometry> {
   if (type == GeometryType::Rectangle) {
     return std::make_unique<Rectangle>();
   } else /* if (type == GeometryType::Triangle) */ {
